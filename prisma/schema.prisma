@@ -1,0 +1,316 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  engineer
+  architect
+  lead
+  viewer
+}
+
+enum WorkstreamStage {
+  idea
+  research
+  planning
+  in_review
+  approved
+  building
+  awaiting_input
+  pr_open
+  merged
+  killed
+}
+
+enum WorkstreamOrigin {
+  internal_friction
+  external_opportunity
+  roadmap
+}
+
+enum WorkstreamPriority {
+  low
+  medium
+  high
+  critical
+}
+
+enum ResearchRunStatus {
+  queued
+  running
+  succeeded
+  failed
+  cancelled
+  paused_budget
+}
+
+enum PlanStatus {
+  draft
+  in_review
+  approved
+  superseded
+}
+
+enum RiskLevel {
+  low
+  medium
+  high
+}
+
+enum RunnerJobStatus {
+  queued
+  provisioning
+  running
+  awaiting_input
+  succeeded
+  failed
+  cancelled
+  paused_budget
+}
+
+enum AgentEventType {
+  thought_summary
+  tool_call
+  tool_result
+  file_edit
+  test_run
+  question
+  answer
+  status
+}
+
+enum IdeaType {
+  friction_log
+  external_signal
+}
+
+enum IdeaStatus {
+  new
+  triaged
+  promoted
+  parked
+}
+
+enum AuditAction {
+  model_call
+  approval
+  hand_off
+  connector_access
+  role_switch
+  seed
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  role      UserRole
+  team      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownedWorkstreams Workstream[] @relation("WorkstreamOwner")
+  comments         Comment[]
+  approvals        Approval[]
+  answeredQuestions Question[]  @relation("QuestionAnswerer")
+  submittedIdeas   Idea[]       @relation("IdeaSubmitter")
+  auditLogs        AuditLog[]
+}
+
+model Workstream {
+  id               String            @id @default(cuid())
+  title            String
+  problemStatement String
+  stage            WorkstreamStage   @default(idea)
+  jiraKey          String?
+  origin           WorkstreamOrigin
+  priority         WorkstreamPriority @default(medium)
+  ownerId          String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  lastActivityAt   DateTime          @default(now())
+
+  owner        User          @relation("WorkstreamOwner", fields: [ownerId], references: [id])
+  researchRuns ResearchRun[]
+  plans        Plan[]
+  runnerJobs   RunnerJob[]
+  ideas        Idea[]
+}
+
+model ResearchRun {
+  id               String            @id @default(cuid())
+  workstreamId     String
+  status           ResearchRunStatus @default(queued)
+  sourcesConsulted Json              @default("[]")
+  findings         String?
+  tokenUsage       Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  startedAt        DateTime?
+  finishedAt       DateTime?
+
+  workstream Workstream   @relation(fields: [workstreamId], references: [id], onDelete: Cascade)
+  events     AgentEvent[]
+}
+
+model Plan {
+  id            String     @id @default(cuid())
+  workstreamId  String
+  versionNumber Int
+  status        PlanStatus @default(draft)
+  markdownBody  String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  workstream Workstream  @relation(fields: [workstreamId], references: [id], onDelete: Cascade)
+  steps      PlanStep[]
+  comments   Comment[]
+  approvals  Approval[]
+  runnerJobs RunnerJob[]
+
+  @@unique([workstreamId, versionNumber])
+}
+
+model PlanStep {
+  id               String    @id @default(cuid())
+  planId           String
+  order            Int
+  title            String
+  description      String
+  filesLikelyTouched String[] @default([])
+  testsToAdd       String[]  @default([])
+  riskLevel        RiskLevel @default(medium)
+  needsConfirmation Boolean  @default(false)
+  completed        Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  plan     Plan      @relation(fields: [planId], references: [id], onDelete: Cascade)
+  comments Comment[]
+
+  @@unique([planId, order])
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  planId     String
+  stepId     String?
+  parentId   String?
+  anchorText String?
+  authorId   String
+  body       String
+  resolved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  plan    Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  step    PlanStep? @relation(fields: [stepId], references: [id])
+  author  User     @relation(fields: [authorId], references: [id])
+  parent  Comment? @relation("CommentThread", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentThread")
+}
+
+model Approval {
+  id         String   @id @default(cuid())
+  planId     String
+  approverId String
+  createdAt  DateTime @default(now())
+
+  plan     Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  approver User @relation(fields: [approverId], references: [id])
+
+  @@unique([planId, approverId])
+}
+
+model RunnerJob {
+  id              String          @id @default(cuid())
+  workstreamId    String
+  planId          String
+  status          RunnerJobStatus @default(queued)
+  workspacePath   String?
+  branch          String?
+  prUrl           String?
+  additionalInstructions String?
+  tokenUsage      Int             @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  startedAt       DateTime?
+  finishedAt      DateTime?
+
+  workstream Workstream   @relation(fields: [workstreamId], references: [id], onDelete: Cascade)
+  plan       Plan         @relation(fields: [planId], references: [id])
+  events     AgentEvent[]
+  questions  Question[]
+}
+
+model AgentEvent {
+  id            String         @id @default(cuid())
+  researchRunId String?
+  runnerJobId   String?
+  type          AgentEventType
+  payload       Json
+  createdAt     DateTime       @default(now())
+
+  researchRun ResearchRun? @relation(fields: [researchRunId], references: [id], onDelete: Cascade)
+  runnerJob   RunnerJob?   @relation(fields: [runnerJobId], references: [id], onDelete: Cascade)
+
+  @@index([researchRunId, createdAt])
+  @@index([runnerJobId, createdAt])
+}
+
+model Question {
+  id           String   @id @default(cuid())
+  runnerJobId  String
+  questionText String
+  options      String[] @default([])
+  answer       String?
+  answeredById String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  answeredAt   DateTime?
+
+  runnerJob  RunnerJob @relation(fields: [runnerJobId], references: [id], onDelete: Cascade)
+  answeredBy User?     @relation("QuestionAnswerer", fields: [answeredById], references: [id])
+}
+
+model Idea {
+  id              String     @id @default(cuid())
+  title           String
+  description     String
+  submittedById   String
+  type            IdeaType
+  frequencyPerWeek Int?
+  minutesLostEach  Int?
+  status          IdeaStatus @default(new)
+  workstreamId    String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  submittedBy User        @relation("IdeaSubmitter", fields: [submittedById], references: [id])
+  workstream  Workstream? @relation(fields: [workstreamId], references: [id])
+}
+
+model AuditLog {
+  id                   String      @id @default(cuid())
+  action               AuditAction
+  userId               String?
+  modelId              String?
+  tokenInput           Int?
+  tokenOutput          Int?
+  connectorItemsAccessed Json?
+  workstreamId         String?
+  planId               String?
+  runnerJobId          String?
+  detail               String?
+  createdAt            DateTime    @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+  @@index([action])
+}
