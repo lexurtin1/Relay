@@ -47,11 +47,20 @@ pnpm dev
 - Ideas / Metrics / Audit screens (Milestone 6)
 - Playwright happy path (Milestone 7)
 
-## Screenshots (Milestone 1)
+## Screenshots
 
-![Dashboard](docs/screenshots/dashboard.png)
+### Before (Milestone 1 shell)
 
-![Workstream in review](docs/screenshots/workstream-review.png)
+![Before dashboard](docs/screenshots/before-dashboard.png)
+
+![Before workstream](docs/screenshots/before-workstream.png)
+
+### After (Operate redesign)
+
+![After dashboard](docs/screenshots/after-dashboard.png)
+
+![After workstream](docs/screenshots/after-workstream.png)
+
 
 ## Branding
 

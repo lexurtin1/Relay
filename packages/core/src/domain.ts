@@ -13,7 +13,8 @@ export const WORKSTREAM_STAGES = [
 
 export type WorkstreamStage = (typeof WORKSTREAM_STAGES)[number];
 
-export const DASHBOARD_STAGE_COLUMNS: WorkstreamStage[] = [
+/** Stages shown as full board columns when non-empty. */
+export const ACTIVE_BOARD_STAGES: WorkstreamStage[] = [
   "research",
   "planning",
   "in_review",
@@ -21,8 +22,24 @@ export const DASHBOARD_STAGE_COLUMNS: WorkstreamStage[] = [
   "awaiting_input",
   "pr_open",
   "approved",
-  "merged",
 ];
+
+export const COMPLETED_BOARD_STAGES: WorkstreamStage[] = ["merged", "killed"];
+
+export const DASHBOARD_STAGE_COLUMNS: WorkstreamStage[] = [
+  ...ACTIVE_BOARD_STAGES,
+  ...COMPLETED_BOARD_STAGES,
+];
+
+export const STEPPER_STAGES = [
+  "research",
+  "plan",
+  "review",
+  "build",
+  "pr",
+] as const;
+
+export type StepperStage = (typeof STEPPER_STAGES)[number];
 
 export interface DashboardCounts {
   inResearch: number;
@@ -40,10 +57,17 @@ export interface WorkstreamCardModel {
   origin: string;
   jiraKey: string | null;
   ownerName: string;
+  ownerInitials: string;
   lastActivityAt: string;
   lastAgentActivity: string | null;
   needsYou: boolean;
   needsYouReason: string | null;
+  needsYouAction: string | null;
+  openCommentCount: number;
+  stepsCompleted: number;
+  stepsTotal: number;
+  agentActive: boolean;
+  stageEnteredAt: string;
 }
 
 export function computeDashboardCounts(
@@ -60,4 +84,37 @@ export function computeDashboardCounts(
 
 export function stageLabel(stage: WorkstreamStage): string {
   return stage.replaceAll("_", " ");
+}
+
+export function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return (parts[0] ?? "?").slice(0, 2).toUpperCase();
+  return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
+}
+
+export function mapStageToStepper(stage: WorkstreamStage): StepperStage {
+  switch (stage) {
+    case "idea":
+    case "research":
+      return "research";
+    case "planning":
+      return "plan";
+    case "in_review":
+    case "approved":
+      return "review";
+    case "building":
+    case "awaiting_input":
+      return "build";
+    case "pr_open":
+    case "merged":
+    case "killed":
+      return "pr";
+    default:
+      return "research";
+  }
+}
+
+export function stepperIndex(stage: WorkstreamStage): number {
+  return STEPPER_STAGES.indexOf(mapStageToStepper(stage));
 }

@@ -11,42 +11,61 @@ export default async function NewWorkstreamPage() {
 
   return (
     <div className="mx-auto max-w-2xl rounded border border-[var(--relay-border)] bg-white p-6">
-      <h1 className="text-xl font-semibold">New workstream</h1>
+      <h1 className="font-display text-xl font-semibold">New workstream</h1>
       <p className="mt-1 text-sm text-[var(--relay-ink-muted)]">
-        Capture the problem. Research starts in a later milestone; for now this creates the record.
+        Capture the problem. You can start research from the workstream once Scout is wired.
       </p>
       <form action={createWorkstream} className="mt-6 space-y-4">
         <input type="hidden" name="ownerId" value={user.id} />
-        <label className="block text-sm">
-          <span className="mb-1 block text-[var(--relay-ink-muted)]">Title</span>
+        <div className="block text-sm">
+          <label htmlFor="title" className="mb-1 block text-[var(--relay-ink-muted)]">
+            Title
+          </label>
           <input
+            id="title"
             name="title"
             required
-            className="w-full rounded border border-[var(--relay-border)] px-3 py-2"
-            placeholder="Short name for the piece of work"
+            autoComplete="off"
+            className="w-full rounded border border-[var(--relay-border)] px-3 py-2 placeholder:text-[var(--relay-ink-subtle)]"
+            placeholder="Short name for the piece of work…"
           />
-        </label>
-        <label className="block text-sm">
-          <span className="mb-1 block text-[var(--relay-ink-muted)]">Problem statement</span>
+        </div>
+        <div className="block text-sm">
+          <label
+            htmlFor="problemStatement"
+            className="mb-1 block text-[var(--relay-ink-muted)]"
+          >
+            Problem statement
+          </label>
           <textarea
+            id="problemStatement"
             name="problemStatement"
             required
             rows={5}
-            className="w-full rounded border border-[var(--relay-border)] px-3 py-2"
+            autoComplete="off"
+            className="w-full rounded border border-[var(--relay-border)] px-3 py-2 placeholder:text-[var(--relay-ink-subtle)]"
             placeholder="What is broken or missing, and who feels it?"
           />
-        </label>
-        <label className="block text-sm">
-          <span className="mb-1 block text-[var(--relay-ink-muted)]">Jira key (optional)</span>
+        </div>
+        <div className="block text-sm">
+          <label htmlFor="jiraKey" className="mb-1 block text-[var(--relay-ink-muted)]">
+            Jira key (optional)
+          </label>
           <input
+            id="jiraKey"
             name="jiraKey"
-            className="w-full rounded border border-[var(--relay-border)] px-3 py-2"
-            placeholder="INNO-123"
+            autoComplete="off"
+            spellCheck={false}
+            className="w-full rounded border border-[var(--relay-border)] px-3 py-2 font-mono placeholder:text-[var(--relay-ink-subtle)]"
+            placeholder="INNO-123…"
           />
-        </label>
-        <label className="block text-sm">
-          <span className="mb-1 block text-[var(--relay-ink-muted)]">Origin</span>
+        </div>
+        <div className="block text-sm">
+          <label htmlFor="origin" className="mb-1 block text-[var(--relay-ink-muted)]">
+            Origin
+          </label>
           <select
+            id="origin"
             name="origin"
             className="w-full rounded border border-[var(--relay-border)] px-3 py-2"
             defaultValue="internal_friction"
@@ -55,10 +74,10 @@ export default async function NewWorkstreamPage() {
             <option value="external_opportunity">External opportunity</option>
             <option value="roadmap">Roadmap</option>
           </select>
-        </label>
+        </div>
         <button
           type="submit"
-          className="rounded bg-[var(--relay-primary)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--relay-primary-hover)]"
+          className="rounded bg-[var(--relay-primary)] px-3 py-2 text-sm font-medium text-[var(--relay-primary-fg)] transition-relay hover:bg-[var(--relay-primary-hover)]"
         >
           Create workstream
         </button>

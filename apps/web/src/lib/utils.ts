@@ -16,3 +16,12 @@ export function formatRelativeTime(date: Date | string): string {
   const days = Math.round(hours / 24);
   return `${days}d ago`;
 }
+
+export function formatTimeInStage(date: Date | string): string {
+  const value = typeof date === "string" ? new Date(date) : date;
+  const minutes = Math.max(1, Math.round((Date.now() - value.getTime()) / 60_000));
+  if (minutes < 60) return `${minutes}m in stage`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h in stage`;
+  return `${Math.round(hours / 24)}d in stage`;
+}

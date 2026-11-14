@@ -1,4 +1,4 @@
-import { DashboardTopBar, WorkstreamBoard } from "@/components/dashboard";
+import { NeedsYouStrip, WorkstreamBoard } from "@/components/dashboard";
 import { getAppName } from "@/lib/config";
 import { getCurrentUser } from "@/lib/session";
 import { getDashboardData } from "@/lib/workstreams";
@@ -12,24 +12,25 @@ export default async function HomePage() {
   if (!user) {
     return (
       <div className="rounded border border-[var(--relay-border)] bg-white p-6 text-sm text-[var(--relay-ink-muted)]">
-        No seeded users found. Run <code>pnpm db:seed</code> or start with Docker Compose.
+        No seeded users found. Run <code className="font-mono">pnpm db:seed</code> or start with
+        Docker Compose.
       </div>
     );
   }
 
-  const { cards, counts } = await getDashboardData();
+  const { cards, needsYou } = await getDashboardData();
 
   return (
     <div className="space-y-4">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-[var(--relay-ink)]">Dashboard</h1>
-          <p className="mt-1 text-sm text-[var(--relay-ink-muted)]">
-            {appName} workstreams for Innovation and Strategy. Signed in as {user.name}.
-          </p>
-        </div>
+      <div>
+        <h1 className="font-display text-2xl font-semibold text-[var(--relay-ink)]">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-[var(--relay-ink-muted)]">
+          {appName} workstreams for Innovation and Strategy.
+        </p>
       </div>
-      <DashboardTopBar counts={counts} />
+      <NeedsYouStrip items={needsYou} />
       <WorkstreamBoard cards={cards} />
     </div>
   );

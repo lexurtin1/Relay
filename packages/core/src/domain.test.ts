@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { computeDashboardCounts } from "./domain";
+import {
+  computeDashboardCounts,
+  initialsFromName,
+  mapStageToStepper,
+} from "./domain";
 
 describe("computeDashboardCounts", () => {
-  it("counts stages used by the dashboard top bar", () => {
+  it("counts stages used by the dashboard", () => {
     const counts = computeDashboardCounts([
       { stage: "research" },
       { stage: "research" },
@@ -20,5 +24,19 @@ describe("computeDashboardCounts", () => {
       awaitingInput: 1,
       prsOpen: 1,
     });
+  });
+});
+
+describe("initialsFromName", () => {
+  it("builds two-letter initials", () => {
+    expect(initialsFromName("Maya Chen")).toBe("MC");
+  });
+});
+
+describe("mapStageToStepper", () => {
+  it("maps workstream stages onto the five-step rail", () => {
+    expect(mapStageToStepper("in_review")).toBe("review");
+    expect(mapStageToStepper("awaiting_input")).toBe("build");
+    expect(mapStageToStepper("pr_open")).toBe("pr");
   });
 });
