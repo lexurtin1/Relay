@@ -4,7 +4,7 @@ Internal white-labelled Calastone agent workspace prototype for Innovation and S
 
 ## Architecture (short)
 
-- `apps/web`: Next.js App Router UI
+- Root Next.js App Router UI (`src/`, `public/`, `theme/`)
 - `apps/worker`: BullMQ agent worker
 - `packages/core`: domain types, Prisma helpers, prompts, **LLM gateway**
 - `packages/connectors`: Salesforce, Power BI, Jira, Confluence, Databricks, GitHub (mock/live)

@@ -11,7 +11,8 @@ test-results
 .env.*.local
 *.log
 .DS_Store
-apps/web/public/brand/.tmp
+*.tsbuildinfo
+public/brand/.tmp
 docker/data
 .worktrees
 demo-repos/**/.git

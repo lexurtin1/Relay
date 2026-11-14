@@ -64,8 +64,8 @@ pnpm dev
 
 ## Branding
 
-- Logos: `apps/web/public/brand/logo-light.png` (header), `logo-dark.png` / `logo-on-dark.png` for dark surfaces, plus `logo.svg` placeholder
-- Theme tokens: `apps/web/theme/brand.ts` (primary blue `#3274C0` sampled from the provided SS&C logo PNG; other neutrals are placeholders)
+- Logos: `public/brand/logo-light.png` (header), `logo-dark.png` / `logo-on-dark.png` for dark surfaces, plus `logo.svg` placeholder
+- Theme tokens: `theme/brand.ts` (primary blue `#3274C0` sampled from the provided SS&C logo PNG; other neutrals are placeholders)
 
 
 ## Config

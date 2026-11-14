@@ -4,7 +4,6 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* .npmrc ./
-COPY apps/web/package.json apps/web/
 COPY apps/worker/package.json apps/worker/
 COPY packages/core/package.json packages/core/
 COPY packages/connectors/package.json packages/connectors/
@@ -14,12 +13,11 @@ RUN pnpm install --frozen-lockfile=false
 FROM deps AS build
 COPY . .
 RUN pnpm db:generate
-RUN pnpm --filter @relay/web build
+RUN pnpm build
 
 FROM base AS runner
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /app /app
 EXPOSE 3000
-CMD ["sh", "-c", "pnpm db:migrate && pnpm db:seed && pnpm --filter @relay/web start"]
-
+CMD ["sh", "-c", "pnpm db:migrate && pnpm db:seed && pnpm start"]
