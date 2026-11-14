@@ -6,6 +6,8 @@ import {
   type StepperStage,
   type WorkstreamStage,
 } from "@relay/core";
+import { withDatabase } from "@/lib/db";
+import { getDemoOverviewData } from "@/lib/demo-data";
 
 export type OverviewStats = {
   allActive: number;
@@ -58,6 +60,10 @@ function weekAgo(): Date {
 }
 
 export async function getOverviewData() {
+  return withDatabase(loadOverviewFromDatabase, () => getDemoOverviewData());
+}
+
+async function loadOverviewFromDatabase() {
   const workstreams = await prisma.workstream.findMany({
     include: {
       owner: true,

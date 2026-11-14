@@ -5,6 +5,8 @@ import {
   type WorkstreamCardModel,
   type WorkstreamStage,
 } from "@relay/core";
+import { withDatabase } from "@/lib/db";
+import { getDemoOverviewData } from "@/lib/demo-data";
 
 function formatNeedsYouReason(opts: {
   awaiting: boolean;
@@ -154,9 +156,12 @@ export async function getDashboardData(ownerId?: string) {
 }
 
 export async function listWorkstreamCommandItems() {
-  const rows = await prisma.workstream.findMany({
-    select: { id: true, title: true, jiraKey: true, stage: true },
-    orderBy: { lastActivityAt: "desc" },
-  });
-  return rows;
+  return withDatabase(
+    () =>
+      prisma.workstream.findMany({
+        select: { id: true, title: true, jiraKey: true, stage: true },
+        orderBy: { lastActivityAt: "desc" },
+      }),
+    () => getDemoOverviewData().commandItems,
+  );
 }

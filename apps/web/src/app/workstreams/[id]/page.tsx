@@ -4,6 +4,8 @@ import type { WorkstreamStage } from "@relay/core";
 import { getCurrentUser } from "@/lib/session";
 import { WorkstreamDetail } from "@/components/workstream-detail";
 import type { ActionBarState } from "@/components/action-bar";
+import { useDemoFixtures } from "@/lib/db";
+import { getDemoWorkstreamDetail } from "@/lib/demo-data";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +17,63 @@ export default async function WorkstreamDetailPage({
   const { id } = await params;
   const user = await getCurrentUser();
   if (!user) notFound();
+
+  if (useDemoFixtures()) {
+    const demo = getDemoWorkstreamDetail(id);
+    if (!demo) notFound();
+    const openCommentCount = demo.plan.comments.filter((c) => !c.resolved).length;
+    const role = user.role;
+    const owns = demo.ownerId === user.id;
+    const actionState: ActionBarState = {
+      canGeneratePlan: true,
+      canRequestReview: false,
+      canRevise: openCommentCount > 0,
+      canApprove: false,
+      canHandOff: false,
+      openCommentCount,
+      generateReason: undefined,
+      reviewReason: "Plan is already in review.",
+      reviseReason: undefined,
+      approveReason: "Resolve or address open comments before approval.",
+      handOffReason: !owns
+        ? "You can only hand off workstreams you own."
+        : "Needs at least one architect approval.",
+    };
+
+    return (
+      <WorkstreamDetail
+        id={demo.id}
+        title={demo.title}
+        problemStatement={demo.problemStatement}
+        stage={demo.stage as WorkstreamStage}
+        ownerName={demo.owner.name}
+        origin={demo.origin}
+        priority={demo.priority}
+        jiraKey={demo.jiraKey}
+        role={role}
+        planVersion={demo.plan.versionNumber}
+        planTotalVersions={2}
+        planMarkdown={demo.plan.markdownBody}
+        steps={demo.plan.steps.map((step) => ({
+          ...step,
+          needsConfirmation: false,
+        }))}
+        comments={demo.plan.comments.map((comment) => ({
+          id: comment.id,
+          stepId: null,
+          anchorText: comment.anchorText,
+          body: comment.body,
+          authorName: comment.author.name,
+          resolved: comment.resolved,
+        }))}
+        researchSummary={demo.researchSummary}
+        sources={demo.sources}
+        history={demo.history}
+        openQuestion={demo.openQuestion}
+        actionState={actionState}
+      />
+    );
+  }
 
   const workstream = await prisma.workstream.findUnique({
     where: { id },
@@ -78,7 +137,6 @@ export default async function WorkstreamDetailPage({
       itemId: s.itemId,
     }));
 
-  // Seed fallback sources for in-review story workstreams without research rows
   if (sources.length === 0 && workstream.jiraKey === "INNO-214") {
     sources.push(
       {
