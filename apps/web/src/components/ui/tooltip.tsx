@@ -26,7 +26,7 @@ export function Tooltip(props: {
           side={props.side ?? "top"}
           sideOffset={6}
           className={cn(
-            "z-50 max-w-xs rounded border border-[var(--relay-border)] bg-[var(--relay-ink)] px-2 py-1.5 text-xs text-white shadow-sm",
+            "z-50 max-w-xs rounded-xl border border-[var(--relay-border)] bg-[var(--relay-ink)] px-2 py-1.5 text-xs text-white shadow-sm",
             props.className,
           )}
         >

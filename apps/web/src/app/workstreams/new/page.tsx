@@ -10,7 +10,7 @@ export default async function NewWorkstreamPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl rounded border border-[var(--relay-border)] bg-white p-6">
+    <div className="mx-auto max-w-2xl rounded-xl border border-[var(--relay-border)] bg-white p-6">
       <h1 className="font-display text-xl font-semibold">New workstream</h1>
       <p className="mt-1 text-sm text-[var(--relay-ink-muted)]">
         Capture the problem. You can start research from the workstream once Scout is wired.
@@ -26,7 +26,7 @@ export default async function NewWorkstreamPage() {
             name="title"
             required
             autoComplete="off"
-            className="w-full rounded border border-[var(--relay-border)] px-3 py-2 placeholder:text-[var(--relay-ink-subtle)]"
+            className="w-full rounded-xl border border-[var(--relay-border)] px-3 py-2 placeholder:text-[var(--relay-ink-subtle)]"
             placeholder="Short name for the piece of work…"
           />
         </div>
@@ -43,7 +43,7 @@ export default async function NewWorkstreamPage() {
             required
             rows={5}
             autoComplete="off"
-            className="w-full rounded border border-[var(--relay-border)] px-3 py-2 placeholder:text-[var(--relay-ink-subtle)]"
+            className="w-full rounded-xl border border-[var(--relay-border)] px-3 py-2 placeholder:text-[var(--relay-ink-subtle)]"
             placeholder="What is broken or missing, and who feels it?"
           />
         </div>
@@ -56,7 +56,7 @@ export default async function NewWorkstreamPage() {
             name="jiraKey"
             autoComplete="off"
             spellCheck={false}
-            className="w-full rounded border border-[var(--relay-border)] px-3 py-2 font-mono placeholder:text-[var(--relay-ink-subtle)]"
+            className="w-full rounded-xl border border-[var(--relay-border)] px-3 py-2 font-mono placeholder:text-[var(--relay-ink-subtle)]"
             placeholder="INNO-123…"
           />
         </div>
@@ -67,7 +67,7 @@ export default async function NewWorkstreamPage() {
           <select
             id="origin"
             name="origin"
-            className="w-full rounded border border-[var(--relay-border)] px-3 py-2"
+            className="w-full rounded-xl border border-[var(--relay-border)] px-3 py-2"
             defaultValue="internal_friction"
           >
             <option value="internal_friction">Internal friction</option>
@@ -77,7 +77,7 @@ export default async function NewWorkstreamPage() {
         </div>
         <button
           type="submit"
-          className="rounded bg-[var(--relay-primary)] px-3 py-2 text-sm font-medium text-[var(--relay-primary-fg)] transition-relay hover:bg-[var(--relay-primary-hover)]"
+          className="rounded-xl bg-[var(--relay-primary)] px-3 py-2 text-sm font-medium text-[var(--relay-primary-fg)] transition-relay hover:bg-[var(--relay-primary-hover)]"
         >
           Create workstream
         </button>

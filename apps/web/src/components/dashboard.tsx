@@ -17,7 +17,8 @@ import { formatTimeInStage } from "@/lib/utils";
 export function NeedsYouStrip(props: { items: WorkstreamCardModel[] }) {
   if (props.items.length === 0) {
     return (
-      <section className="rounded border border-[var(--relay-border)] bg-[var(--relay-surface)] px-4 py-3">
+      <section className="rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface)] px-4 py-3 shadow-sm">
+
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="font-display text-sm font-semibold text-[var(--relay-ink)]">
@@ -29,7 +30,7 @@ export function NeedsYouStrip(props: { items: WorkstreamCardModel[] }) {
           </div>
           <Link
             href="/workstreams/new"
-            className="inline-flex items-center gap-1.5 rounded bg-[var(--relay-primary)] px-3 py-2 text-sm font-medium text-[var(--relay-primary-fg)] transition-relay hover:bg-[var(--relay-primary-hover)]"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--relay-primary)] px-3 py-2 text-sm font-medium text-[var(--relay-primary-fg)] transition-relay hover:bg-[var(--relay-primary-hover)]"
           >
             <Plus className="h-4 w-4" aria-hidden />
             New workstream
@@ -40,7 +41,8 @@ export function NeedsYouStrip(props: { items: WorkstreamCardModel[] }) {
   }
 
   return (
-    <section className="rounded border border-[color-mix(in_srgb,var(--relay-warning)_28%,var(--relay-border))] bg-[var(--relay-warning-soft)]">
+    <section className="rounded-2xl border border-[color-mix(in_srgb,var(--relay-warning)_28%,var(--relay-border))] bg-[var(--relay-warning-soft)] shadow-sm">
+
       <div className="flex items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--relay-warning)_18%,transparent)] px-4 py-2.5">
         <div className="flex items-center gap-2">
           <span
@@ -56,7 +58,7 @@ export function NeedsYouStrip(props: { items: WorkstreamCardModel[] }) {
         </div>
         <Link
           href="/workstreams/new"
-          className="inline-flex items-center gap-1.5 rounded bg-[var(--relay-primary)] px-3 py-1.5 text-sm font-medium text-[var(--relay-primary-fg)] transition-relay hover:bg-[var(--relay-primary-hover)]"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--relay-primary)] px-3 py-1.5 text-sm font-medium text-[var(--relay-primary-fg)] transition-relay hover:bg-[var(--relay-primary-hover)]"
         >
           <Plus className="h-4 w-4" aria-hidden />
           New workstream
@@ -87,7 +89,7 @@ export function NeedsYouStrip(props: { items: WorkstreamCardModel[] }) {
             </div>
             <Link
               href={`/workstreams/${item.id}`}
-              className="inline-flex items-center gap-1 rounded border border-[var(--relay-border)] bg-[var(--relay-surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--relay-ink)] transition-relay hover:border-[var(--relay-primary)]"
+              className="inline-flex items-center gap-1 rounded-xl border border-[var(--relay-border)] bg-[var(--relay-surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--relay-ink)] transition-relay hover:border-[var(--relay-primary)]"
             >
               {item.needsYouAction ?? "Open"}
               <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -125,7 +127,7 @@ export function WorkstreamBoard(props: { cards: WorkstreamCardModel[] }) {
             type="checkbox"
             checked={showCompleted}
             onChange={(event) => setShowCompleted(event.target.checked)}
-            className="rounded border-[var(--relay-border)]"
+            className="rounded-xl border-[var(--relay-border)]"
           />
           Show completed
           <span className="tabular">({completedCards.length})</span>
@@ -139,7 +141,7 @@ export function WorkstreamBoard(props: { cards: WorkstreamCardModel[] }) {
             return (
               <div
                 key={stage}
-                className="flex w-10 shrink-0 flex-col items-center rounded border border-dashed border-[var(--relay-border)] bg-[var(--relay-surface)] py-3"
+                className="flex w-10 shrink-0 flex-col items-center rounded-2xl border border-dashed border-[var(--relay-border)] bg-[var(--relay-surface)] py-3"
                 title={`No workstreams in ${stageLabel(stage)}`}
               >
                 <span className="writing-mode-vertical text-[10px] font-semibold uppercase tracking-wide text-[var(--relay-ink-subtle)] [writing-mode:vertical-rl] rotate-180">
@@ -152,7 +154,7 @@ export function WorkstreamBoard(props: { cards: WorkstreamCardModel[] }) {
           return (
             <section
               key={stage}
-              className="flex min-w-[240px] max-w-[300px] flex-1 flex-col rounded border border-[var(--relay-border)] bg-[var(--relay-surface-sunken)]"
+              className="flex min-w-[240px] max-w-[300px] flex-1 flex-col rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface-sunken)]"
             >
               <header className="flex items-center justify-between gap-2 px-3 py-2">
                 <h2 className="text-[11px] font-semibold uppercase tracking-wide text-[var(--relay-ink-muted)]">
@@ -178,7 +180,7 @@ export function WorkstreamBoard(props: { cards: WorkstreamCardModel[] }) {
               return (
                 <section
                   key={stage}
-                  className="flex min-w-[240px] max-w-[300px] flex-1 flex-col rounded border border-[var(--relay-border)] bg-[var(--relay-surface-sunken)]"
+                  className="flex min-w-[240px] max-w-[300px] flex-1 flex-col rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface-sunken)]"
                 >
                   <header className="flex items-center justify-between gap-2 px-3 py-2">
                     <h2 className="text-[11px] font-semibold uppercase tracking-wide text-[var(--relay-ink-muted)]">
@@ -214,7 +216,7 @@ function WorkstreamCard(props: { card: WorkstreamCardModel }) {
   return (
     <Link
       href={`/workstreams/${card.id}`}
-      className="block rounded border border-[var(--relay-border)] bg-[var(--relay-surface)] p-3 transition-relay hover:border-[var(--relay-primary)]"
+      className="block rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface)] p-3 shadow-sm transition-relay hover:border-[var(--relay-primary)] hover:shadow-md"
     >
       <div className="flex items-start gap-2">
         <h3 className="min-w-0 flex-1 text-sm font-semibold leading-snug text-[var(--relay-ink)]">
@@ -222,7 +224,7 @@ function WorkstreamCard(props: { card: WorkstreamCardModel }) {
         </h3>
         {card.agentActive ? (
           <span
-            className="mt-1 inline-flex h-2 w-2 shrink-0 rounded-full bg-[var(--relay-primary)] animate-relay-pulse"
+            className="mt-1 inline-flex h-2 w-2 shrink-0 rounded-full bg-[var(--relay-brand)] animate-relay-pulse"
             title="Agent actively running"
             aria-label="Agent actively running"
           />
@@ -248,9 +250,9 @@ function WorkstreamCard(props: { card: WorkstreamCardModel }) {
               {card.stepsCompleted} of {card.stepsTotal}
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded bg-[var(--relay-surface-sunken)]">
+          <div className="h-1.5 overflow-hidden rounded-xl bg-[var(--relay-surface-sunken)]">
             <div
-              className="h-full rounded bg-[var(--relay-primary)] transition-relay"
+              className="h-full rounded-xl bg-[var(--relay-primary)] transition-relay"
               style={{ width: `${progress}%` }}
             />
           </div>

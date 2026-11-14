@@ -4,9 +4,9 @@ import type { User } from "@prisma/client";
 import { switchUser } from "@/app/actions";
 import { CommandTrigger } from "@/components/command-trigger";
 
-
 const nav = [
-  { href: "/", label: "Dashboard" },
+  { href: "/", label: "Overview" },
+  { href: "/workstreams", label: "Workstreams" },
   { href: "/ideas", label: "Ideas" },
   { href: "/knowledge", label: "Knowledge" },
   { href: "/metrics", label: "Metrics" },
@@ -20,12 +20,20 @@ export function Header(props: {
   users: User[];
   currentPath?: string;
 }) {
+  const path = props.currentPath ?? "/";
+  const initials = props.currentUser.name
+    .split(/\s+/)
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
-    <header className="border-b border-[var(--relay-border)] bg-[var(--relay-surface)]">
-      <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-6 px-4">
+    <header className="border-b border-[#1f2430] bg-[#0f141d] text-white">
+      <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-5 px-4">
         <Link href="/" className="flex items-center gap-3 shrink-0">
           <Image
-            src="/brand/logo-header.png"
+            src="/brand/logo-on-dark.png"
             alt="SS&C Calastone"
             width={168}
             height={48}
@@ -33,30 +41,28 @@ export function Header(props: {
             unoptimized
             priority
           />
-          <span className="h-5 w-px bg-[var(--relay-border-strong)]" aria-hidden />
-          <span className="font-display text-[17px] font-semibold tracking-tight text-[var(--relay-ink)]">
+          <span className="h-5 w-px bg-white/20" aria-hidden />
+          <span className="font-display text-[17px] font-semibold tracking-tight">
             {props.appName}
           </span>
         </Link>
 
         <nav
           aria-label="Primary"
-          className="hidden md:flex items-center gap-0.5 text-sm text-[var(--relay-ink-muted)]"
+          className="hidden md:flex items-center gap-0.5 text-sm text-white/70"
         >
           {nav.map((item) => {
             const active =
               item.href === "/"
-                ? props.currentPath === "/"
-                : props.currentPath?.startsWith(item.href);
+                ? path === "/"
+                : path === item.href || path.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded px-2.5 py-1.5 transition-relay hover:bg-[var(--relay-surface-sunken)] hover:text-[var(--relay-ink)] ${
-                  active
-                    ? "bg-[var(--relay-surface-sunken)] font-medium text-[var(--relay-ink)]"
-                    : ""
+                className={`rounded-xl px-2.5 py-1.5 transition-relay hover:bg-white/10 hover:text-white ${
+                  active ? "bg-white/10 font-medium text-white" : ""
                 }`}
               >
                 {item.label}
@@ -68,22 +74,21 @@ export function Header(props: {
         <div className="ml-auto flex items-center gap-3">
           <CommandTrigger />
 
-
           {props.mockMode ? (
-            <span className="rounded border border-[var(--relay-border-strong)] bg-[var(--relay-surface)] px-2 py-0.5 text-xs font-medium text-[var(--relay-ink-muted)]">
-              Mock mode
+            <span className="rounded-full border border-[color-mix(in_srgb,var(--relay-primary)_45%,transparent)] bg-[color-mix(in_srgb,var(--relay-primary)_18%,transparent)] px-2.5 py-0.5 text-xs font-medium text-[#d7d2ff]">
+              Mock data
             </span>
           ) : null}
 
           <form action={switchUserBound} className="flex items-center gap-2 text-sm">
-            <label htmlFor="user-switcher" className="text-[var(--relay-ink-muted)]">
-              User
+            <label htmlFor="user-switcher" className="sr-only">
+              Switch user
             </label>
             <select
               id="user-switcher"
               name="userId"
               defaultValue={props.currentUser.id}
-              className="max-w-[220px] rounded border border-[var(--relay-border)] bg-white px-2 py-1 text-[var(--relay-ink)]"
+              className="max-w-[180px] rounded-xl border border-white/15 bg-[#171d29] px-2 py-1 text-white"
             >
               {props.users.map((user) => (
                 <option key={user.id} value={user.id}>
@@ -93,9 +98,10 @@ export function Header(props: {
             </select>
             <button
               type="submit"
-              className="rounded border border-[var(--relay-border)] px-2 py-1 text-xs text-[var(--relay-ink-muted)] transition-relay hover:bg-[var(--relay-surface-muted)]"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--relay-primary)] text-[11px] font-semibold text-white"
+              title={`Signed in as ${props.currentUser.name}`}
             >
-              Switch
+              {initials}
             </button>
           </form>
         </div>

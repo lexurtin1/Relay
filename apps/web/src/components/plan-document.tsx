@@ -71,7 +71,7 @@ export function PlanDocument(props: {
               <li className="mb-1 text-[var(--relay-ink-muted)]">{children}</li>
             ),
             code: ({ children }) => (
-              <code className="rounded bg-[var(--relay-surface-sunken)] px-1 py-0.5 font-mono text-[12px] text-[var(--relay-ink)]">
+              <code className="rounded-xl bg-[var(--relay-surface-sunken)] px-1 py-0.5 font-mono text-[12px] text-[var(--relay-ink)]">
                 {children}
               </code>
             ),
@@ -90,10 +90,10 @@ export function PlanDocument(props: {
             <li
               id={`step-${step.id}`}
               key={step.id}
-              className="rounded border border-[var(--relay-border)] bg-[var(--relay-surface)] p-3 scroll-mt-24"
+              className="rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface-muted)] p-3 scroll-mt-24"
             >
               <div className="flex flex-wrap items-start gap-2">
-                <span className="tabular inline-flex h-5 w-5 items-center justify-center rounded bg-[var(--relay-surface-sunken)] text-[11px] font-semibold text-[var(--relay-ink-muted)]">
+                <span className="tabular inline-flex h-5 w-5 items-center justify-center rounded-xl bg-[var(--relay-surface-sunken)] text-[11px] font-semibold text-[var(--relay-ink-muted)]">
                   {step.order}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -103,7 +103,7 @@ export function PlanDocument(props: {
                     </h3>
                     <span
                       className={cn(
-                        "rounded border px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide",
+                        "rounded-xl border px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide",
                         riskClass[step.riskLevel],
                       )}
                     >
@@ -121,7 +121,7 @@ export function PlanDocument(props: {
                       {step.filesLikelyTouched.map((file) => (
                         <code
                           key={file}
-                          className="rounded border border-[var(--relay-border)] bg-[var(--relay-surface-muted)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--relay-ink-muted)]"
+                          className="rounded-xl border border-[var(--relay-border)] bg-[var(--relay-surface-muted)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--relay-ink-muted)]"
                         >
                           {file}
                         </code>
@@ -173,7 +173,7 @@ function renderWithHighlights(
       <mark
         id={`anchor-${first.id}`}
         className={cn(
-          "rounded px-0.5 transition-relay",
+          "rounded-xl px-0.5 transition-relay",
           active
             ? "bg-[color-mix(in_srgb,var(--relay-primary)_28%,white)]"
             : "bg-[color-mix(in_srgb,var(--relay-warning)_22%,white)]",

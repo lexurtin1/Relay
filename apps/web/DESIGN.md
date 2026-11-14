@@ -12,16 +12,18 @@ Calm internal operations tool in the style of Linear, Vercel dashboard, and Stri
 
 ## Surfaces
 
-- Dashboard: Needs-you strip first, then a viewport-fitting board with collapsing empty stages.
-- Workstream detail: stage stepper, activity timeline, plan document (~55%), margin comments, sticky action bar.
+- Overview (home): dark header, hero band, stage stats, Needs your action + Agents running, workstreams progress table (structure from Relay dashboard redesigns PDF).
+- Workstream detail: numbered stage stepper, Research / Plan / Comments columns, sticky revise/approve/hand-off bar.
+- Keep rounder SaaS cards (14 to 18px) and Calastone blue + purple accent tokens.
 
 ## Tokens
 
 Source of truth: `theme/brand.ts` and `src/app/globals.css`.
 
-- Accent: `#3274C0` (logo-sampled) for primary actions and live agent states only.
-- Neutrals carry structure.
-- Status: amber needs-you, green done/success, red failed/killed. Status colours only on indicators.
+- Calastone brand blue: `#3274C0` for live agent states and research/building pills.
+- SaaS purple accent: `#6B5CE7` for primary actions, focus, active nav, and progress.
+- Soft lilac surfaces and violet-tinted borders; cards use 14 to 18px radii.
+- Status: amber needs-you, green done/success, red failed/killed.
 - Type: Gill Sans MT for page/section titles; Geist Sans for UI body/data; Geist Mono for IDs, paths, code. Tabular nums for counts.
 
 ## Motion

@@ -19,7 +19,7 @@ const toneByStage: Record<
 
 const toneClass = {
   neutral: "border-[var(--relay-border)] bg-[var(--relay-surface)] text-[var(--relay-ink-muted)]",
-  live: "border-[color-mix(in_srgb,var(--relay-primary)_35%,white)] bg-[color-mix(in_srgb,var(--relay-primary)_8%,white)] text-[var(--relay-primary)]",
+  live: "border-[color-mix(in_srgb,var(--relay-brand)_35%,white)] bg-[var(--relay-brand-soft)] text-[var(--relay-brand)]",
   warning:
     "border-[color-mix(in_srgb,var(--relay-warning)_35%,white)] bg-[var(--relay-warning-soft)] text-[var(--relay-warning)]",
   success:
@@ -28,12 +28,13 @@ const toneClass = {
     "border-[color-mix(in_srgb,var(--relay-danger)_30%,white)] bg-[var(--relay-danger-soft)] text-[var(--relay-danger)]",
 } as const;
 
+
 export function StatusPill(props: { stage: WorkstreamStage; className?: string }) {
   const tone = toneByStage[props.stage];
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded border px-1.5 py-0.5 text-xs font-medium capitalize",
+        "inline-flex items-center rounded-xl border px-1.5 py-0.5 text-xs font-medium capitalize",
         toneClass[tone],
         props.className,
       )}

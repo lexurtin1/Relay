@@ -1,23 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --relay-primary: #3274c0;
-  --relay-primary-hover: #2b64a8;
+  --relay-brand: #3274c0;
+  --relay-brand-hover: #2b64a8;
+  --relay-brand-soft: #e8f1fb;
+  --relay-primary: #6b5ce7;
+  --relay-primary-hover: #5848d6;
   --relay-primary-fg: #ffffff;
-  --relay-ink: #1a1c1e;
+  --relay-primary-soft: #f1effe;
+  --relay-accent: #6b5ce7;
+  --relay-accent-muted: #8b7ff0;
+  --relay-ink: #16181d;
   --relay-ink-muted: #4a5562;
   --relay-ink-subtle: #667085;
   --relay-surface: #ffffff;
-  --relay-surface-muted: #f4f5f7;
-  --relay-surface-sunken: #ebeef2;
-  --relay-border: #d5dae1;
-  --relay-border-strong: #b8c0cc;
+  --relay-surface-muted: #f5f4fb;
+  --relay-surface-sunken: #eeebf8;
+  --relay-border: #ddd8ef;
+  --relay-border-strong: #c4bde0;
   --relay-danger: #b42318;
   --relay-danger-soft: #fef3f2;
   --relay-warning: #b54708;
   --relay-warning-soft: #fffaeb;
   --relay-success: #027a48;
   --relay-success-soft: #ecfdf3;
+  --relay-radius-control: 10px;
+  --relay-radius-card: 14px;
+  --relay-radius-panel: 18px;
   --relay-font-display: "Gill Sans MT", "Gill Sans", Calibri, sans-serif;
   --relay-font-ui: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --relay-font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -33,7 +42,10 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-  background: var(--relay-surface-muted);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, color-mix(in srgb, var(--relay-primary) 10%, white), transparent 60%),
+    radial-gradient(900px 420px at 100% 0%, color-mix(in srgb, var(--relay-brand) 8%, white), transparent 55%),
+    var(--relay-surface-muted);
   color: var(--relay-ink);
   font-family: var(--relay-font-ui);
   font-feature-settings: "tnum" 1;
@@ -64,7 +76,7 @@ textarea {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--relay-primary) 22%, white);
+  background: color-mix(in srgb, var(--relay-primary) 24%, white);
   color: var(--relay-ink);
 }
 
@@ -76,6 +88,18 @@ kbd {
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+.rounded-relay {
+  border-radius: var(--relay-radius-card);
+}
+
+.rounded-relay-panel {
+  border-radius: var(--relay-radius-panel);
+}
+
+.rounded-relay-control {
+  border-radius: var(--relay-radius-control);
 }
 
 @keyframes relay-pulse {
@@ -144,4 +168,3 @@ h2 {
     transition: none !important;
   }
 }
-

@@ -29,7 +29,7 @@ const iconFor = {
 export function ActivityTimeline(props: { events: ActivityEventView[] }) {
   if (props.events.length === 0) {
     return (
-      <div className="rounded border border-dashed border-[var(--relay-border)] bg-[var(--relay-surface)] p-4 text-sm text-[var(--relay-ink-muted)]">
+      <div className="rounded-xl border border-dashed border-[var(--relay-border)] bg-[var(--relay-surface)] p-4 text-sm text-[var(--relay-ink-muted)]">
         <p className="font-medium text-[var(--relay-ink)]">No agent activity yet</p>
         <p className="mt-1">
           Start research to see Scout&apos;s progress here. Tool calls stay collapsed until you

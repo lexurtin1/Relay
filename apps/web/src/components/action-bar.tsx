@@ -8,16 +8,24 @@ export type ActionBarState = {
   canRequestReview: boolean;
   canApprove: boolean;
   canHandOff: boolean;
+  canRevise: boolean;
+  openCommentCount: number;
   generateReason?: string;
   reviewReason?: string;
   approveReason?: string;
   handOffReason?: string;
+  reviseReason?: string;
 };
 
 export function ActionBar(props: {
   state: ActionBarState;
   role: string;
 }) {
+  const statusLeft =
+    props.state.openCommentCount > 0
+      ? `${props.state.openCommentCount} comments must be resolved or addressed before approval.`
+      : "Actions apply to the current plan version.";
+
   const actions: Array<{
     id: string;
     label: string;
@@ -26,26 +34,20 @@ export function ActionBar(props: {
     primary?: boolean;
   }> = [
     {
-      id: "generate",
-      label: "Generate plan",
-      enabled: props.state.canGeneratePlan,
-      reason: props.state.generateReason ?? "Research findings are required first.",
-    },
-    {
-      id: "review",
-      label: "Request review",
-      enabled: props.state.canRequestReview,
-      reason: props.state.reviewReason ?? "A draft plan is required.",
+      id: "revise",
+      label: "Revise plan using comments",
+      enabled: props.state.canRevise,
+      reason: props.state.reviseReason ?? "Open comments are required to revise.",
     },
     {
       id: "approve",
-      label: "Approve",
+      label: "Approve plan",
       enabled: props.state.canApprove,
       reason:
         props.state.approveReason ??
         (props.role !== "architect" && props.role !== "lead"
           ? "Only architects and leads can approve plans."
-          : "Plan must be in review."),
+          : "Plan must be in review with comments addressed."),
     },
     {
       id: "handoff",
@@ -62,9 +64,7 @@ export function ActionBar(props: {
     <TooltipProvider>
       <div className="sticky bottom-0 z-20 border-t border-[var(--relay-border)] bg-[var(--relay-surface)]/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-2 px-4 py-3">
-          <div className="mr-auto text-xs text-[var(--relay-ink-muted)]">
-            Actions apply to the current plan version.
-          </div>
+          <div className="mr-auto text-xs text-[var(--relay-ink-muted)]">{statusLeft}</div>
           {actions.map((action) => {
             const button = (
               <button
@@ -72,7 +72,7 @@ export function ActionBar(props: {
                 type="button"
                 disabled={!action.enabled}
                 className={cn(
-                  "rounded px-3 py-2 text-sm font-medium transition-relay",
+                  "rounded-xl px-3 py-2 text-sm font-medium transition-relay",
                   action.primary
                     ? "bg-[var(--relay-primary)] text-[var(--relay-primary-fg)] hover:bg-[var(--relay-primary-hover)] disabled:bg-[var(--relay-border)] disabled:text-[var(--relay-ink-subtle)]"
                     : "border border-[var(--relay-border)] bg-[var(--relay-surface)] text-[var(--relay-ink)] hover:border-[var(--relay-primary)] disabled:text-[var(--relay-ink-subtle)]",

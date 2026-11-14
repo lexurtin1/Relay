@@ -43,7 +43,7 @@ export default async function WorkstreamDetailPage({
       researchRuns: {
         include: { events: { orderBy: { createdAt: "desc" }, take: 30 } },
         orderBy: { createdAt: "desc" },
-        take: 1,
+        take: 3,
       },
     },
   });
@@ -53,40 +53,86 @@ export default async function WorkstreamDetailPage({
   const plan = workstream.plans[0] ?? null;
   const job = workstream.runnerJobs[0];
   const research = workstream.researchRuns[0];
-  const rawEvents = job?.events ?? research?.events ?? [];
-
-  const events = rawEvents.map((event) => {
-    const payload = event.payload as {
-      summary?: string;
-      message?: string;
-      tool?: string;
-    };
-    return {
-      id: event.id,
-      type: event.type,
-      createdAt: event.createdAt.toISOString(),
-      summary:
-        payload.summary ??
-        payload.message ??
-        (payload.tool ? `Tool: ${payload.tool}` : event.type),
-    };
-  });
-
   const openQuestion =
     job?.questions.find((q) => !q.answer)?.questionText ?? null;
+  const openCommentCount =
+    plan?.comments.filter((c) => !c.resolved).length ?? 0;
 
   const hasArchitectApproval = (plan?.approvals.length ?? 0) > 0;
   const role = user.role;
   const owns = workstream.ownerId === user.id;
 
+  const sourcesRaw = Array.isArray(research?.sourcesConsulted)
+    ? (research?.sourcesConsulted as Array<{
+        connector?: string;
+        title?: string;
+        itemId?: string;
+      }>)
+    : [];
+
+  const sources = sourcesRaw
+    .filter((s) => s.title)
+    .map((s) => ({
+      connector: s.connector ?? "source",
+      title: s.title as string,
+      itemId: s.itemId,
+    }));
+
+  // Seed fallback sources for in-review story workstreams without research rows
+  if (sources.length === 0 && workstream.jiraKey === "INNO-214") {
+    sources.push(
+      {
+        connector: "confluence",
+        title: "ISIN handling in order routing",
+        itemId: "conf-isin",
+      },
+      {
+        connector: "confluence",
+        title: "MCP server tool conventions",
+        itemId: "conf-mcp",
+      },
+      {
+        connector: "jira",
+        title: "INNO-198 duplicate ISIN logic",
+        itemId: "INNO-198",
+      },
+      {
+        connector: "github",
+        title: "packages/mcp/src/tools",
+        itemId: "gh-tools",
+      },
+    );
+  }
+
+  const history = [
+    ...workstream.plans.map((p) => ({
+      id: `plan-${p.id}`,
+      label:
+        p.versionNumber > 1
+          ? `Plan v${p.versionNumber} generated from comments`
+          : `Plan v${p.versionNumber} generated`,
+      at: p.createdAt.toISOString(),
+    })),
+    ...workstream.researchRuns
+      .filter((r) => r.status === "succeeded" || r.findings)
+      .map((r) => ({
+        id: `research-${r.id}`,
+        label: "Research completed",
+        at: (r.finishedAt ?? r.updatedAt).toISOString(),
+      })),
+  ].sort((a, b) => +new Date(b.at) - +new Date(a.at));
+
   const actionState: ActionBarState = {
     canGeneratePlan: Boolean(research?.status === "succeeded" || research?.findings),
     canRequestReview: Boolean(plan && plan.status === "draft"),
+    canRevise: openCommentCount > 0 && Boolean(plan),
     canApprove:
       Boolean(plan && plan.status === "in_review") &&
+      openCommentCount === 0 &&
       (role === "architect" || role === "lead"),
     canHandOff:
       Boolean(plan && (plan.status === "approved" || hasArchitectApproval)) && owns,
+    openCommentCount,
     generateReason: research?.findings
       ? undefined
       : "Finish a research run before generating a plan.",
@@ -95,11 +141,17 @@ export default async function WorkstreamDetailPage({
         ? undefined
         : `Plan is ${plan.status.replaceAll("_", " ")}, not draft.`
       : "Create a draft plan first.",
+    reviseReason:
+      openCommentCount > 0
+        ? undefined
+        : "Open comments are required before revising from review feedback.",
     approveReason:
       role === "architect" || role === "lead"
-        ? plan?.status === "in_review"
-          ? undefined
-          : "Plan must be in review."
+        ? openCommentCount > 0
+          ? "Resolve or address open comments before approval."
+          : plan?.status === "in_review"
+            ? undefined
+            : "Plan must be in review."
         : "Only architects and leads can approve plans.",
     handOffReason: !owns
       ? "You can only hand off workstreams you own."
@@ -110,6 +162,12 @@ export default async function WorkstreamDetailPage({
           : "Needs at least one architect approval.",
   };
 
+  const researchSummary =
+    research?.findings ??
+    (workstream.jiraKey === "INNO-214"
+      ? "ISIN checks are implemented separately in three tools. None return structured error codes, so agents cannot branch on failure type."
+      : workstream.problemStatement);
+
   return (
     <WorkstreamDetail
       id={workstream.id}
@@ -117,9 +175,12 @@ export default async function WorkstreamDetailPage({
       problemStatement={workstream.problemStatement}
       stage={workstream.stage as WorkstreamStage}
       ownerName={workstream.owner.name}
+      origin={workstream.origin}
+      priority={workstream.priority}
       jiraKey={workstream.jiraKey}
       role={role}
       planVersion={plan?.versionNumber ?? null}
+      planTotalVersions={workstream.plans.length}
       planMarkdown={plan?.markdownBody ?? null}
       steps={
         plan?.steps.map((step) => ({
@@ -144,7 +205,9 @@ export default async function WorkstreamDetailPage({
           resolved: comment.resolved,
         })) ?? []
       }
-      events={events}
+      researchSummary={researchSummary}
+      sources={sources}
+      history={history}
       openQuestion={openQuestion}
       actionState={actionState}
     />

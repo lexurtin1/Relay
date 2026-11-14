@@ -42,7 +42,7 @@ export function CommandPalette(props: { workstreams: CommandWorkstream[] }) {
       />
       <Command
         label="Command palette"
-        className="relative z-10 w-full max-w-xl overflow-hidden rounded-lg border border-[var(--relay-border)] bg-[var(--relay-surface)] shadow-lg animate-relay-in [overscroll-behavior:contain]"
+        className="relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface)] shadow-lg animate-relay-in [overscroll-behavior:contain]"
       >
         <div className="flex items-center gap-2 border-b border-[var(--relay-border)] px-3">
           <Search className="h-4 w-4 text-[var(--relay-ink-subtle)]" aria-hidden />
@@ -51,7 +51,7 @@ export function CommandPalette(props: { workstreams: CommandWorkstream[] }) {
             autoComplete="off"
             className="h-11 w-full bg-transparent text-sm outline-none placeholder:text-[var(--relay-ink-subtle)]"
           />
-          <kbd className="rounded border border-[var(--relay-border)] px-1.5 py-0.5 text-[10px] text-[var(--relay-ink-subtle)]">
+          <kbd className="rounded-xl border border-[var(--relay-border)] px-1.5 py-0.5 text-[10px] text-[var(--relay-ink-subtle)]">
             esc
           </kbd>
         </div>
@@ -66,7 +66,7 @@ export function CommandPalette(props: { workstreams: CommandWorkstream[] }) {
                 setOpen(false);
                 router.push("/workstreams/new");
               }}
-              className="flex cursor-pointer items-center gap-2 rounded px-2 py-2 text-[var(--relay-ink)] aria-selected:bg-[var(--relay-surface-sunken)]"
+              className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-2 text-[var(--relay-ink)] aria-selected:bg-[var(--relay-surface-sunken)]"
             >
               <FilePlus2 className="h-4 w-4 text-[var(--relay-primary)]" aria-hidden />
               <span>New workstream</span>
@@ -84,7 +84,7 @@ export function CommandPalette(props: { workstreams: CommandWorkstream[] }) {
                   setOpen(false);
                   router.push(`/workstreams/${item.id}`);
                 }}
-                className="flex cursor-pointer items-center justify-between gap-3 rounded px-2 py-2 text-[var(--relay-ink)] aria-selected:bg-[var(--relay-surface-sunken)]"
+                className="flex cursor-pointer items-center justify-between gap-3 rounded-xl px-2 py-2 text-[var(--relay-ink)] aria-selected:bg-[var(--relay-surface-sunken)]"
               >
                 <span className="truncate">{item.title}</span>
                 <span className="flex shrink-0 items-center gap-2 text-[11px] text-[var(--relay-ink-muted)]">
