@@ -29,7 +29,7 @@ describe("computeDashboardCounts", () => {
 
 describe("initialsFromName", () => {
   it("builds two-letter initials", () => {
-    expect(initialsFromName("Maya Chen")).toBe("MC");
+    expect(initialsFromName("Alex Curtin")).toBe("AC");
   });
 });
 

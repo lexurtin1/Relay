@@ -17,7 +17,7 @@ export async function getCurrentUser(): Promise<User | null> {
         if (user) return user;
       }
       return prisma.user.findFirst({
-        where: { email: "maya.chen@example-calastone.invalid" },
+        where: { email: "alex.curtin@example-calastone.invalid" },
       });
     },
     () => getDemoUser(userId),
