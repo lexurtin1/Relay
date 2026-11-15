@@ -6,10 +6,6 @@ import type { WorkstreamStage } from "@relay/core";
 import { StageStepper } from "@/components/stage-stepper";
 import { PlanDocument, type PlanCommentView, type PlanStepView } from "@/components/plan-document";
 import { ActionBar, type ActionBarState } from "@/components/action-bar";
-import {
-  segsForStage,
-  TimelineTrack,
-} from "@/components/timeline-track";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
 export type ResearchSourceView = {
@@ -47,16 +43,6 @@ export function WorkstreamDetail(props: {
 }) {
   const [hoverCommentId, setHoverCommentId] = useState<string | null>(null);
   const openComments = props.comments.filter((c) => !c.resolved).length;
-  const segs = segsForStage(
-    props.stage,
-    props.openQuestion
-      ? "waiting"
-      : props.stage === "building" || props.stage === "research"
-        ? "active"
-        : props.stage === "merged" || props.stage === "pr_open"
-          ? "done"
-          : "neutral",
-  );
 
   const statusLine = props.openQuestion
     ? "Runner paused, waiting on you"
@@ -82,12 +68,12 @@ export function WorkstreamDetail(props: {
           {" · Owner "}
           {props.ownerName}
         </p>
-        <h1 className="mt-1.5 text-[clamp(30px,3.4vw,42px)] font-medium leading-[1.1] tracking-[-0.03em] text-[var(--relay-ink)]">
+        <h1 className="mt-1.5 text-[28px] font-medium leading-[1.15] tracking-[-0.02em] text-[var(--relay-ink)]">
           {props.title}
         </h1>
         <p
           className={cn(
-            "mt-2.5 text-[17px] capitalize",
+            "mt-2.5 text-[14px]",
             props.openQuestion
               ? "text-[var(--relay-warning)]"
               : "text-[var(--relay-brand-fg)]",
@@ -99,28 +85,21 @@ export function WorkstreamDetail(props: {
 
       <StageStepper stage={props.stage} />
 
-      <div>
-        <TimelineTrack
-          segs={segs}
-          ariaLabel={`${props.title} timeline`}
-          large
-        />
-        <p className="mt-2.5 text-[13px] text-[var(--relay-ink-muted)]">
-          Timeline · Updated {formatRelativeTime(props.history[0]?.at ?? new Date().toISOString())}
-        </p>
-      </div>
+      <ActionBar
+        workstreamId={props.id}
+        state={props.actionState}
+        role={props.role}
+      />
 
       {props.openQuestion ? (
-        <section className="rl-sheet flex flex-col gap-3 p-7" aria-labelledby="rl-q-h">
-          <h2 id="rl-q-h" className="m-0 text-xl font-medium text-[var(--relay-warning)]">
+        <section className="rl-sheet flex flex-col gap-3 p-5" aria-labelledby="rl-q-h">
+          <h2 id="rl-q-h" className="m-0 text-[17px] font-medium text-[var(--relay-warning)]">
             Question from the Runner
           </h2>
-          <p className="m-0 text-[17px] text-[var(--relay-ink)]">{props.openQuestion}</p>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" className="rl-btn-second">
-              Answer in workstream
-            </button>
-          </div>
+          <p className="m-0 text-[14px] text-[var(--relay-ink)]">{props.openQuestion}</p>
+          <p className="m-0 text-[12.5px] text-[var(--relay-ink-muted)]">
+            Answer from Overview Needs you, or continue after the card clears.
+          </p>
         </section>
       ) : null}
 
@@ -276,8 +255,6 @@ export function WorkstreamDetail(props: {
           </section>
         </div>
       </div>
-
-      <ActionBar state={props.actionState} role={props.role} />
     </div>
   );
 }

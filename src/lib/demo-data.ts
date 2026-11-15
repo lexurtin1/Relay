@@ -121,7 +121,7 @@ export const DEMO_WORKSTREAM_ROWS: WorkstreamRowRow[] = [
   },
 ];
 
-const DEMO_STATS: OverviewStats = {
+let DEMO_STATS: OverviewStats = {
   allActive: 4,
   research: 1,
   inReview: 1,
@@ -130,7 +130,17 @@ const DEMO_STATS: OverviewStats = {
   mergedThisWeek: 1,
 };
 
-const DEMO_NEEDS: NeedsActionItem[] = [
+/** In-memory audit trail for demo / Vercel prototype mode. */
+export const DEMO_AUDIT: Array<{
+  id: string;
+  action: string;
+  workstreamId: string | null;
+  detail: string | null;
+  userId: string | null;
+  at: string;
+}> = [];
+
+let DEMO_NEEDS: NeedsActionItem[] = [
   {
     id: "demo-ws-nav-q",
     jiraKey: "INNO-201",
@@ -156,7 +166,7 @@ const DEMO_NEEDS: NeedsActionItem[] = [
   },
 ];
 
-const DEMO_AGENTS: AgentRunningItem[] = [
+let DEMO_AGENTS: AgentRunningItem[] = [
   {
     id: "demo-runner-nav",
     workstreamId: "demo-ws-nav",
@@ -184,9 +194,9 @@ const DEMO_AGENTS: AgentRunningItem[] = [
 export function getDemoOverviewData() {
   return {
     stats: DEMO_STATS,
-    needsAction: DEMO_NEEDS,
-    agentsRunning: DEMO_AGENTS,
-    rows: DEMO_WORKSTREAM_ROWS,
+    needsAction: [...DEMO_NEEDS],
+    agentsRunning: [...DEMO_AGENTS],
+    rows: [...DEMO_WORKSTREAM_ROWS],
     agentsActive: DEMO_AGENTS.length,
     workstreamCount: DEMO_WORKSTREAM_ROWS.length,
     commandItems: DEMO_WORKSTREAM_ROWS.map((w) => ({
@@ -196,6 +206,128 @@ export function getDemoOverviewData() {
       stage: w.stage,
     })),
   };
+}
+
+function pushDemoAudit(
+  action: string,
+  workstreamId: string | null,
+  detail: string,
+  userId: string | null,
+) {
+  DEMO_AUDIT.unshift({
+    id: `audit-${DEMO_AUDIT.length + 1}`,
+    action,
+    workstreamId,
+    detail,
+    userId,
+    at: new Date().toISOString(),
+  });
+}
+
+function refreshDemoStats() {
+  DEMO_STATS = {
+    allActive: DEMO_WORKSTREAM_ROWS.filter((w) => w.stage !== "merged" && w.stage !== "killed")
+      .length,
+    research: DEMO_WORKSTREAM_ROWS.filter((w) => w.stage === "research").length,
+    inReview: DEMO_WORKSTREAM_ROWS.filter((w) => w.stage === "in_review").length,
+    building: DEMO_WORKSTREAM_ROWS.filter(
+      (w) => w.stage === "building" || w.stage === "awaiting_input",
+    ).length,
+    pullRequest: DEMO_WORKSTREAM_ROWS.filter((w) => w.stage === "pr_open").length,
+    mergedThisWeek: DEMO_WORKSTREAM_ROWS.filter((w) => w.stage === "merged").length,
+  };
+}
+
+/** Prototype mutators for demo fixtures (no Postgres). */
+export function demoAnswerQuestion(
+  needsId: string,
+  option: string,
+  userId: string,
+): { ok: true } | { ok: false; error: string } {
+  const idx = DEMO_NEEDS.findIndex((n) => n.id === needsId && n.kind === "question");
+  if (idx < 0) return { ok: false, error: "Question not found." };
+  const item = DEMO_NEEDS[idx]!;
+  const wsId = needsId.replace(/-q$/, "");
+  DEMO_NEEDS = DEMO_NEEDS.filter((_, i) => i !== idx);
+  const row = DEMO_WORKSTREAM_ROWS.find((w) => w.id === wsId);
+  if (row) {
+    row.stage = "building" as WorkstreamStage;
+    row.stepperIndex = 3;
+    row.progressLabel = "Runner resumed";
+    row.progressTone = "active";
+    row.updatedAt = new Date().toISOString();
+  }
+  DEMO_AGENTS = DEMO_AGENTS.map((a) =>
+    a.workstreamId === wsId
+      ? { ...a, statusLine: `Answered: ${option}`, kind: "Runner" as const }
+      : a,
+  );
+  pushDemoAudit("hand_off", wsId, `Answered question: ${option}`, userId);
+  refreshDemoStats();
+  void item;
+  return { ok: true };
+}
+
+export function demoSetWorkstreamStage(
+  workstreamId: string,
+  stage: WorkstreamStage,
+  userId: string,
+  auditAction: string,
+  detail: string,
+  opts?: { resolveComments?: boolean },
+): { ok: true } | { ok: false; error: string } {
+  const row = DEMO_WORKSTREAM_ROWS.find((w) => w.id === workstreamId);
+  if (!row) return { ok: false, error: "Workstream not found." };
+  row.stage = stage;
+  row.stepperIndex = mapStageIndex(stage);
+  row.updatedAt = new Date().toISOString();
+  if (stage === "planning") {
+    row.progressLabel = "Revising plan";
+    row.progressTone = "active";
+  } else if (stage === "in_review") {
+    row.progressLabel = opts?.resolveComments ? "Plan in review" : row.progressLabel;
+    row.progressTone = "waiting";
+  } else if (stage === "approved") {
+    row.progressLabel = "Approved";
+    row.progressTone = "done";
+    DEMO_NEEDS = DEMO_NEEDS.filter((n) => n.id !== `${workstreamId}-c`);
+  } else if (stage === "building") {
+    row.progressLabel = "Runner starting";
+    row.progressTone = "active";
+  }
+  if (opts?.resolveComments) {
+    DEMO_NEEDS = DEMO_NEEDS.filter((n) => n.id !== `${workstreamId}-c`);
+    const detailState = demoDetailState.get(workstreamId) ?? {
+      commentsResolved: false,
+      planVersion: 2,
+    };
+    detailState.commentsResolved = true;
+    detailState.planVersion += 1;
+    demoDetailState.set(workstreamId, detailState);
+  }
+  pushDemoAudit(auditAction, workstreamId, detail, userId);
+  refreshDemoStats();
+  return { ok: true };
+}
+
+const demoDetailState = new Map<string, { commentsResolved: boolean; planVersion: number }>();
+
+function mapStageIndex(stage: WorkstreamStage): number {
+  switch (stage) {
+    case "idea":
+    case "research":
+      return 0;
+    case "planning":
+      return 1;
+    case "in_review":
+    case "approved":
+      return 2;
+    case "building":
+    case "awaiting_input":
+      return 3;
+    default:
+      return 4;
+  }
 }
 
 export function getDemoUser(userId?: string | null): User {
@@ -229,9 +361,51 @@ Expose a shared ISIN validation tool on the Calastone MCP server so engineers st
 4. Document usage in Confluence
 
 ## Risks
-- **medium** — existing callers expect different error shapes
-- **low** — check-digit edge cases for CUSIP-mapped ISINs
+- **medium** - existing callers expect different error shapes
+- **low** - check-digit edge cases for CUSIP-mapped ISINs
 `;
+
+  const state = demoDetailState.get(id) ?? {
+    commentsResolved: false,
+    planVersion: 2,
+  };
+  demoDetailState.set(id, state);
+
+  const planStatus =
+    row.stage === "approved" || row.stage === "building"
+      ? ("approved" as const)
+      : row.stage === "planning"
+        ? ("draft" as const)
+        : ("in_review" as const);
+
+  const comments = state.commentsResolved
+    ? []
+    : [
+        {
+          id: "c1",
+          body: "Please keep error codes stable for existing order-routing callers.",
+          resolved: false,
+          createdAt: hoursAgo(3).toISOString(),
+          anchorText: "typed error codes",
+          author: DEMO_USERS[2]!,
+        },
+        {
+          id: "c2",
+          body: "Add an explicit test for lowercase input normalisation.",
+          resolved: false,
+          createdAt: hoursAgo(2).toISOString(),
+          anchorText: "unit tests",
+          author: DEMO_USERS[2]!,
+        },
+        {
+          id: "c3",
+          body: "Link the Confluence page from the tool description.",
+          resolved: false,
+          createdAt: hoursAgo(2).toISOString(),
+          anchorText: "Document usage",
+          author: DEMO_USERS[3]!,
+        },
+      ];
 
   return {
     id: row.id,
@@ -245,9 +419,9 @@ Expose a shared ISIN validation tool on the Calastone MCP server so engineers st
     owner,
     ownerId: owner.id,
     plan: {
-      id: `${row.id}-plan-v2`,
-      versionNumber: 2,
-      status: "in_review" as const,
+      id: `${row.id}-plan-v${state.planVersion}`,
+      versionNumber: state.planVersion,
+      status: planStatus,
       markdownBody: planMarkdown,
       steps: [
         {
@@ -281,32 +455,7 @@ Expose a shared ISIN validation tool on the Calastone MCP server so engineers st
           completed: false,
         },
       ],
-      comments: [
-        {
-          id: "c1",
-          body: "Please keep error codes stable for existing order-routing callers.",
-          resolved: false,
-          createdAt: hoursAgo(3).toISOString(),
-          anchorText: "typed error codes",
-          author: DEMO_USERS[2]!,
-        },
-        {
-          id: "c2",
-          body: "Add an explicit test for lowercase input normalisation.",
-          resolved: false,
-          createdAt: hoursAgo(2).toISOString(),
-          anchorText: "unit tests",
-          author: DEMO_USERS[2]!,
-        },
-        {
-          id: "c3",
-          body: "Link the Confluence page from the tool description.",
-          resolved: false,
-          createdAt: hoursAgo(2).toISOString(),
-          anchorText: "Document usage",
-          author: DEMO_USERS[3]!,
-        },
-      ],
+      comments,
     },
     sources: [
       {

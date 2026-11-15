@@ -11,17 +11,17 @@ Relay is a well-structured shell with no working engine yet. The data model, UI 
 | --- | --- | --- |
 | Data model | Complete for the Orbit loop: workstreams, research runs, plans with versions and steps, anchored comments, approvals, runner jobs, agent events, questions, ideas, audit log | `prisma/schema.prisma` |
 | Demo mode | Works without a database through fixtures | `src/lib/db.ts`, `src/lib/demo-data.ts` |
-| Overview | Start work composer (3 modes), Needs your input cards, workstream timelines | `src/components/overview.tsx` |
-| Workstream detail | Stage stepper, plan document, anchored comments, action bar | `src/components/workstream-detail.tsx` |
-| Action bar | Buttons render but have no handlers. Revise, Approve and Hand off do nothing | `src/components/action-bar.tsx` |
-| Needs your input | Option buttons link to the workstream page instead of answering | `overview.tsx`, `NeedsInputSection` |
+| Overview | Phase 1: one research composer, Needs you answers, workstream list | `src/components/overview.tsx` |
+| Workstream detail | Phase 1: Next step panel, stage stepper, plan and comments | `src/components/workstream-detail.tsx` |
+| Action bar | Phase 1: Next step panel wired to revise / request review / approve / hand off (prototype; jobs are no-ops) | `src/components/action-bar.tsx`, `src/app/actions/workstream.ts` |
+| Needs your input | Phase 1: question options call `answerQuestion` and dismiss the card | `overview.tsx`, `NeedsInputSection` |
 | New workstream | Five-field form; creates a record at stage `idea`; nothing starts | `src/app/workstreams/new/page.tsx`, `src/app/actions.ts` |
 | Knowledge search | Works against a mock corpus. Live connectors also return mock data | `packages/connectors/src/live-connector.ts` |
 | Gateway | Single text call to `/v1/messages`. No tool-use loop, no streaming | `packages/core/src/llm/gateway.ts` |
 | Worker | Heartbeat only. No queues, no processors | `apps/worker/src/index.ts` |
-| Ideas, Metrics, Audit | Placeholder pages. Ideas and Metrics are in the dock; Audit is linked from Metrics | `src/app/ideas`, `metrics`, `audit` |
-| Header | "Agents running" pill always reads "Workspace ready" because the count is never passed | `src/components/header.tsx`, `src/app/layout.tsx` |
-| Visual layer | Fixed glass header, floating glass dock, sticky glass action bar, drifting colour blobs and rotating wireframe polyhedra behind content | `layout.tsx`, `atmosphere.tsx`, `calastone-wireframes.tsx` |
+| Ideas, Metrics, Audit | Placeholder routes kept; hidden from top nav until Phase 7 | `src/app/ideas`, `metrics`, `audit` |
+| Header | Phase 1: top tabs (Overview, Workstreams, Knowledge) and live agents-running count | `src/components/header.tsx`, `src/app/layout.tsx` |
+| Visual layer | Phase 1: glass on top bar and command palette only; dock / atmosphere / wireframes removed from working pages; Next step panel on solid sheet | `layout.tsx`, `DESIGN.md` |
 | Jira | Stored as a free-text key only. No sync | `Workstream.jiraKey` |
 
 Two things are worth keeping exactly as they are: the schema, and the rule that every model call goes through the SS&C AI Gateway module.

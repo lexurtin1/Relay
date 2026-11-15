@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
-import { prisma } from "@relay/core";
-import type { WorkstreamStage } from "@relay/core";
+import {
+  getActionCapabilities,
+  prisma,
+  type UserRole,
+  type WorkstreamStage,
+} from "@relay/core";
 import { getCurrentUser } from "@/lib/session";
 import { WorkstreamDetail } from "@/components/workstream-detail";
 import type { ActionBarState } from "@/components/action-bar";
@@ -22,23 +26,17 @@ export default async function WorkstreamDetailPage({
     const demo = getDemoWorkstreamDetail(id);
     if (!demo) notFound();
     const openCommentCount = demo.plan.comments.filter((c) => !c.resolved).length;
-    const role = user.role;
+    const role = user.role as UserRole;
     const owns = demo.ownerId === user.id;
-    const actionState: ActionBarState = {
-      canGeneratePlan: true,
-      canRequestReview: false,
-      canRevise: openCommentCount > 0,
-      canApprove: false,
-      canHandOff: false,
+    const actionState: ActionBarState = getActionCapabilities({
+      stage: demo.stage as WorkstreamStage,
+      role,
+      owns,
       openCommentCount,
-      generateReason: undefined,
-      reviewReason: "Plan is already in review.",
-      reviseReason: undefined,
-      approveReason: "Resolve or address open comments before approval.",
-      handOffReason: !owns
-        ? "You can only hand off workstreams you own."
-        : "Needs at least one architect approval.",
-    };
+      hasPlan: true,
+      planStatus: demo.plan.status,
+      hasResearchFindings: Boolean(demo.researchSummary),
+    });
 
     return (
       <WorkstreamDetail
@@ -180,45 +178,16 @@ export default async function WorkstreamDetailPage({
       })),
   ].sort((a, b) => +new Date(b.at) - +new Date(a.at));
 
-  const actionState: ActionBarState = {
-    canGeneratePlan: Boolean(research?.status === "succeeded" || research?.findings),
-    canRequestReview: Boolean(plan && plan.status === "draft"),
-    canRevise: openCommentCount > 0 && Boolean(plan),
-    canApprove:
-      Boolean(plan && plan.status === "in_review") &&
-      openCommentCount === 0 &&
-      (role === "architect" || role === "lead"),
-    canHandOff:
-      Boolean(plan && (plan.status === "approved" || hasArchitectApproval)) && owns,
+  const actionState: ActionBarState = getActionCapabilities({
+    stage: workstream.stage as WorkstreamStage,
+    role: role as UserRole,
+    owns,
     openCommentCount,
-    generateReason: research?.findings
-      ? undefined
-      : "Finish a research run before generating a plan.",
-    reviewReason: plan
-      ? plan.status === "draft"
-        ? undefined
-        : `Plan is ${plan.status.replaceAll("_", " ")}, not draft.`
-      : "Create a draft plan first.",
-    reviseReason:
-      openCommentCount > 0
-        ? undefined
-        : "Open comments are required before revising from review feedback.",
-    approveReason:
-      role === "architect" || role === "lead"
-        ? openCommentCount > 0
-          ? "Resolve or address open comments before approval."
-          : plan?.status === "in_review"
-            ? undefined
-            : "Plan must be in review."
-        : "Only architects and leads can approve plans.",
-    handOffReason: !owns
-      ? "You can only hand off workstreams you own."
-      : !plan
-        ? "An approved plan is required."
-        : hasArchitectApproval || plan.status === "approved"
-          ? undefined
-          : "Needs at least one architect approval.",
-  };
+    hasPlan: Boolean(plan),
+    planStatus: plan?.status,
+    hasResearchFindings: Boolean(research?.status === "succeeded" || research?.findings),
+    hasArchitectApproval,
+  });
 
   const researchSummary =
     research?.findings ??
