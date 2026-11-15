@@ -37,9 +37,10 @@ Tests: `pnpm test`
 
 ## Milestones
 
-1. Skeleton (current): schema, seed, branded dashboard
-2. Connectors and knowledge search
-3. Scout and Planner
+1. Skeleton: schema, seed, branded dashboard (done)
+2. Connectors and knowledge search (done)
+3. Scout and Planner (current)
+
 4. Review / comments / approval
 5. Runner
 6. Reviewer, Ideas, Metrics, Audit

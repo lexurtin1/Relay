@@ -1,0 +1,211 @@
+import type { ConnectorId, SourceDocument } from "@relay/core";
+
+export type CorpusDoc = SourceDocument & {
+  tags?: string[];
+};
+
+type SourceId = Exclude<ConnectorId, "ontology">;
+
+/** Fictional Calastone-flavoured documents for mock mode. No real client data. */
+export const MOCK_CORPUS: Record<SourceId, CorpusDoc[]> = {
+  confluence: [
+    {
+      id: "conf-isin-routing",
+      connectorId: "confluence",
+      title: "ISIN handling in order routing",
+      body: "Fictional runbook for validating ISINs before order routing. Prefer a shared helper over per-tool regex. Error envelopes should use stable codes so clients can branch.",
+      url: "https://confluence.example-calastone.invalid/isin-routing",
+      tags: ["isin", "routing", "mcp"],
+      metadata: { space: "INNO", updated: "2026-10-12" },
+    },
+    {
+      id: "conf-mcp-conventions",
+      connectorId: "confluence",
+      title: "MCP server tool conventions",
+      body: "Tools must be read-only unless explicitly approved. Return structured errors with code and message. Document each tool in the package README with one example call.",
+      url: "https://confluence.example-calastone.invalid/mcp-conventions",
+      tags: ["mcp", "tools", "errors"],
+      metadata: { space: "INNO", updated: "2026-09-28" },
+    },
+    {
+      id: "conf-onboarding",
+      connectorId: "confluence",
+      title: "Distributor onboarding checklist (fictional)",
+      body: "Steps for onboarding a fictional distributor: KYC pack, connectivity form, test ISINs, and Salesforce stage hand-off. Last reviewed by Innovation and Strategy.",
+      url: "https://confluence.example-calastone.invalid/onboarding-checklist",
+      tags: ["onboarding", "distributor", "salesforce"],
+      metadata: { space: "OPS", updated: "2026-08-02" },
+    },
+    {
+      id: "conf-nav-exceptions",
+      connectorId: "confluence",
+      title: "NAV reconciliation exception labels",
+      body: "Power BI semantic model labels for NAV exceptions: THRESHOLD_BREACH, MISSING_PRICE, STALE_FEED. Reuse these labels when building classifiers.",
+      url: "https://confluence.example-calastone.invalid/nav-exception-labels",
+      tags: ["nav", "powerbi", "exceptions"],
+      metadata: { space: "OPS", updated: "2026-10-01" },
+    },
+  ],
+  jira: [
+    {
+      id: "INNO-198",
+      connectorId: "jira",
+      title: "INNO-198 Duplicate ISIN logic across tools",
+      body: "Three services copy the same ISIN regex. Tracked as tech debt for Innovation. Related to INNO-214 shared MCP tool.",
+      url: "https://jira.example-calastone.invalid/browse/INNO-198",
+      tags: ["isin", "debt", "mcp"],
+      metadata: { status: "Done", type: "Story" },
+    },
+    {
+      id: "INNO-214",
+      connectorId: "jira",
+      title: "INNO-214 Add ISIN validation tool to MCP server",
+      body: "Expose validate_isin on the fictional Calastone MCP server with clear error codes and unit tests.",
+      url: "https://jira.example-calastone.invalid/browse/INNO-214",
+      tags: ["isin", "mcp", "active"],
+      metadata: { status: "In Progress", type: "Story" },
+    },
+    {
+      id: "INNO-201",
+      connectorId: "jira",
+      title: "INNO-201 NAV reconciliation exception classifier",
+      body: "Classify NAV exceptions using Power BI labels or a new MCP enum. Runner paused pending decision.",
+      url: "https://jira.example-calastone.invalid/browse/INNO-201",
+      tags: ["nav", "runner", "powerbi"],
+      metadata: { status: "Blocked", type: "Story" },
+    },
+    {
+      id: "INNO-176",
+      connectorId: "jira",
+      title: "INNO-176 Audit export for Relay plan approvals",
+      body: "Export plan approvals for compliance review. Pull request open.",
+      url: "https://jira.example-calastone.invalid/browse/INNO-176",
+      tags: ["audit", "approvals"],
+      metadata: { status: "In Review", type: "Story" },
+    },
+  ],
+  github: [
+    {
+      id: "gh-mcp-tools",
+      connectorId: "github",
+      title: "packages/mcp/src/tools",
+      body: "Tool registration for the fictional MCP server. Candidates for validate_isin live beside order and fund tools.",
+      url: "https://github.com/example-calastone/mcp/tree/main/packages/mcp/src/tools",
+      tags: ["mcp", "code", "isin"],
+      metadata: { path: "packages/mcp/src/tools.ts", language: "typescript" },
+    },
+    {
+      id: "gh-isin-helper",
+      connectorId: "github",
+      title: "packages/mcp/src/isin.ts (draft)",
+      body: "Draft ISO 6166 check-digit helper. Not yet exported as an MCP tool.",
+      url: "https://github.com/example-calastone/mcp/blob/main/packages/mcp/src/isin.ts",
+      tags: ["isin", "code"],
+      metadata: { path: "packages/mcp/src/isin.ts", language: "typescript" },
+    },
+    {
+      id: "gh-relay-readme",
+      connectorId: "github",
+      title: "Relay workspace README",
+      body: "Internal agent workspace prototype. Mock mode default. Connectors are read-only for research.",
+      url: "https://github.com/example-calastone/relay/blob/main/README.md",
+      tags: ["relay", "docs"],
+      metadata: { path: "README.md", language: "markdown" },
+    },
+  ],
+  salesforce: [
+    {
+      id: "sf-opp-fund-launch",
+      connectorId: "salesforce",
+      title: "Opportunity: fictional fund launch visibility",
+      body: "Stage Negotiation. Client asked about fund launch visibility in a discovery call. Linked friction idea in Relay.",
+      url: "https://salesforce.example-calastone.invalid/opp/006FUNDLNCH",
+      tags: ["opportunity", "fund", "launch"],
+      metadata: { stage: "Negotiation", amount: "n/a" },
+    },
+    {
+      id: "sf-account-distributor",
+      connectorId: "salesforce",
+      title: "Account: fictional EU distributor",
+      body: "Onboarding stalled waiting for checklist confirmation. Stages: Prospect, KYC, Connectivity, Live.",
+      url: "https://salesforce.example-calastone.invalid/account/001DISTEU",
+      tags: ["onboarding", "distributor"],
+      metadata: { stage: "Connectivity" },
+    },
+    {
+      id: "sf-pipeline-weekly",
+      connectorId: "salesforce",
+      title: "Pipeline stages for weekly CCO summary",
+      body: "Canonical stage names for the fictional weekly pipeline report: Qualify, Propose, Negotiate, Closed Won, Closed Lost.",
+      url: "https://salesforce.example-calastone.invalid/reports/pipeline-stages",
+      tags: ["pipeline", "cco", "report"],
+      metadata: { object: "Opportunity" },
+    },
+  ],
+  powerbi: [
+    {
+      id: "pbi-nav-model",
+      connectorId: "powerbi",
+      title: "NAV exceptions semantic model",
+      body: "Measures and labels for NAV threshold breaches. Labels: THRESHOLD_BREACH, MISSING_PRICE, STALE_FEED. Used by ops dashboards.",
+      url: "https://powerbi.example-calastone.invalid/datasets/nav-exceptions",
+      tags: ["nav", "labels", "semantic"],
+      metadata: { workspace: "Innovation Demo" },
+    },
+    {
+      id: "pbi-volume",
+      connectorId: "powerbi",
+      title: "Order volume by region (demo)",
+      body: "Demo dataset of weekly order volumes by fictional region. Joined to Salesforce stages for CCO reports.",
+      url: "https://powerbi.example-calastone.invalid/datasets/order-volume",
+      tags: ["volume", "report", "cco"],
+      metadata: { workspace: "Innovation Demo" },
+    },
+    {
+      id: "pbi-sla",
+      connectorId: "powerbi",
+      title: "Exception SLA burn-down",
+      body: "Tracks open NAV exceptions by age. Amber after 4 hours, red after 1 business day.",
+      url: "https://powerbi.example-calastone.invalid/reports/exception-sla",
+      tags: ["nav", "sla", "ops"],
+      metadata: { workspace: "Operations Demo" },
+    },
+  ],
+  databricks: [
+    {
+      id: "dbx-isin-ref",
+      connectorId: "databricks",
+      title: "table: demo.ref.isin_allowlist",
+      body: "Demo allowlist of country codes accepted by the fictional ISIN validator. Not live market data.",
+      url: "https://databricks.example-calastone.invalid/#table/demo/ref/isin_allowlist",
+      tags: ["isin", "allowlist", "table"],
+      metadata: { catalog: "demo", schema: "ref" },
+    },
+    {
+      id: "dbx-nav-exceptions",
+      connectorId: "databricks",
+      title: "table: demo.ops.nav_exceptions_daily",
+      body: "Daily snapshot of NAV exceptions with label, fund_id, and breach_bps. Feeds the Power BI semantic model.",
+      url: "https://databricks.example-calastone.invalid/#table/demo/ops/nav_exceptions_daily",
+      tags: ["nav", "exceptions", "table"],
+      metadata: { catalog: "demo", schema: "ops" },
+    },
+    {
+      id: "dbx-job-pipeline",
+      connectorId: "databricks",
+      title: "job: weekly_cco_pipeline_export",
+      body: "Scheduled job that exports Salesforce stages joined to order volumes for the fictional CCO pack.",
+      url: "https://databricks.example-calastone.invalid/#job/weekly_cco_pipeline_export",
+      tags: ["pipeline", "job", "cco"],
+      metadata: { schedule: "weekly" },
+    },
+  ],
+};
+
+export function allMockDocs(): CorpusDoc[] {
+  return Object.values(MOCK_CORPUS).flat();
+}
+
+export function docsFor(id: SourceId): CorpusDoc[] {
+  return MOCK_CORPUS[id] ?? [];
+}

@@ -2,7 +2,7 @@
 
 White-labelled internal agent workspace for Calastone Innovation and Strategy. Prototype modelled on Stripe Orbit: research, plan, review, hand off to an isolated Runner, and track everything on one dashboard.
 
-**Milestone 1 (skeleton) is implemented:** monorepo, Docker Compose, Prisma schema, demo seed, branded app shell, dashboard reading seeded workstreams.
+**Milestones 1–2 are implemented:** monorepo, Docker Compose, Prisma schema, demo seed, glass branded shell, dashboard, mock connectors, and knowledge search.
 
 ## Quick start (Docker)
 
@@ -30,17 +30,17 @@ pnpm dev
 
 ## What works now
 
-- Branded header with SS&C Calastone logo PNGs and `APP_NAME`
+- Glass branded shell with dark/light theme, dock nav, and Calastone wireframe atmosphere
 - Mock mode badge and role switcher (engineer / architect / lead / viewer)
-- Dashboard board grouped by stage with counts and Needs you markers
-- Workstream detail stub showing seeded plan, comments, and agent events
+- Overview with Start work composer, needs-you cards, and workstream timelines
+- Workstream detail with plan, comments, and stage stepper
+- Knowledge search across Salesforce, Power BI, Jira, Confluence, Databricks, GitHub (mock corpus; live health when env vars are set)
 - New workstream form (creates a DB record)
 - Worker heartbeat process
 - Full Prisma domain model and story seed
 
 ## Not yet
 
-- Live connectors and knowledge search (Milestone 2)
 - Scout / Planner agents and SSE (Milestone 3)
 - Anchored review workflow (Milestone 4)
 - Runner worktrees and ask_human (Milestone 5)

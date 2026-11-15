@@ -1,10 +1,43 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { Suspense } from "react";
+import { KnowledgeSearch } from "@/components/knowledge-search";
+import {
+  getConnectorHealth,
+  runKnowledgeSearch,
+  type SourceConnectorId,
+} from "@/lib/knowledge";
 
-export default function KnowledgePage() {
+export const dynamic = "force-dynamic";
+
+export default async function KnowledgePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ q?: string; source?: string }>;
+}) {
+  const params = searchParams ? await searchParams : {};
+  const query = (params.q ?? "").trim();
+  const source = (params.source ?? "All").trim() || "All";
+
+  const health = await getConnectorHealth();
+  const sources: SourceConnectorId[] | undefined =
+    source !== "All" ? [source as SourceConnectorId] : undefined;
+  const initialResults = query
+    ? await runKnowledgeSearch({ query, sources })
+    : [];
+
   return (
-    <PlaceholderPage
-      title="Knowledge search"
-      body="Connector health and cross-source search arrive in Milestone 2. Search Confluence, Jira, GitHub and the other connected sources from Overview when ready."
-    />
+    <Suspense fallback={<KnowledgeFallback />}>
+      <KnowledgeSearch
+        initialQuery={query}
+        initialSource={source}
+        health={health}
+        initialResults={initialResults}
+      />
+    </Suspense>
+  );
+}
+
+function KnowledgeFallback() {
+  return (
+    <div className="text-[var(--relay-ink-muted)]">Loading knowledge search…</div>
   );
 }
