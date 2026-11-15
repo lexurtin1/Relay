@@ -8,6 +8,7 @@ import {
 } from "@relay/core";
 import { withDatabase } from "@/lib/db";
 import { getDemoOverviewData } from "@/lib/demo-data";
+import { getDemoRunnerState } from "@/lib/demo-runner-store";
 
 export type OverviewStats = {
   allActive: number;
@@ -60,7 +61,32 @@ function weekAgo(): Date {
 }
 
 export async function getOverviewData() {
-  return withDatabase(loadOverviewFromDatabase, () => getDemoOverviewData());
+  return withDatabase(loadOverviewFromDatabase, () => {
+    const base = getDemoOverviewData();
+    const liveNeeds: NeedsActionItem[] = [];
+    for (const row of base.rows) {
+      const runner = getDemoRunnerState(row.id);
+      if (!runner?.openQuestion) continue;
+      liveNeeds.push({
+        id: `${row.id}-q`,
+        jiraKey: row.jiraKey,
+        title: row.title,
+        kind: "question",
+        summary: "Runner paused for your decision",
+        detail: runner.openQuestion,
+        options: runner.questionOptions ?? [],
+        actionLabel: "Answer to resume",
+        createdAt: new Date().toISOString(),
+      });
+    }
+    const needsAction = [
+      ...liveNeeds,
+      ...base.needsAction.filter(
+        (item) => !liveNeeds.some((live) => live.id.replace(/-q$/, "") === item.id.replace(/-q$|-c$/, "")),
+      ),
+    ];
+    return { ...base, needsAction };
+  });
 }
 
 async function loadOverviewFromDatabase() {

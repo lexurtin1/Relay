@@ -49,7 +49,10 @@ export function OverviewPageView(props: {
 }) {
   const needsN = props.needsAction.length;
   const agentsN = props.agentsActive;
-  const summary = `${needsN} item${needsN === 1 ? "" : "s"} need${needsN === 1 ? "s" : ""} your input · ${agentsN} agent${agentsN === 1 ? "" : "s"} running · ${props.stats.mergedThisWeek} merged this week`;
+  const summary =
+    needsN > 0
+      ? `${needsN} action${needsN === 1 ? "" : "s"} waiting on you · ${agentsN} agent${agentsN === 1 ? "" : "s"} running · ${props.stats.mergedThisWeek} merged this week`
+      : `Nothing waiting on you · ${agentsN} agent${agentsN === 1 ? "" : "s"} running · ${props.stats.mergedThisWeek} merged this week`;
 
   return (
     <div className="flex flex-col gap-9">
@@ -138,56 +141,75 @@ function StartWorkComposer() {
 function NeedsInputSection(props: { items: NeedsActionItem[] }) {
   return (
     <section aria-labelledby="rl-wait-h">
-      <h2 id="rl-wait-h" className="m-0 text-xl font-medium tracking-[-0.01em] text-[var(--relay-ink)]">
-        Needs your input
-      </h2>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2
+            id="rl-wait-h"
+            className="m-0 text-xl font-medium tracking-[-0.01em] text-[var(--relay-ink)]"
+          >
+            Waiting on you
+          </h2>
+          <p className="mt-2 max-w-[62ch] text-[var(--relay-ink-muted)]">
+            Personal action queue. Runner pauses and open plan comments land here until you clear
+            them.
+          </p>
+        </div>
+        {props.items.length > 0 ? (
+          <p className="m-0 text-sm tabular text-[var(--relay-warning)]">
+            {props.items.length} open
+          </p>
+        ) : null}
+      </div>
       {props.items.length === 0 ? (
-        <p className="mt-4 text-[var(--relay-ink-muted)]">
-          Nothing needs your input. Agents that pause with a question are listed here.
+        <p className="mt-4 rounded-[16px] border border-dashed border-[var(--relay-border)] px-4 py-5 text-[var(--relay-ink-muted)]">
+          Inbox clear. When an agent needs a decision, it appears in this list.
         </p>
       ) : (
-        <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(340px,100%),1fr))] gap-4">
+        <ol className="rl-sheet mt-4 m-0 flex list-none flex-col divide-y divide-[var(--relay-border)] p-1">
           {props.items.map((item) => {
             const wsId = item.id.replace(/-q$|-c$/, "");
+            const kindLabel =
+              item.kind === "question" ? "Answer the Runner" : "Review comments";
             return (
-              <article
-                key={item.id}
-                className="rl-sheet flex flex-col gap-2.5 p-[22px] animate-relay-in"
-              >
-                <p className="m-0 text-[13px] text-[var(--relay-ink-muted)]">
-                  {item.jiraKey ? (
-                    <span className="font-mono">{item.jiraKey}</span>
-                  ) : null}
-                  {item.jiraKey ? " · " : null}
-                  <span className="text-[var(--relay-warning)]">{item.summary}</span>
-                </p>
-                <h3 className="m-0 text-[17px] font-medium tracking-[-0.01em] text-[var(--relay-ink)]">
-                  {item.title}
-                </h3>
-                {item.detail ? (
-                  <p className="m-0 text-[var(--relay-ink-body)]">{item.detail}</p>
-                ) : null}
-                <div className="mt-1.5 flex flex-wrap gap-2">
-                  {item.options.slice(0, 3).map((option) => (
-                    <Link
-                      key={option}
-                      href={`/workstreams/${wsId}`}
-                      className="rl-btn-second inline-flex items-center no-underline"
-                    >
-                      {option}
-                    </Link>
-                  ))}
-                  <Link
-                    href={`/workstreams/${wsId}`}
-                    className="rl-btn-second inline-flex items-center no-underline"
-                  >
-                    {item.actionLabel}
-                  </Link>
-                </div>
-              </article>
+              <li key={item.id} className="animate-relay-in">
+                <Link
+                  href={`/workstreams/${wsId}`}
+                  className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-[14px] px-3.5 py-3.5 text-[var(--relay-ink)] no-underline transition-relay hover:bg-[color-mix(in_srgb,var(--relay-warning)_8%,transparent)]"
+                >
+                  <span
+                    className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--relay-warning)]"
+                    aria-hidden
+                  />
+                  <span className="flex min-w-0 flex-[1_1_280px] flex-col gap-0.5">
+                    <span className="text-[12px] font-medium uppercase tracking-[0.05em] text-[var(--relay-warning)]">
+                      {kindLabel}
+                      {item.jiraKey ? (
+                        <>
+                          {" · "}
+                          <span className="font-mono normal-case tracking-normal">
+                            {item.jiraKey}
+                          </span>
+                        </>
+                      ) : null}
+                    </span>
+                    <span className="text-base font-medium">{item.title}</span>
+                    <span className="text-sm text-[var(--relay-ink-body)]">
+                      {item.detail ?? item.summary}
+                    </span>
+                  </span>
+                  <span className="flex min-w-[140px] flex-col items-start gap-1 sm:items-end">
+                    <span className="text-[13px] text-[var(--relay-ink-muted)]">
+                      {formatRelativeTime(item.createdAt)}
+                    </span>
+                    <span className="text-sm font-medium text-[var(--relay-brand-fg)]">
+                      {item.actionLabel} →
+                    </span>
+                  </span>
+                </Link>
+              </li>
             );
           })}
-        </div>
+        </ol>
       )}
     </section>
   );

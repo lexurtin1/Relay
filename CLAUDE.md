@@ -42,6 +42,6 @@ Tests: `pnpm test`
 2. Connectors and knowledge search (done)
 3. Scout and Planner (done)
 4. Review / comments / approval (done)
-5. Runner (current)
-6. Reviewer, Ideas, Metrics, Audit
+5. Runner (done)
+6. Reviewer, Ideas, Metrics, Audit (current)
 7. Hardening and Playwright happy path

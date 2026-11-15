@@ -140,7 +140,7 @@ const DEMO_NEEDS: NeedsActionItem[] = [
     detail:
       "Should threshold breaches use the existing Power BI semantic model labels, or a new enum in the MCP tool response?",
     options: ["Reuse Power BI labels", "New MCP enum", "Ask architect"],
-    actionLabel: "Write an answer",
+    actionLabel: "Answer to resume",
     createdAt: hoursAgo(1).toISOString(),
   },
   {
@@ -149,9 +149,9 @@ const DEMO_NEEDS: NeedsActionItem[] = [
     title: "Add ISIN validation tool to the Calastone MCP server",
     kind: "comments",
     summary: "Plan v2 · 3 open comments, architect approval needed",
-    detail: null,
+    detail: "Teammates left anchored notes on error codes, tests, and docs.",
     options: [],
-    actionLabel: "Review plan",
+    actionLabel: "Open plan review",
     createdAt: hoursAgo(2).toISOString(),
   },
 ];

@@ -10,7 +10,7 @@ async function main() {
       mode: isMockMode() ? "mock" : "live",
       redisUrl: config.redisUrl,
       startedAt,
-      note: "Scout and Planner run in-process from the web app in Milestone 3. BullMQ processors land with Runner in Milestone 5. Heartbeat only for now.",
+      note: "Milestone 5 mock Runner progresses in-process from the web app after hand-off. BullMQ consumers can replace that path later. Heartbeat only here for now.",
     }),
   );
 
