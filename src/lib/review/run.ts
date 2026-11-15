@@ -195,6 +195,11 @@ export async function handOffToRunner(input: {
     );
     if (!architectOk) throw new Error("Needs an architect or lead approval.");
     const jobId = applyDemoHandOff(input.workstreamId);
+    const { startRunnerAfterHandOff } = await import("@/lib/runner/run");
+    void startRunnerAfterHandOff({
+      workstreamId: input.workstreamId,
+      runnerJobId: jobId,
+    });
     return { ok: true, runnerJobId: jobId };
   }
 
@@ -264,6 +269,12 @@ export async function handOffToRunner(input: {
       runnerJobId: job.id,
       detail: "Handed off to Runner (queued)",
     },
+  });
+
+  const { startRunnerAfterHandOff } = await import("@/lib/runner/run");
+  void startRunnerAfterHandOff({
+    workstreamId: input.workstreamId,
+    runnerJobId: job.id,
   });
 
   return { ok: true, runnerJobId: job.id };

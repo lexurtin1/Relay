@@ -12,6 +12,7 @@ import {
   listDemoApprovals,
   listDemoComments,
 } from "@/lib/demo-review-store";
+import { getDemoRunnerState } from "@/lib/demo-runner-store";
 import { computeReviewGates } from "@/lib/review/gates";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +42,10 @@ export default async function WorkstreamDetailPage({
     const stage = (agent.stage as WorkstreamStage | undefined) ?? (demo.stage as WorkstreamStage);
     const sources = agent.sources?.length ? agent.sources : demo.sources;
     const history = agent.history?.length ? agent.history : demo.history;
+    const runner = getDemoRunnerState(id);
+    const openQuestion =
+      runner?.openQuestion ??
+      (review.handedOff ? null : demo.openQuestion);
     const planLifecycle =
       review.planLifecycle ??
       (approvals.length > 0 ? "approved" : (demo.plan.status as string));
@@ -54,7 +59,7 @@ export default async function WorkstreamDetailPage({
       planStatus: planLifecycle,
       openCommentCount,
       hasArchitectApproval,
-      handedOff: review.handedOff,
+      handedOff: Boolean(review.handedOff || runner),
     });
     const actionState: ActionBarState = {
       canGeneratePlan: Boolean(researchSummary),
@@ -121,7 +126,8 @@ export default async function WorkstreamDetailPage({
         researchSummary={researchSummary}
         sources={sources}
         history={history}
-        openQuestion={demo.openQuestion}
+        openQuestion={openQuestion}
+        questionOptions={runner?.questionOptions ?? []}
         actionState={actionState}
         agentEvents={agent.events}
         canResearch
@@ -147,8 +153,8 @@ export default async function WorkstreamDetailPage({
       },
       runnerJobs: {
         include: {
-          questions: true,
-          events: { orderBy: { createdAt: "desc" }, take: 30 },
+          questions: { orderBy: { createdAt: "desc" } },
+          events: { orderBy: { createdAt: "desc" }, take: 40 },
         },
         orderBy: { createdAt: "desc" },
         take: 1,
@@ -166,8 +172,8 @@ export default async function WorkstreamDetailPage({
   const plan = workstream.plans[0] ?? null;
   const job = workstream.runnerJobs[0];
   const research = workstream.researchRuns[0];
-  const openQuestion =
-    job?.questions.find((q) => !q.answer)?.questionText ?? null;
+  const openQuestionRow = job?.questions.find((q) => !q.answer) ?? null;
+  const openQuestion = openQuestionRow?.questionText ?? null;
   const openCommentCount =
     plan?.comments.filter((c) => !c.resolved).length ?? 0;
 
@@ -330,10 +336,13 @@ export default async function WorkstreamDetailPage({
       sources={sources}
       history={history}
       openQuestion={openQuestion}
+      questionOptions={openQuestionRow?.options ?? []}
       actionState={actionState}
-      agentEvents={(research?.events ?? [])
-        .slice()
-        .reverse()
+      agentEvents={[
+        ...(job?.events ?? []),
+        ...(research?.events ?? []),
+      ]
+        .sort((a, b) => +a.createdAt - +b.createdAt)
         .map((e) => {
           const payload = (e.payload ?? {}) as { summary?: string };
           return {

@@ -38,6 +38,6 @@ export default async function KnowledgePage({
 
 function KnowledgeFallback() {
   return (
-    <div className="text-[var(--relay-ink-muted)]">Loading knowledge search…</div>
+    <div className="text-[var(--relay-ink-muted)]">Loading knowledge chat…</div>
   );
 }

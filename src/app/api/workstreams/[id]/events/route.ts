@@ -1,6 +1,7 @@
 import { prisma } from "@relay/core";
 import { useDemoFixtures } from "@/lib/db";
 import { getDemoAgentState } from "@/lib/demo-agent-store";
+import { getDemoRunnerState } from "@/lib/demo-runner-store";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -25,6 +26,7 @@ export async function GET(
         try {
           if (useDemoFixtures()) {
             const state = getDemoAgentState(id);
+            const runner = getDemoRunnerState(id);
             const events = state.events ?? [];
             if (events.length !== lastCount) {
               lastCount = events.length;
@@ -38,22 +40,43 @@ export async function GET(
                 })),
                 researchStatus: state.researchStatus ?? "idle",
                 planStatus: state.planStatus ?? "idle",
+                runnerStatus: runner?.status ?? "idle",
                 researchSummary: state.researchSummary ?? null,
                 stage: state.stage ?? null,
+                openQuestion: runner?.openQuestion ?? null,
               });
             }
             return;
           }
 
-          const run = await prisma.researchRun.findFirst({
-            where: { workstreamId: id },
-            include: {
-              events: { orderBy: { createdAt: "asc" }, take: 100 },
-            },
-            orderBy: { createdAt: "desc" },
-          });
+          const [run, job] = await Promise.all([
+            prisma.researchRun.findFirst({
+              where: { workstreamId: id },
+              include: {
+                events: { orderBy: { createdAt: "asc" }, take: 100 },
+              },
+              orderBy: { createdAt: "desc" },
+            }),
+            prisma.runnerJob.findFirst({
+              where: { workstreamId: id },
+              include: {
+                events: { orderBy: { createdAt: "asc" }, take: 100 },
+                questions: { where: { answer: null }, take: 1 },
+              },
+              orderBy: { createdAt: "desc" },
+            }),
+          ]);
 
-          const events = (run?.events ?? []).map((e) => {
+          const researchEvents = (run?.events ?? []).map((e) => {
+            const payload = (e.payload ?? {}) as { summary?: string };
+            return {
+              id: e.id,
+              type: e.type,
+              summary: payload.summary ?? e.type,
+              createdAt: e.createdAt.toISOString(),
+            };
+          });
+          const runnerEvents = (job?.events ?? []).map((e) => {
             const payload = (e.payload ?? {}) as { summary?: string };
             return {
               id: e.id,
@@ -63,6 +86,17 @@ export async function GET(
             };
           });
 
+          const preferRunner =
+            job &&
+            (job.status === "queued" ||
+              job.status === "provisioning" ||
+              job.status === "running" ||
+              job.status === "awaiting_input" ||
+              job.status === "succeeded");
+          const events = preferRunner
+            ? [...researchEvents, ...runnerEvents]
+            : researchEvents;
+
           if (events.length !== lastCount) {
             lastCount = events.length;
             send({
@@ -70,8 +104,10 @@ export async function GET(
               events,
               researchStatus: run?.status ?? "idle",
               planStatus: "idle",
+              runnerStatus: job?.status ?? "idle",
               researchSummary: run?.findings ?? null,
               stage: null,
+              openQuestion: job?.questions[0]?.questionText ?? null,
             });
           }
         } catch (error) {

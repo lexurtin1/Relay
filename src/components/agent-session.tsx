@@ -34,16 +34,30 @@ export function AgentSessionPanel(props: {
           events?: ActivityEventView[];
           researchStatus?: string;
           planStatus?: string;
+          runnerStatus?: string;
           researchSummary?: string | null;
+          openQuestion?: string | null;
+          stage?: string | null;
         };
         if (data.type === "snapshot") {
           if (data.events) setEvents(data.events);
           if (data.researchSummary) setSummary(data.researchSummary);
-          if (data.researchStatus === "running" || data.planStatus === "running") {
+          if (
+            data.researchStatus === "running" ||
+            data.planStatus === "running" ||
+            data.runnerStatus === "running" ||
+            data.runnerStatus === "provisioning"
+          ) {
             setStatus("running");
-          } else if (data.researchStatus === "succeeded" || data.planStatus === "succeeded") {
-            setStatus("ready");
-            const key = `${data.researchStatus}:${data.planStatus}:${data.events?.length ?? 0}`;
+          } else if (
+            data.researchStatus === "succeeded" ||
+            data.planStatus === "succeeded" ||
+            data.runnerStatus === "awaiting_input" ||
+            data.runnerStatus === "succeeded" ||
+            data.openQuestion
+          ) {
+            setStatus(data.runnerStatus === "awaiting_input" ? "waiting" : "ready");
+            const key = `${data.researchStatus}:${data.planStatus}:${data.runnerStatus}:${data.openQuestion ?? ""}:${data.events?.length ?? 0}`;
             if (refreshedFor.current !== key) {
               refreshedFor.current = key;
               router.refresh();

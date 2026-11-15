@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import type { WorkstreamStage } from "@relay/core";
 import { addCommentAction, resolveCommentAction } from "@/app/actions/review";
+import { answerRunnerQuestionAction } from "@/app/actions/runner";
 import { StageStepper } from "@/components/stage-stepper";
 import { PlanDocument, type PlanCommentView, type PlanStepView } from "@/components/plan-document";
 import { ActionBar, type ActionBarState } from "@/components/action-bar";
@@ -55,6 +56,7 @@ export function WorkstreamDetail(props: {
   sources: ResearchSourceView[];
   history: HistoryItemView[];
   openQuestion: string | null;
+  questionOptions?: string[];
   actionState: ActionBarState;
   agentEvents?: ActivityEventView[];
   canResearch?: boolean;
@@ -134,13 +136,35 @@ export function WorkstreamDetail(props: {
       {props.openQuestion ? (
         <section className="rl-sheet flex flex-col gap-3 p-7" aria-labelledby="rl-q-h">
           <h2 id="rl-q-h" className="m-0 text-xl font-medium text-[var(--relay-warning)]">
-            Question from the Runner
+            Waiting on you
           </h2>
+          <p className="m-0 text-sm text-[var(--relay-ink-muted)]">
+            The Runner paused the build. Pick an answer to resume.
+          </p>
           <p className="m-0 text-[17px] text-[var(--relay-ink)]">{props.openQuestion}</p>
           <div className="flex flex-wrap gap-2">
-            <button type="button" className="rl-btn-second">
-              Answer in workstream
-            </button>
+            {(props.questionOptions?.length
+              ? props.questionOptions
+              : ["Continue with recommended default"]
+            ).map((option) => (
+              <button
+                key={option}
+                type="button"
+                className="rl-btn-primary"
+                disabled={pending || props.role === "viewer"}
+                onClick={() => {
+                  startTransition(async () => {
+                    await answerRunnerQuestionAction({
+                      workstreamId: props.id,
+                      answer: option,
+                    });
+                    setFlash("Answer sent. Runner is resuming.");
+                  });
+                }}
+              >
+                {option}
+              </button>
+            ))}
           </div>
         </section>
       ) : null}
