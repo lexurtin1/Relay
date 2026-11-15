@@ -5,11 +5,9 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import { Header } from "@/components/header";
 import { CommandPalette } from "@/components/command-palette";
-import { DockNav } from "@/components/dock-nav";
-import { Atmosphere } from "@/components/atmosphere";
-import { CalastoneWireframes } from "@/components/calastone-wireframes";
 import { ThemeProvider, themeBootScript } from "@/components/theme-provider";
 import { getAppName, isMockMode } from "@/lib/config";
+import { getOverviewData } from "@/lib/overview";
 import { getCurrentUser, listDemoUsers } from "@/lib/session";
 import { listWorkstreamCommandItems } from "@/lib/workstreams";
 import type { WorkstreamStage } from "@relay/core";
@@ -30,11 +28,14 @@ export default async function RootLayout({
   let currentUser = null;
   let users: Awaited<ReturnType<typeof listDemoUsers>> = [];
   let commandItems: Awaited<ReturnType<typeof listWorkstreamCommandItems>> = [];
+  let agentsActive = 0;
 
   try {
     currentUser = await getCurrentUser();
     users = await listDemoUsers();
     commandItems = await listWorkstreamCommandItems();
+    const overview = await getOverviewData();
+    agentsActive = overview.agentsActive;
   } catch {
     // Database may be unavailable during first boot before migrations.
   }
@@ -49,7 +50,7 @@ export default async function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
-      <body className="relative min-h-screen overflow-x-hidden">
+      <body className="relative min-h-screen overflow-x-hidden bg-[var(--relay-bg)]">
         <ThemeProvider defaultTheme="dark">
           <a
             href="#main"
@@ -57,14 +58,17 @@ export default async function RootLayout({
           >
             Skip to main content
           </a>
-          <CalastoneWireframes />
-          <Atmosphere />
+          <div
+            aria-hidden
+            className="pointer-events-none fixed inset-x-0 top-0 z-0 h-40 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--relay-brand)_18%,transparent),transparent)]"
+          />
           {currentUser ? (
             <Header
               appName={appName}
               mockMode={mockMode}
               currentUser={currentUser}
               users={users}
+              agentsActive={agentsActive}
             />
           ) : (
             <header className="relative z-30 border-b border-[var(--relay-border)] px-4 py-3 text-sm text-[var(--relay-ink-muted)]">
@@ -73,11 +77,10 @@ export default async function RootLayout({
           )}
           <main
             id="main"
-            className="relative z-10 mx-auto max-w-[1120px] px-7 pb-36 pt-28"
+            className="relative z-10 mx-auto max-w-[1120px] px-7 pb-16 pt-24"
           >
             {children}
           </main>
-          {currentUser ? <DockNav /> : null}
           {currentUser ? (
             <CommandPalette
               workstreams={commandItems.map((item) => ({
