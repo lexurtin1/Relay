@@ -50,10 +50,10 @@ export function PlanDocument(props: {
           remarkPlugins={[remarkGfm]}
           components={{
             h1: ({ children }) => (
-              <h1 className="font-display mb-3 text-xl font-semibold">{children}</h1>
+              <h1 className="mb-3 text-xl font-medium tracking-tight">{children}</h1>
             ),
             h2: ({ children }) => (
-              <h2 className="font-display mb-2 mt-4 text-base font-semibold">{children}</h2>
+              <h2 className="mb-2 mt-4 text-base font-medium tracking-tight">{children}</h2>
             ),
             p: ({ children }) => {
               const text = stringifyChildren(children);
@@ -82,7 +82,7 @@ export function PlanDocument(props: {
       </article>
 
       <div className="space-y-2">
-        <h2 className="font-display text-sm font-semibold text-[var(--relay-ink)]">
+        <h2 className="text-sm font-semibold text-[var(--relay-ink)]">
           Structured steps
         </h2>
         <ol className="space-y-2">

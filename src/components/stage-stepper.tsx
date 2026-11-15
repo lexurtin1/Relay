@@ -1,4 +1,3 @@
-import { Check } from "lucide-react";
 import { STEPPER_STAGES, stepperIndex, type WorkstreamStage } from "@relay/core";
 import { cn } from "@/lib/utils";
 
@@ -14,40 +13,34 @@ export function StageStepper(props: { stage: WorkstreamStage }) {
   const current = stepperIndex(props.stage);
 
   return (
-    <ol className="flex flex-wrap items-center gap-2" aria-label="Workstream stage">
+    <ol className="m-0 flex list-none flex-wrap gap-2 p-0" aria-label="Stage">
       {STEPPER_STAGES.map((step, index) => {
         const done = index < current;
         const active = index === current;
-        const locked = index > current;
         return (
-          <li key={step} className="flex items-center gap-2">
+          <li
+            key={step}
+            className={cn(
+              "flex items-center gap-2 rounded-full border border-[var(--relay-border)] px-3.5 py-1.5 pl-1.5 text-sm text-[var(--relay-ink-muted)]",
+              done && "border-[var(--relay-border-strong)] text-[var(--relay-ink-body)]",
+              active &&
+                "border-[var(--relay-primary)] bg-[var(--relay-primary)] font-medium text-[var(--relay-primary-fg)]",
+            )}
+            aria-current={active ? "step" : undefined}
+          >
             <span
               className={cn(
-                "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-relay",
-                done &&
-                  "border-[color-mix(in_srgb,var(--relay-brand)_35%,white)] bg-[var(--relay-brand-soft)] text-[var(--relay-brand)]",
-                active &&
-                  "border-[color-mix(in_srgb,var(--relay-warning)_40%,white)] bg-[var(--relay-warning-soft)] text-[var(--relay-warning)]",
-                locked &&
-                  "border-[var(--relay-border)] bg-[var(--relay-surface)] text-[var(--relay-ink-subtle)]",
+                "inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--relay-ink)_8%,transparent)] text-xs",
+                done && "bg-[var(--relay-accent)] text-white",
+                active && "bg-[var(--relay-primary-fg)] text-[var(--relay-primary)]",
               )}
-              aria-current={active ? "step" : undefined}
             >
-              <span
-                className={cn(
-                  "inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold",
-                  done && "bg-[var(--relay-brand)] text-white",
-                  active && "bg-[var(--relay-warning)] text-white",
-                  locked && "bg-[var(--relay-surface-sunken)] text-[var(--relay-ink-subtle)]",
-                )}
-              >
-                {done ? <Check className="h-3.5 w-3.5" aria-hidden /> : index + 1}
-              </span>
-              {labels[step]}
+              {index + 1}
             </span>
-            {index < STEPPER_STAGES.length - 1 ? (
-              <span className="hidden h-px w-6 bg-[var(--relay-border-strong)] sm:block" aria-hidden />
-            ) : null}
+            {labels[step]}
+            <span className="sr-only">
+              {done ? ", done" : active ? ", current" : ", not started"}
+            </span>
           </li>
         );
       })}

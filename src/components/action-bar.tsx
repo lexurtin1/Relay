@@ -23,8 +23,12 @@ export function ActionBar(props: {
 }) {
   const statusLeft =
     props.state.openCommentCount > 0
-      ? `${props.state.openCommentCount} comments must be resolved or addressed before approval.`
-      : "Actions apply to the current plan version.";
+      ? `${props.state.openCommentCount} comment${props.state.openCommentCount === 1 ? "" : "s"} must be resolved before approval.`
+      : props.state.canHandOff
+        ? "Plan approved. Hand it off to start the build."
+        : props.state.canApprove
+          ? "All comments resolved. The plan can be approved."
+          : "Actions apply to the current plan version.";
 
   const actions: Array<{
     id: string;
@@ -62,9 +66,9 @@ export function ActionBar(props: {
 
   return (
     <TooltipProvider>
-      <div className="sticky bottom-0 z-20 border-t border-[var(--relay-border)] bg-[var(--relay-surface)]/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-2 px-4 py-3">
-          <div className="mr-auto text-xs text-[var(--relay-ink-muted)]">{statusLeft}</div>
+      <div className="rl-glass sticky bottom-24 z-20 mx-auto mt-6 flex max-w-[1120px] flex-col gap-3 rounded-[22px] p-3.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="mr-auto text-sm text-[var(--relay-ink-muted)]">{statusLeft}</div>
           {actions.map((action) => {
             const button = (
               <button
@@ -72,10 +76,8 @@ export function ActionBar(props: {
                 type="button"
                 disabled={!action.enabled}
                 className={cn(
-                  "rounded-xl px-3 py-2 text-sm font-medium transition-relay",
-                  action.primary
-                    ? "bg-[var(--relay-primary)] text-[var(--relay-primary-fg)] hover:bg-[var(--relay-primary-hover)] disabled:bg-[var(--relay-border)] disabled:text-[var(--relay-ink-subtle)]"
-                    : "border border-[var(--relay-border)] bg-[var(--relay-surface)] text-[var(--relay-ink)] hover:border-[var(--relay-primary)] disabled:text-[var(--relay-ink-subtle)]",
+                  action.primary ? "rl-btn-primary" : "rl-btn-second",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
                 )}
               >
                 {action.label}

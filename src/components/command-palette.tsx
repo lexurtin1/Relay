@@ -33,7 +33,7 @@ export function CommandPalette(props: { workstreams: CommandWorkstream[] }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 px-4 pt-[12vh]">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-[rgba(6,10,18,0.55)] px-4 pt-[12vh]">
       <button
         type="button"
         aria-label="Close command palette"
@@ -42,7 +42,7 @@ export function CommandPalette(props: { workstreams: CommandWorkstream[] }) {
       />
       <Command
         label="Command palette"
-        className="relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface)] shadow-lg animate-relay-in [overscroll-behavior:contain]"
+        className="rl-glass relative z-10 w-full max-w-xl overflow-hidden rounded-[22px] animate-relay-in [overscroll-behavior:contain]"
       >
         <div className="flex items-center gap-2 border-b border-[var(--relay-border)] px-3">
           <Search className="h-4 w-4 text-[var(--relay-ink-subtle)]" aria-hidden />

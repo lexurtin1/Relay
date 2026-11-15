@@ -8,28 +8,30 @@ Operate
 
 ## World
 
-Calm internal operations tool in the style of Linear, Vercel dashboard, and Stripe dashboard. Dense, precise, no marketing theatre.
+Dark glass Calastone agent workspace. Soft colour atmosphere, translucent chrome, and subtle teal-to-blue wireframe polyhedra in the background. Light theme is a composed alternate, not a mechanical invert.
 
 ## Surfaces
 
-- Overview (home): dark header, hero band, stage stats, Needs your action + Agents running, workstreams progress table (structure from Relay dashboard redesigns PDF).
-- Workstream detail: numbered stage stepper, Research / Plan / Comments columns, sticky revise/approve/hand-off bar.
-- Keep rounder SaaS cards (14 to 18px) and Calastone blue + purple accent tokens.
+- Shell: fixed brand bar (Relay + SS&C Calastone subtitle), glass status pill, theme toggle, bottom glass dock (Overview, Workstreams, Ideas, Knowledge, Metrics). Audit linked from Metrics.
+- Overview: large title, Start work glass composer, Needs your input sheets, Workstream timelines with segmented bars.
+- Workstream list/detail: stage chips, timeline tracks, sheet panels, glass sticky action bar.
+- Atmosphere: drifting blue / teal / amber blobs plus slow-rotating Calastone wireframe icosahedra at low opacity.
 
 ## Tokens
 
-Source of truth: `theme/brand.ts` and `src/app/globals.css`.
+Source of truth: `theme/brand.ts` and `src/app/globals.css` (`data-theme="dark"|"light"`).
 
-- Calastone brand blue: `#3274C0` for live agent states and research/building pills.
-- SaaS purple accent: `#6B5CE7` for primary actions, focus, active nav, and progress.
-- Soft lilac surfaces and violet-tinted borders; cards use 14 to 18px radii.
-- Status: amber needs-you, green done/success, red failed/killed.
-- Type: Gill Sans MT for page/section titles; Geist Sans for UI body/data; Geist Mono for IDs, paths, code. Tabular nums for counts.
+- Ground dark `#060A12`, sheets `#0D131F`, ink `#F2F5FA` / muted `#A9B4C6` / body `#D5DCE8`.
+- Calastone blues `#2B6FD6` / `#3F82E0` / `#8DBBFA` for live states and links. No SaaS purple.
+- Primary actions: light fill on dark (`#F2F5FA` on `#0D131F`); blue fill on light theme.
+- Status: amber needs-you, green done, red failed. Timeline: person `#DDE4EF`, agent `#3F82E0`, waiting hatch amber.
+- Type: Geist Sans for UI; Geist Mono for IDs, paths, code. Tabular nums for counts.
+- Radii: controls 12px, sheets 20px, glass panels / dock 26px.
 
 ## Motion
 
-150ms ease-out transitions only. New activity events slide in. Agent live pulse. Respect `prefers-reduced-motion`.
+Glass transitions 150ms. Blob drift (28–40s). Wireframe slow rotation. Live agent pulse 1.6s. Respect `prefers-reduced-motion` (static wireframes, no drift/pulse).
 
 ## Components
 
-Avatar initials, status pills, command palette (⌘K), Sonner toasts, Lucide icons, react-markdown plan body.
+Theme toggle, dock nav, timeline tracks, avatar initials, status pills, command palette (⌘K), Sonner toasts, Lucide / inline SVG icons, react-markdown plan body.

@@ -30,11 +30,11 @@ async function main() {
   await prisma.workstream.deleteMany();
   await prisma.user.deleteMany();
 
-  const [maya, owen, aisha, leon, vera] = await Promise.all([
+  const [alex, owen, aisha, leon, vera] = await Promise.all([
     prisma.user.create({
       data: {
-        name: "Maya Chen",
-        email: "maya.chen@example-calastone.invalid",
+        name: "Alex Curtin",
+        email: "alex.curtin@example-calastone.invalid",
         role: UserRole.engineer,
         team: "Innovation and Strategy",
       },
@@ -83,7 +83,7 @@ async function main() {
       jiraKey: "INNO-214",
       origin: WorkstreamOrigin.internal_friction,
       priority: WorkstreamPriority.high,
-      ownerId: maya.id,
+      ownerId: alex.id,
       lastActivityAt: hoursAgo(2),
     },
   });
@@ -317,7 +317,7 @@ Add a read-only \`validate_isin\` tool to the fictional Calastone MCP server so 
       jiraKey: "INNO-201",
       origin: WorkstreamOrigin.external_opportunity,
       priority: WorkstreamPriority.medium,
-      ownerId: maya.id,
+      ownerId: alex.id,
       lastActivityAt: minutesAgo(8),
     },
   });
@@ -480,7 +480,7 @@ Add a read-only \`validate_isin\` tool to the fictional Calastone MCP server so 
       jiraKey: "INNO-220",
       origin: WorkstreamOrigin.internal_friction,
       priority: WorkstreamPriority.medium,
-      ownerId: maya.id,
+      ownerId: alex.id,
       lastActivityAt: hoursAgo(1),
     },
   });
@@ -528,7 +528,7 @@ Add a read-only \`validate_isin\` tool to the fictional Calastone MCP server so 
         title: "Manual ISIN checks in three tools",
         description:
           "Engineers copy ISIN regex between MCP tools, LibreChat modules, and ad-hoc scripts.",
-        submittedById: maya.id,
+        submittedById: alex.id,
         type: IdeaType.friction_log,
         frequencyPerWeek: 8,
         minutesLostEach: 15,
@@ -548,7 +548,7 @@ Add a read-only \`validate_isin\` tool to the fictional Calastone MCP server so 
       {
         title: "Waiting on Confluence for onboarding steps",
         description: "New joiners cannot find the latest distributor checklist.",
-        submittedById: maya.id,
+        submittedById: alex.id,
         type: IdeaType.friction_log,
         frequencyPerWeek: 3,
         minutesLostEach: 40,
