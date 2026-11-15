@@ -177,8 +177,8 @@ export function KnowledgeSearch(props: {
   }
 
   return (
-    <div className="flex min-h-[calc(100dvh-11rem)] flex-col gap-3 lg:flex-row lg:gap-4">
-      <aside className="rl-sheet flex w-full flex-col p-3 lg:w-[260px] lg:shrink-0">
+    <div className="flex h-[calc(100dvh-10.5rem)] min-h-[560px] flex-col gap-3 lg:flex-row lg:gap-4">
+      <aside className="rl-sheet flex max-h-[220px] w-full flex-col overflow-hidden p-3 lg:max-h-none lg:w-[260px] lg:shrink-0">
         <div className="flex items-center justify-between gap-2 px-1 pb-2">
           <h1 className="m-0 text-base font-medium text-[var(--relay-ink)]">Knowledge</h1>
           <button type="button" className="rl-btn-second" onClick={startNewChat}>
@@ -225,8 +225,8 @@ export function KnowledgeSearch(props: {
         </div>
       </aside>
 
-      <section className="rl-sheet relative flex min-h-[560px] min-w-0 flex-1 flex-col overflow-hidden">
-        <div ref={scrollerRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6">
+      <section className="rl-sheet relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div ref={scrollerRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6">
           {!active ? (
             <div className="flex h-full min-h-[320px] flex-col items-center justify-center text-center">
               <p className="m-0 text-xl font-medium text-[var(--relay-ink)]">Ask knowledge</p>
@@ -251,7 +251,7 @@ export function KnowledgeSearch(props: {
         </div>
 
         <form
-          className="border-t border-[var(--relay-border)] bg-[color-mix(in_srgb,var(--relay-surface)_88%,transparent)] px-3 py-3 sm:px-4"
+          className="sticky bottom-0 z-10 border-t border-[var(--relay-border)] bg-[color-mix(in_srgb,var(--relay-surface)_92%,transparent)] px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4"
           onSubmit={(e) => {
             e.preventDefault();
             runAsk(draft);
