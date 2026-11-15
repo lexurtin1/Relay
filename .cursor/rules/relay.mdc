@@ -1,0 +1,18 @@
+---
+description: Relay hard rules for every agent working in this repo
+alwaysApply: true
+---
+
+# Relay hard rules
+
+- Every model call goes through `packages/core/src/llm/gateway.ts` (imported as `@relay/core` or `@relay/core/llm/gateway`).
+- Never call Anthropic, OpenAI, or any other provider directly.
+- Default mode is `RELAY_MODE=mock`.
+- Product name is `APP_NAME` (default `Relay`).
+- No production data in Runner workspaces.
+- Do not invent facts about real Calastone clients, systems, or brand colours beyond provided assets.
+- No em dashes in UI copy, docs, or comments.
+
+# Phased work
+
+When implementing features, read `docs/plan/RELAY_PLAN.md` for the active phase only. Work one phase per branch. Keep mock mode and demo fixtures working.
