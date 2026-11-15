@@ -135,6 +135,20 @@ async function runDemoScript(
     const prUrl =
       "https://github.com/example-calastone/ops-tools/pull/42";
     finishDemoRunner(workstreamId, { prUrl });
+    appendDemoEvent(workstreamId, {
+      type: "status",
+      summary:
+        "Reviewer: draft PR looks consistent with the plan. Flags: confirm Power BI label choice in docs.",
+    });
+    const { recordAudit } = await import("@/lib/audit");
+    await recordAudit({
+      action: "model_call",
+      detail:
+        "Reviewer checked draft PR against plan (mock). Flag: confirm Power BI label choice in docs.",
+      workstreamId,
+      tokenInput: 400,
+      tokenOutput: 120,
+    });
   } finally {
     runningJobs.delete(key);
   }
@@ -227,6 +241,31 @@ async function runDbScript(
         type: AgentEventType.status,
         payload: { summary: `PR ready: ${prUrl}`, prUrl },
       },
+    });
+    await prisma.agentEvent.create({
+      data: {
+        runnerJobId,
+        type: AgentEventType.status,
+        payload: {
+          summary:
+            "Reviewer: draft PR looks consistent with the plan. Flags: confirm Power BI label choice in docs.",
+          reviewer: {
+            ok: true,
+            flags: ["Confirm Power BI label choice in docs"],
+            summary: "Draft PR looks consistent with the plan.",
+          },
+        },
+      },
+    });
+    const { recordAudit } = await import("@/lib/audit");
+    await recordAudit({
+      action: "model_call",
+      detail:
+        "Reviewer checked draft PR against plan (mock). Flag: confirm Power BI label choice in docs.",
+      workstreamId,
+      runnerJobId,
+      tokenInput: 400,
+      tokenOutput: 120,
     });
   } finally {
     runningJobs.delete(key);

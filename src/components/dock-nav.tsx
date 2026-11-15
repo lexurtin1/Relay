@@ -87,7 +87,12 @@ export function DockNav() {
         const active =
           item.href === "/"
             ? pathname === "/"
-            : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            : item.href === "/metrics"
+              ? pathname === "/metrics" ||
+                pathname.startsWith("/metrics/") ||
+                pathname === "/audit" ||
+                pathname.startsWith("/audit/")
+              : pathname === item.href || pathname.startsWith(`${item.href}/`);
         return (
           <Link
             key={item.href}

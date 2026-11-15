@@ -27,9 +27,10 @@ flowchart LR
 
 ## Components
 
-- **Web**: dashboard, workstream detail, ideas, knowledge chat, metrics, audit. Runs Scout/Planner/Runner mock progression in-process and streams activity over SSE. Plan review and ask_human answers write through server actions. Demo fixtures use in-memory agent/review/runner stores when `useDemoFixtures()` is on.
+- **Web**: dashboard, workstream detail, ideas triage, knowledge chat, metrics, audit. Runs Scout/Planner/Runner mock progression in-process and streams activity over SSE. Plan review and ask_human answers write through server actions. Demo fixtures use in-memory agent/review/runner/ideas/audit stores when `useDemoFixtures()` is on.
 - **Worker**: heartbeat today; mock Runner currently progresses from the web process after hand-off. BullMQ consumers can replace that path later.
-- **Agents**: `packages/agents` (Scout + Planner). Runner script lives under `src/lib/runner`. Every model call goes through the gateway.
+- **Agents**: `packages/agents` (Scout + Planner). Runner script lives under `src/lib/runner`. A thin Reviewer status event lands after Runner success in mock/DB scripts. Every model call goes through the gateway.
+- **Operate surfaces**: Ideas (`src/lib/ideas.ts`), Metrics (`src/lib/metrics.ts`), and Audit (`src/lib/audit.ts`) read demo fixtures or Prisma. Role switch and knowledge search append audit rows.
 - **Mock workspaces**: `demo-repos/ops-tools` for Runner file-edit paths in mock mode.
 - **Gateway module**: `packages/core/src/llm/gateway.ts` is the only outbound model transport.
 - **Connectors**: MCP-style read interfaces under `packages/connectors`, package name intent `relay-toolshed`.
