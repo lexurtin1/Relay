@@ -37,11 +37,16 @@ Tests: `pnpm test`
 
 ## Milestones
 
-1. Skeleton: schema, seed, branded dashboard (done)
-2. Connectors and knowledge search (done)
-3. Scout and Planner (current)
+See `docs/plan/RELAY_PLAN.md` for the full plan. Work one phase per branch.
 
-4. Review / comments / approval
-5. Runner
-6. Reviewer, Ideas, Metrics, Audit
-7. Hardening and Playwright happy path
+0. Spike: Goose behind the gateway
+1. Make the UI honest (actions, state machine, layout)
+2. MCP layer (shared `mcp-servers.yaml`, connector adapters)
+3. Scout and Planner (BullMQ + SSE)
+4. Review and approval
+5. Runner (sandbox, ask_human, PR)
+6. Jira sync
+7. Ideas, Metrics, Audit
+8. Hardening and Playwright happy path
+
+Done so far: schema, seed, branded dashboard, connectors and knowledge search (mock).
