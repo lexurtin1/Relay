@@ -78,7 +78,8 @@ async function startPlannerDemo(workstreamId: string): Promise<{ ok: true }> {
           });
         },
       });
-      const version = (state.planVersion ?? 0) + 1;
+      const version =
+        Math.max(state.planVersion ?? 0, detail.plan.versionNumber ?? 0) + 1;
       patchDemoAgentState(workstreamId, {
         planStatus: "succeeded",
         planMarkdown: result.markdownBody,
