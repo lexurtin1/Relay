@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
@@ -38,14 +39,74 @@ export function PlanDocument(props: {
   comments: PlanCommentView[];
   highlightedCommentId?: string | null;
   onHoverAnchor?: (commentId: string | null) => void;
+  canComment?: boolean;
+  onAnchorComment?: (anchorText: string) => void;
 }) {
+  const articleRef = useRef<HTMLElement | null>(null);
+  const [selection, setSelection] = useState<{ text: string; top: number; left: number } | null>(
+    null,
+  );
   const anchors = props.comments
     .filter((c) => c.anchorText)
     .map((c) => ({ id: c.id, text: c.anchorText as string }));
 
+  useEffect(() => {
+    if (!props.canComment || !props.onAnchorComment) return;
+
+    function onMouseUp() {
+      const sel = window.getSelection();
+      const text = sel?.toString().trim() ?? "";
+      if (!text || text.length < 3 || text.length > 160) {
+        setSelection(null);
+        return;
+      }
+      const root = articleRef.current;
+      if (!root || !sel || sel.rangeCount === 0) {
+        setSelection(null);
+        return;
+      }
+      const range = sel.getRangeAt(0);
+      if (!root.contains(range.commonAncestorContainer)) {
+        setSelection(null);
+        return;
+      }
+      const rect = range.getBoundingClientRect();
+      const rootRect = root.getBoundingClientRect();
+      setSelection({
+        text,
+        top: rect.top - rootRect.top - 40,
+        left: Math.max(0, rect.left - rootRect.left),
+      });
+    }
+
+    document.addEventListener("mouseup", onMouseUp);
+    return () => document.removeEventListener("mouseup", onMouseUp);
+  }, [props.canComment, props.onAnchorComment]);
+
   return (
     <div className="space-y-5">
-      <article className="prose-relay text-sm leading-relaxed text-[var(--relay-ink)]">
+      <article
+        ref={articleRef}
+        className="relative prose-relay text-sm leading-relaxed text-[var(--relay-ink)]"
+      >
+        {selection && props.canComment && props.onAnchorComment ? (
+          <div
+            className="absolute z-10"
+            style={{ top: selection.top, left: selection.left }}
+          >
+            <button
+              type="button"
+              className="rl-btn-second shadow-sm"
+              onClick={() => {
+                props.onAnchorComment?.(selection.text);
+                setSelection(null);
+                window.getSelection()?.removeAllRanges();
+              }}
+            >
+              Comment on selection
+            </button>
+          </div>
+        ) : null}
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{

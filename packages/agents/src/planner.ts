@@ -28,6 +28,8 @@ export async function runPlanner(input: {
   title: string;
   problem: string;
   findings: string;
+  version?: number;
+  comments?: Array<{ body: string; anchorText?: string | null; authorName?: string }>;
   onEvent?: (event: PlannerEvent) => void | Promise<void>;
 }): Promise<PlannerResult> {
   const events: PlannerEvent[] = [];
@@ -36,7 +38,22 @@ export async function runPlanner(input: {
     await input.onEvent?.(event);
   };
 
-  await emit({ type: "status", summary: "Planner drafting plan v1" });
+  const version = input.version ?? 1;
+  const fromComments = (input.comments?.length ?? 0) > 0;
+  await emit({
+    type: "status",
+    summary: fromComments
+      ? `Planner revising plan to v${version} from comments`
+      : `Planner drafting plan v${version}`,
+  });
+
+  const commentsBlock = (input.comments ?? [])
+    .map((c, i) => {
+      const anchor = c.anchorText ? ` (on "${c.anchorText}")` : "";
+      const who = c.authorName ? `${c.authorName}: ` : "";
+      return `${i + 1}. ${who}${c.body}${anchor}`;
+    })
+    .join("\n");
 
   const response = await createMessage({
     system: PLANNER_SYSTEM,
@@ -47,6 +64,8 @@ export async function runPlanner(input: {
           title: input.title,
           problem: input.problem,
           findings: input.findings,
+          version,
+          commentsBlock,
         }),
       },
     ],
@@ -54,14 +73,20 @@ export async function runPlanner(input: {
   });
 
   const markdownBody =
-    response.content.trim() || mockPlanMarkdown(input.title, input.problem);
+    response.content.trim() ||
+    mockPlanMarkdown(input.title, input.problem, version, fromComments);
   const steps = extractSteps(markdownBody);
 
   await emit({
     type: "thought_summary",
     summary: `Drafted ${steps.length} implementation steps`,
   });
-  await emit({ type: "status", summary: "Planner plan v1 ready" });
+  await emit({
+    type: "status",
+    summary: fromComments
+      ? `Planner plan v${version} ready from comments`
+      : `Planner plan v${version} ready`,
+  });
 
   return {
     markdownBody,
@@ -138,14 +163,22 @@ function guessTests(title: string): string[] {
   return ["tools.test.ts"];
 }
 
-function mockPlanMarkdown(title: string, problem: string): string {
+function mockPlanMarkdown(
+  title: string,
+  problem: string,
+  version = 1,
+  fromComments = false,
+): string {
   return [
     `# Plan: ${title}`,
     "",
     "## Goal",
     problem.slice(0, 240) || "Deliver a small, reviewable change.",
+    fromComments
+      ? "Address open review comments while keeping the change small and testable."
+      : "",
     "",
-    "## Steps",
+    `## Steps (v${version})`,
     "1. Extract shared helper module",
     "2. Register the tool or API with structured errors",
     "3. Add unit tests for happy path and edge cases",
@@ -154,5 +187,7 @@ function mockPlanMarkdown(title: string, problem: string): string {
     "## Risks",
     "- **medium** — callers may expect different error shapes",
     "- **low** — documentation drift",
-  ].join("\n");
+  ]
+    .filter((line, i, arr) => !(line === "" && arr[i - 1] === ""))
+    .join("\n");
 }

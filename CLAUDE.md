@@ -41,7 +41,7 @@ Tests: `pnpm test`
 1. Skeleton: schema, seed, branded dashboard (done)
 2. Connectors and knowledge search (done)
 3. Scout and Planner (done)
-4. Review / comments / approval (current)
-5. Runner
+4. Review / comments / approval (done)
+5. Runner (current)
 6. Reviewer, Ideas, Metrics, Audit
 7. Hardening and Playwright happy path

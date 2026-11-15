@@ -123,17 +123,29 @@ function scriptedMockContent(system: string, prompt: string): string {
   }
 
   if (/You are Planner/i.test(system)) {
+    const fromComments = /Open review comments to address/i.test(prompt);
     return [
       "# Plan: shared implementation",
       "",
       "## Goal",
-      "Deliver a small, reviewable change based on Scout findings without inventing real client systems.",
+      fromComments
+        ? "Revise the plan from review feedback: keep error codes stable, add lowercase normalisation tests, and link Confluence from the tool description."
+        : "Deliver a small, reviewable change based on Scout findings without inventing real client systems.",
       "",
       "## Steps",
-      "1. Extract shared helper module with unit tests",
-      "2. Register the tool or API with structured error codes",
-      "3. Migrate one caller and verify behaviour",
-      "4. Document usage in README / Confluence",
+      fromComments
+        ? [
+            "1. Extract shared helper with ISO check digit and lowercase normalisation",
+            "2. Register MCP tool with stable structured error codes for callers",
+            "3. Add unit tests including lowercase input cases",
+            "4. Document usage and link Confluence from the tool description",
+          ].join("\n")
+        : [
+            "1. Extract shared helper module with unit tests",
+            "2. Register the tool or API with structured error codes",
+            "3. Migrate one caller and verify behaviour",
+            "4. Document usage in README / Confluence",
+          ].join("\n"),
       "",
       "## Risks",
       "- **medium** — callers may expect different error shapes",
