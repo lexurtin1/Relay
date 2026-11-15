@@ -21,7 +21,8 @@ export default async function NewWorkstreamPage({
           New workstream
         </h1>
         <p className="mt-2 text-[var(--relay-ink-muted)]">
-          Capture the problem. You can start research from the workstream once Scout is wired.
+          Capture the problem. From the workstream, ask Scout to research connected sources, then
+          Planner to draft a plan.
         </p>
       </div>
       <form action={createWorkstream} className="rl-sheet flex flex-col gap-4 p-6">
