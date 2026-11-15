@@ -8,7 +8,7 @@
     "dev:worker": "pnpm --filter @relay/worker dev",
     "dev:all": "pnpm --parallel --filter relay --filter @relay/worker dev",
     "build": "next build",
-    "build:packages": "pnpm -r --filter @relay/core --filter @relay/connectors --filter @relay/worker build",
+    "build:packages": "pnpm -r --filter @relay/core --filter @relay/connectors --filter @relay/agents --filter @relay/worker build",
     "start": "next start --port 3000",
     "lint": "next lint",
     "test": "pnpm -r --if-present test",
@@ -23,6 +23,7 @@
   "dependencies": {
     "@prisma/client": "^6.5.0",
     "@radix-ui/react-tooltip": "^1.4.1",
+    "@relay/agents": "workspace:*",
     "@relay/connectors": "workspace:*",
     "@relay/core": "workspace:*",
     "clsx": "^2.1.1",

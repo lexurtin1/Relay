@@ -10,7 +10,7 @@ async function main() {
       mode: isMockMode() ? "mock" : "live",
       redisUrl: config.redisUrl,
       startedAt,
-      note: "Job processors arrive in Milestones 3 and 5. Heartbeat only for Milestone 1.",
+      note: "Scout and Planner run in-process from the web app in Milestone 3. BullMQ processors land with Runner in Milestone 5. Heartbeat only for now.",
     }),
   );
 

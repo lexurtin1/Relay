@@ -10,6 +10,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@relay/agents": "workspace:*",
     "@relay/connectors": "workspace:*",
     "@relay/core": "workspace:*",
     "bullmq": "^5.41.0",

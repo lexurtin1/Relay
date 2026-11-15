@@ -88,22 +88,64 @@ function mockResponse(
 ): GatewayResponse {
   const lastUser = [...request.messages].reverse().find((m) => m.role === "user");
   const prompt = lastUser?.content ?? "";
-  const content = [
-    "Mock mode response from the Relay LLM gateway.",
-    "No AI_GATEWAY_API_KEY is configured, so this is a deterministic stub.",
-    "",
-    `Echo of request (${Math.min(prompt.length, 280)} chars):`,
-    prompt.slice(0, 280),
-  ].join("\n");
+  const system = request.system ?? "";
+  const content = scriptedMockContent(system, prompt);
 
   return {
     id: `mock_${Date.now()}`,
     model,
     content,
     usage: {
-      inputTokens: Math.ceil(prompt.length / 4),
+      inputTokens: Math.ceil((system.length + prompt.length) / 4),
       outputTokens: Math.ceil(content.length / 4),
     },
     mocked: true,
   };
+}
+
+function scriptedMockContent(system: string, prompt: string): string {
+  if (/You are Scout/i.test(system)) {
+    return [
+      "## Summary",
+      "Connected sources show duplicated ISIN validation logic and a Confluence convention for stable MCP error codes.",
+      "NAV exception work should reuse Power BI semantic labels where they already exist.",
+      "",
+      "## Sources",
+      "- Confluence: ISIN handling / MCP conventions",
+      "- Jira: INNO-198 / INNO-214",
+      "- GitHub: packages/mcp/src/tools",
+      "",
+      "## Recommendation",
+      "Extract a shared helper, register one MCP tool, and keep error codes stable for callers.",
+      "",
+      `Context: ${prompt.slice(0, 160)}`,
+    ].join("\n");
+  }
+
+  if (/You are Planner/i.test(system)) {
+    return [
+      "# Plan: shared implementation",
+      "",
+      "## Goal",
+      "Deliver a small, reviewable change based on Scout findings without inventing real client systems.",
+      "",
+      "## Steps",
+      "1. Extract shared helper module with unit tests",
+      "2. Register the tool or API with structured error codes",
+      "3. Migrate one caller and verify behaviour",
+      "4. Document usage in README / Confluence",
+      "",
+      "## Risks",
+      "- **medium** — callers may expect different error shapes",
+      "- **low** — documentation drift",
+    ].join("\n");
+  }
+
+  return [
+    "Mock mode response from the Relay LLM gateway.",
+    "No AI_GATEWAY_API_KEY is configured, so this is a deterministic stub.",
+    "",
+    `Echo of request (${Math.min(prompt.length, 280)} chars):`,
+    prompt.slice(0, 280),
+  ].join("\n");
 }

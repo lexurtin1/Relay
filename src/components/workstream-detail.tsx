@@ -6,6 +6,8 @@ import type { WorkstreamStage } from "@relay/core";
 import { StageStepper } from "@/components/stage-stepper";
 import { PlanDocument, type PlanCommentView, type PlanStepView } from "@/components/plan-document";
 import { ActionBar, type ActionBarState } from "@/components/action-bar";
+import { AgentSessionPanel } from "@/components/agent-session";
+import type { ActivityEventView } from "@/components/activity-timeline";
 import {
   segsForStage,
   TimelineTrack,
@@ -44,6 +46,9 @@ export function WorkstreamDetail(props: {
   history: HistoryItemView[];
   openQuestion: string | null;
   actionState: ActionBarState;
+  agentEvents?: ActivityEventView[];
+  canResearch?: boolean;
+  canPlan?: boolean;
 }) {
   const [hoverCommentId, setHoverCommentId] = useState<string | null>(null);
   const openComments = props.comments.filter((c) => !c.resolved).length;
@@ -125,52 +130,35 @@ export function WorkstreamDetail(props: {
       ) : null}
 
       <div className="flex flex-wrap items-start gap-6">
-        <section
-          className="rl-sheet min-w-0 flex-[1_1_300px] p-6"
-          aria-labelledby="rl-sess-h"
-        >
-          <h2 id="rl-sess-h" className="m-0 text-xl font-medium text-[var(--relay-ink)]">
-            Agent session
-          </h2>
-          <p className="mt-1.5 text-[13px] text-[var(--relay-ink-muted)]">
-            Everything Scout, the Runner and people did on this workstream, newest first.
-          </p>
-          <ol className="mt-4 flex list-none flex-col gap-3.5 p-0">
-            {props.history.length === 0 ? (
-              <li className="text-sm text-[var(--relay-ink-muted)]">No history yet.</li>
-            ) : (
-              props.history.map((item) => (
-                <li key={item.id} className="flex items-start gap-3">
-                  <span
-                    className="mt-1.5 inline-block h-3 w-3 shrink-0 rounded bg-[var(--relay-seg-agent)]"
-                    aria-hidden
-                  />
-                  <span>
-                    <span className="block">
-                      <span className="mr-2 inline-block text-[11.5px] uppercase tracking-[0.06em] text-[var(--relay-brand-fg)]">
-                        Event
-                      </span>
-                      {item.label}
-                    </span>
-                    <span className="text-[13px] text-[var(--relay-ink-muted)]">
-                      {formatRelativeTime(item.at)}
-                    </span>
-                  </span>
-                </li>
-              ))
-            )}
-          </ol>
-
-          <div className="mt-5">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--relay-ink-subtle)]">
+        <div className="flex min-w-0 flex-[1_1_300px] flex-col gap-4">
+          <AgentSessionPanel
+            workstreamId={props.id}
+            initialEvents={
+              props.agentEvents ??
+              props.history.map((item) => ({
+                id: item.id,
+                type: "status",
+                summary: item.label,
+                createdAt: item.at,
+              }))
+            }
+            canResearch={props.canResearch ?? true}
+            canPlan={props.canPlan ?? Boolean(props.researchSummary)}
+            researchSummary={props.researchSummary}
+          />
+          <section className="rl-sheet p-5" aria-labelledby="sources-h">
+            <h3
+              id="sources-h"
+              className="m-0 text-xs font-semibold uppercase tracking-wide text-[var(--relay-ink-subtle)]"
+            >
               Sources read by Scout
             </h3>
             {props.sources.length === 0 ? (
-              <p className="text-sm text-[var(--relay-ink-muted)]">
+              <p className="mt-2 text-sm text-[var(--relay-ink-muted)]">
                 No sources yet. Start research to populate this list.
               </p>
             ) : (
-              <ul className="space-y-2">
+              <ul className="mt-3 space-y-2">
                 {props.sources.map((source) => (
                   <li
                     key={`${source.connector}-${source.itemId ?? source.title}`}
@@ -184,8 +172,8 @@ export function WorkstreamDetail(props: {
                 ))}
               </ul>
             )}
-          </div>
-        </section>
+          </section>
+        </div>
 
         <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-4">
           <section className="rl-sheet flex flex-col gap-5 p-7" aria-labelledby="plan-heading">

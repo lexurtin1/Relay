@@ -8,6 +8,7 @@ Internal white-labelled Calastone agent workspace prototype for Innovation and S
 - `apps/worker`: BullMQ agent worker
 - `packages/core`: domain types, Prisma helpers, prompts, **LLM gateway**
 - `packages/connectors`: Salesforce, Power BI, Jira, Confluence, Databricks, GitHub (mock/live)
+- `packages/agents`: Scout and Planner (gateway-only model calls)
 - Postgres via Prisma, Redis via BullMQ, SSE for live agent activity
 
 ## Hard rules
@@ -39,9 +40,8 @@ Tests: `pnpm test`
 
 1. Skeleton: schema, seed, branded dashboard (done)
 2. Connectors and knowledge search (done)
-3. Scout and Planner (current)
-
-4. Review / comments / approval
+3. Scout and Planner (done)
+4. Review / comments / approval (current)
 5. Runner
 6. Reviewer, Ideas, Metrics, Audit
 7. Hardening and Playwright happy path

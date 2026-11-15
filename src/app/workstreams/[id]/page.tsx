@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/session";
 import { WorkstreamDetail } from "@/components/workstream-detail";
 import type { ActionBarState } from "@/components/action-bar";
 import { useDemoFixtures } from "@/lib/db";
+import { getDemoAgentState } from "@/lib/demo-agent-store";
 import { getDemoWorkstreamDetail } from "@/lib/demo-data";
 
 export const dynamic = "force-dynamic";
@@ -21,17 +22,26 @@ export default async function WorkstreamDetailPage({
   if (useDemoFixtures()) {
     const demo = getDemoWorkstreamDetail(id);
     if (!demo) notFound();
+    const agent = getDemoAgentState(id);
     const openCommentCount = demo.plan.comments.filter((c) => !c.resolved).length;
     const role = user.role;
     const owns = demo.ownerId === user.id;
+    const researchSummary = agent.researchSummary ?? demo.researchSummary;
+    const planMarkdown = agent.planMarkdown ?? demo.plan.markdownBody;
+    const planVersion = agent.planVersion ?? demo.plan.versionNumber;
+    const stage = (agent.stage as WorkstreamStage | undefined) ?? (demo.stage as WorkstreamStage);
+    const sources = agent.sources?.length ? agent.sources : demo.sources;
+    const history = agent.history?.length ? agent.history : demo.history;
     const actionState: ActionBarState = {
-      canGeneratePlan: true,
+      canGeneratePlan: Boolean(researchSummary),
       canRequestReview: false,
       canRevise: openCommentCount > 0,
       canApprove: false,
       canHandOff: false,
       openCommentCount,
-      generateReason: undefined,
+      generateReason: researchSummary
+        ? undefined
+        : "Finish a research run before generating a plan.",
       reviewReason: "Plan is already in review.",
       reviseReason: undefined,
       approveReason: "Resolve or address open comments before approval.",
@@ -45,19 +55,32 @@ export default async function WorkstreamDetailPage({
         id={demo.id}
         title={demo.title}
         problemStatement={demo.problemStatement}
-        stage={demo.stage as WorkstreamStage}
+        stage={stage}
         ownerName={demo.owner.name}
         origin={demo.origin}
         priority={demo.priority}
         jiraKey={demo.jiraKey}
         role={role}
-        planVersion={demo.plan.versionNumber}
-        planTotalVersions={2}
-        planMarkdown={demo.plan.markdownBody}
-        steps={demo.plan.steps.map((step) => ({
-          ...step,
-          needsConfirmation: false,
-        }))}
+        planVersion={planVersion}
+        planTotalVersions={Math.max(2, planVersion)}
+        planMarkdown={planMarkdown}
+        steps={
+          agent.planSteps?.map((step) => ({
+            id: `demo-step-${step.order}`,
+            order: step.order,
+            title: step.title,
+            description: step.description,
+            filesLikelyTouched: step.filesLikelyTouched,
+            testsToAdd: step.testsToAdd,
+            riskLevel: step.riskLevel,
+            completed: false,
+            needsConfirmation: false,
+          })) ??
+          demo.plan.steps.map((step) => ({
+            ...step,
+            needsConfirmation: false,
+          }))
+        }
         comments={demo.plan.comments.map((comment) => ({
           id: comment.id,
           stepId: null,
@@ -66,11 +89,14 @@ export default async function WorkstreamDetailPage({
           authorName: comment.author.name,
           resolved: comment.resolved,
         }))}
-        researchSummary={demo.researchSummary}
-        sources={demo.sources}
-        history={demo.history}
+        researchSummary={researchSummary}
+        sources={sources}
+        history={history}
         openQuestion={demo.openQuestion}
         actionState={actionState}
+        agentEvents={agent.events}
+        canResearch
+        canPlan={Boolean(researchSummary)}
       />
     );
   }
@@ -268,6 +294,20 @@ export default async function WorkstreamDetailPage({
       history={history}
       openQuestion={openQuestion}
       actionState={actionState}
+      agentEvents={(research?.events ?? [])
+        .slice()
+        .reverse()
+        .map((e) => {
+          const payload = (e.payload ?? {}) as { summary?: string };
+          return {
+            id: e.id,
+            type: e.type,
+            summary: payload.summary ?? e.type,
+            createdAt: e.createdAt.toISOString(),
+          };
+        })}
+      canResearch
+      canPlan={Boolean(research?.findings || research?.status === "succeeded")}
     />
   );
 }
