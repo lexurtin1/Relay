@@ -7,6 +7,12 @@ import type { ActionBarState } from "@/components/action-bar";
 import { useDemoFixtures } from "@/lib/db";
 import { getDemoAgentState } from "@/lib/demo-agent-store";
 import { getDemoWorkstreamDetail } from "@/lib/demo-data";
+import {
+  getDemoReviewState,
+  listDemoApprovals,
+  listDemoComments,
+} from "@/lib/demo-review-store";
+import { computeReviewGates } from "@/lib/review/gates";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +29,10 @@ export default async function WorkstreamDetailPage({
     const demo = getDemoWorkstreamDetail(id);
     if (!demo) notFound();
     const agent = getDemoAgentState(id);
-    const openCommentCount = demo.plan.comments.filter((c) => !c.resolved).length;
+    const review = getDemoReviewState(id);
+    const comments = listDemoComments(id);
+    const approvals = listDemoApprovals(id);
+    const openCommentCount = comments.filter((c) => !c.resolved).length;
     const role = user.role;
     const owns = demo.ownerId === user.id;
     const researchSummary = agent.researchSummary ?? demo.researchSummary;
@@ -32,22 +41,35 @@ export default async function WorkstreamDetailPage({
     const stage = (agent.stage as WorkstreamStage | undefined) ?? (demo.stage as WorkstreamStage);
     const sources = agent.sources?.length ? agent.sources : demo.sources;
     const history = agent.history?.length ? agent.history : demo.history;
+    const planLifecycle =
+      review.planLifecycle ??
+      (approvals.length > 0 ? "approved" : (demo.plan.status as string));
+    const hasArchitectApproval = approvals.some(
+      (a) => a.approverRole === "architect" || a.approverRole === "lead",
+    );
+    const gates = computeReviewGates({
+      role,
+      owns,
+      hasPlan: Boolean(planMarkdown),
+      planStatus: planLifecycle,
+      openCommentCount,
+      hasArchitectApproval,
+      handedOff: review.handedOff,
+    });
     const actionState: ActionBarState = {
       canGeneratePlan: Boolean(researchSummary),
       canRequestReview: false,
-      canRevise: openCommentCount > 0,
-      canApprove: false,
-      canHandOff: false,
+      canRevise: gates.canRevise,
+      canApprove: gates.canApprove,
+      canHandOff: gates.canHandOff,
       openCommentCount,
       generateReason: researchSummary
         ? undefined
         : "Finish a research run before generating a plan.",
       reviewReason: "Plan is already in review.",
-      reviseReason: undefined,
-      approveReason: "Resolve or address open comments before approval.",
-      handOffReason: !owns
-        ? "You can only hand off workstreams you own."
-        : "Needs at least one architect approval.",
+      reviseReason: gates.reviseReason,
+      approveReason: gates.approveReason,
+      handOffReason: gates.handOffReason,
     };
 
     return (
@@ -61,6 +83,7 @@ export default async function WorkstreamDetailPage({
         priority={demo.priority}
         jiraKey={demo.jiraKey}
         role={role}
+        planId={demo.plan.id}
         planVersion={planVersion}
         planTotalVersions={Math.max(2, planVersion)}
         planMarkdown={planMarkdown}
@@ -81,13 +104,19 @@ export default async function WorkstreamDetailPage({
             needsConfirmation: false,
           }))
         }
-        comments={demo.plan.comments.map((comment) => ({
+        comments={comments.map((comment) => ({
           id: comment.id,
-          stepId: null,
+          stepId: comment.stepId,
           anchorText: comment.anchorText,
           body: comment.body,
-          authorName: comment.author.name,
+          authorName: comment.authorName,
           resolved: comment.resolved,
+        }))}
+        approvals={approvals.map((a) => ({
+          id: a.id,
+          approverName: a.approverName,
+          approverRole: a.approverRole,
+          createdAt: a.createdAt,
         }))}
         researchSummary={researchSummary}
         sources={sources}
@@ -109,11 +138,10 @@ export default async function WorkstreamDetailPage({
         include: {
           steps: { orderBy: { order: "asc" } },
           comments: {
-            where: { parentId: null },
             include: { author: true },
             orderBy: { createdAt: "asc" },
           },
-          approvals: true,
+          approvals: { include: { approver: true } },
         },
         orderBy: { versionNumber: "desc" },
       },
@@ -143,9 +171,19 @@ export default async function WorkstreamDetailPage({
   const openCommentCount =
     plan?.comments.filter((c) => !c.resolved).length ?? 0;
 
-  const hasArchitectApproval = (plan?.approvals.length ?? 0) > 0;
+  const hasArchitectApproval = (plan?.approvals ?? []).some(
+    (a) => a.approver.role === "architect" || a.approver.role === "lead",
+  );
   const role = user.role;
   const owns = workstream.ownerId === user.id;
+  const handedOff = Boolean(
+    job &&
+      (job.status === "queued" ||
+        job.status === "running" ||
+        job.status === "provisioning" ||
+        job.status === "awaiting_input" ||
+        job.status === "succeeded"),
+  );
 
   const sourcesRaw = Array.isArray(research?.sourcesConsulted)
     ? (research?.sourcesConsulted as Array<{
@@ -206,16 +244,22 @@ export default async function WorkstreamDetailPage({
       })),
   ].sort((a, b) => +new Date(b.at) - +new Date(a.at));
 
+  const gates = computeReviewGates({
+    role,
+    owns,
+    hasPlan: Boolean(plan),
+    planStatus: plan?.status ?? null,
+    openCommentCount,
+    hasArchitectApproval,
+    handedOff,
+  });
+
   const actionState: ActionBarState = {
     canGeneratePlan: Boolean(research?.status === "succeeded" || research?.findings),
     canRequestReview: Boolean(plan && plan.status === "draft"),
-    canRevise: openCommentCount > 0 && Boolean(plan),
-    canApprove:
-      Boolean(plan && plan.status === "in_review") &&
-      openCommentCount === 0 &&
-      (role === "architect" || role === "lead"),
-    canHandOff:
-      Boolean(plan && (plan.status === "approved" || hasArchitectApproval)) && owns,
+    canRevise: gates.canRevise,
+    canApprove: gates.canApprove,
+    canHandOff: gates.canHandOff,
     openCommentCount,
     generateReason: research?.findings
       ? undefined
@@ -225,25 +269,9 @@ export default async function WorkstreamDetailPage({
         ? undefined
         : `Plan is ${plan.status.replaceAll("_", " ")}, not draft.`
       : "Create a draft plan first.",
-    reviseReason:
-      openCommentCount > 0
-        ? undefined
-        : "Open comments are required before revising from review feedback.",
-    approveReason:
-      role === "architect" || role === "lead"
-        ? openCommentCount > 0
-          ? "Resolve or address open comments before approval."
-          : plan?.status === "in_review"
-            ? undefined
-            : "Plan must be in review."
-        : "Only architects and leads can approve plans.",
-    handOffReason: !owns
-      ? "You can only hand off workstreams you own."
-      : !plan
-        ? "An approved plan is required."
-        : hasArchitectApproval || plan.status === "approved"
-          ? undefined
-          : "Needs at least one architect approval.",
+    reviseReason: gates.reviseReason,
+    approveReason: gates.approveReason,
+    handOffReason: gates.handOffReason,
   };
 
   const researchSummary =
@@ -263,6 +291,7 @@ export default async function WorkstreamDetailPage({
       priority={workstream.priority}
       jiraKey={workstream.jiraKey}
       role={role}
+      planId={plan?.id ?? null}
       planVersion={plan?.versionNumber ?? null}
       planTotalVersions={workstream.plans.length}
       planMarkdown={plan?.markdownBody ?? null}
@@ -287,6 +316,14 @@ export default async function WorkstreamDetailPage({
           body: comment.body,
           authorName: comment.author.name,
           resolved: comment.resolved,
+        })) ?? []
+      }
+      approvals={
+        plan?.approvals.map((a) => ({
+          id: a.id,
+          approverName: a.approver.name,
+          approverRole: a.approver.role,
+          createdAt: a.createdAt.toISOString(),
         })) ?? []
       }
       researchSummary={researchSummary}

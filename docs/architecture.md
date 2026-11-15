@@ -27,9 +27,9 @@ flowchart LR
 
 ## Components
 
-- **Web**: dashboard, workstream detail, ideas, knowledge, metrics, audit. Reads Postgres. Runs Scout/Planner in-process for Milestone 3 and streams activity over SSE (`/api/workstreams/[id]/events`). Demo fixtures use an in-memory agent store when `useDemoFixtures()` is on.
+- **Web**: dashboard, workstream detail, ideas, knowledge, metrics, audit. Reads Postgres. Runs Scout/Planner in-process and streams activity over SSE (`/api/workstreams/[id]/events`). Plan review supports anchored comments, revise-from-comments, architect/lead approval, and a Runner hand-off gate that queues a stub `RunnerJob`. Demo fixtures use in-memory agent/review stores when `useDemoFixtures()` is on.
 - **Worker**: heartbeat today; BullMQ processors for Runner jobs arrive in Milestone 5.
-- **Agents**: `packages/agents` (Scout + Planner). Every model call goes through the gateway.
+- **Agents**: `packages/agents` (Scout + Planner, including comment-aware revise). Every model call goes through the gateway.
 - **Gateway module**: `packages/core/src/llm/gateway.ts` is the only outbound model transport.
 - **Connectors**: MCP-style read interfaces under `packages/connectors`, package name intent `relay-toolshed`.
 - **Isolated workspaces**: one git worktree per Runner job (Docker in live/local builds; `demo-repos/` in mock mode).

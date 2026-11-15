@@ -1,5 +1,11 @@
 "use client";
 
+import { useTransition } from "react";
+import {
+  approvePlanAction,
+  handOffAction,
+  revisePlanAction,
+} from "@/app/actions/review";
 import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -18,9 +24,13 @@ export type ActionBarState = {
 };
 
 export function ActionBar(props: {
+  workstreamId: string;
+  planId: string | null;
   state: ActionBarState;
   role: string;
 }) {
+  const [pending, startTransition] = useTransition();
+
   const statusLeft =
     props.state.openCommentCount > 0
       ? `${props.state.openCommentCount} comment${props.state.openCommentCount === 1 ? "" : "s"} must be resolved before approval.`
@@ -36,31 +46,45 @@ export function ActionBar(props: {
     enabled: boolean;
     reason: string;
     primary?: boolean;
+    run: () => Promise<void>;
   }> = [
     {
       id: "revise",
-      label: "Revise plan using comments",
-      enabled: props.state.canRevise,
+      label: pending ? "Revising…" : "Revise plan using comments",
+      enabled: props.state.canRevise && !pending,
       reason: props.state.reviseReason ?? "Open comments are required to revise.",
+      run: async () => {
+        await revisePlanAction(props.workstreamId);
+      },
     },
     {
       id: "approve",
-      label: "Approve plan",
-      enabled: props.state.canApprove,
+      label: pending ? "Approving…" : "Approve plan",
+      enabled: props.state.canApprove && Boolean(props.planId) && !pending,
       reason:
         props.state.approveReason ??
         (props.role !== "architect" && props.role !== "lead"
           ? "Only architects and leads can approve plans."
           : "Plan must be in review with comments addressed."),
+      run: async () => {
+        if (!props.planId) return;
+        await approvePlanAction({
+          workstreamId: props.workstreamId,
+          planId: props.planId,
+        });
+      },
     },
     {
       id: "handoff",
-      label: "Hand off to Runner",
-      enabled: props.state.canHandOff,
+      label: pending ? "Handing off…" : "Hand off to Runner",
+      enabled: props.state.canHandOff && !pending,
       reason:
         props.state.handOffReason ??
         "Requires an architect-approved plan for a workstream you own.",
       primary: true,
+      run: async () => {
+        await handOffAction(props.workstreamId);
+      },
     },
   ];
 
@@ -79,6 +103,11 @@ export function ActionBar(props: {
                   action.primary ? "rl-btn-primary" : "rl-btn-second",
                   "disabled:cursor-not-allowed disabled:opacity-50",
                 )}
+                onClick={() => {
+                  startTransition(async () => {
+                    await action.run();
+                  });
+                }}
               >
                 {action.label}
               </button>

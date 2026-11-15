@@ -5,11 +5,18 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@relay/core";
 import { SESSION_COOKIE } from "@/lib/session";
+import { useDemoFixtures } from "@/lib/db";
+import { getDemoUser } from "@/lib/demo-data";
 import { WorkstreamOrigin, WorkstreamPriority, WorkstreamStage } from "@prisma/client";
 
 export async function switchUser(userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) return;
+  if (useDemoFixtures()) {
+    const user = getDemoUser(userId);
+    if (!user || user.id !== userId) return;
+  } else {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return;
+  }
   const jar = await cookies();
   jar.set(SESSION_COOKIE, userId, {
     httpOnly: true,

@@ -24,4 +24,23 @@ describe("agents", () => {
     expect(result.steps.length).toBeGreaterThanOrEqual(3);
     expect(result.mocked).toBe(true);
   });
+
+  it("revises Planner output from review comments", async () => {
+    const result = await runPlanner({
+      title: "Add ISIN validation tool",
+      problem: "Share one ISIN validator.",
+      findings: "Sources show duplicated regex and MCP error conventions.",
+      version: 3,
+      comments: [
+        {
+          body: "Keep error codes stable for callers.",
+          anchorText: "structured error codes",
+          authorName: "Aisha",
+        },
+      ],
+    });
+    expect(result.markdownBody).toMatch(/error codes|normalisation|Confluence/i);
+    expect(result.events.some((e) => /from comments/i.test(e.summary))).toBe(true);
+    expect(result.mocked).toBe(true);
+  });
 });

@@ -30,8 +30,11 @@ export function plannerUserPrompt(input: {
   title: string;
   problem: string;
   findings: string;
+  version?: number;
+  commentsBlock?: string;
 }): string {
-  return [
+  const version = input.version ?? 1;
+  const lines = [
     `Workstream: ${input.title}`,
     "",
     "Problem:",
@@ -39,7 +42,19 @@ export function plannerUserPrompt(input: {
     "",
     "Scout findings:",
     input.findings,
+  ];
+
+  if (input.commentsBlock?.trim()) {
+    lines.push("", "Open review comments to address:", input.commentsBlock.trim());
+  }
+
+  lines.push(
     "",
-    "Draft implementation plan v1 with 3 to 5 steps.",
-  ].join("\n");
+    `Draft implementation plan v${version} with 3 to 5 steps.`,
+    input.commentsBlock?.trim()
+      ? "Incorporate the review comments explicitly in the steps."
+      : "",
+  );
+
+  return lines.filter((line, i, arr) => !(line === "" && arr[i - 1] === "")).join("\n");
 }

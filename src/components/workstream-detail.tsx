@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import type { WorkstreamStage } from "@relay/core";
+import { addCommentAction, resolveCommentAction } from "@/app/actions/review";
 import { StageStepper } from "@/components/stage-stepper";
 import { PlanDocument, type PlanCommentView, type PlanStepView } from "@/components/plan-document";
 import { ActionBar, type ActionBarState } from "@/components/action-bar";
@@ -26,6 +27,13 @@ export type HistoryItemView = {
   at: string;
 };
 
+export type ApprovalView = {
+  id: string;
+  approverName: string;
+  approverRole: string;
+  createdAt: string;
+};
+
 export function WorkstreamDetail(props: {
   id: string;
   title: string;
@@ -36,11 +44,13 @@ export function WorkstreamDetail(props: {
   priority: string;
   jiraKey: string | null;
   role: string;
+  planId: string | null;
   planVersion: number | null;
   planTotalVersions: number;
   planMarkdown: string | null;
   steps: PlanStepView[];
   comments: PlanCommentView[];
+  approvals?: ApprovalView[];
   researchSummary: string | null;
   sources: ResearchSourceView[];
   history: HistoryItemView[];
@@ -51,6 +61,12 @@ export function WorkstreamDetail(props: {
   canPlan?: boolean;
 }) {
   const [hoverCommentId, setHoverCommentId] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+  const [anchorText, setAnchorText] = useState<string | null>(null);
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const [flash, setFlash] = useState<string | null>(null);
+  const canComment = props.role !== "viewer" && Boolean(props.planId);
   const openComments = props.comments.filter((c) => !c.resolved).length;
   const segs = segsForStage(
     props.stage,
@@ -194,6 +210,12 @@ export function WorkstreamDetail(props: {
                 comments={props.comments}
                 highlightedCommentId={hoverCommentId}
                 onHoverAnchor={setHoverCommentId}
+                canComment={canComment}
+                onAnchorComment={(text) => {
+                  setAnchorText(text);
+                  setReplyTo(null);
+                  setFlash(`Commenting on “${text.slice(0, 48)}${text.length > 48 ? "…" : ""}”`);
+                }}
               />
             ) : (
               <div className="text-sm text-[var(--relay-ink-muted)]">
@@ -203,12 +225,102 @@ export function WorkstreamDetail(props: {
                 </p>
               </div>
             )}
+            {(props.approvals?.length ?? 0) > 0 ? (
+              <div className="rounded-[14px] border border-[color-mix(in_srgb,var(--relay-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--relay-success)_8%,transparent)] px-3 py-2 text-sm text-[var(--relay-ink)]">
+                Approved by{" "}
+                {props.approvals!
+                  .map((a) => `${a.approverName} (${a.approverRole})`)
+                  .join(", ")}
+              </div>
+            ) : null}
           </section>
 
           <section className="rl-sheet p-6" aria-labelledby="comments-heading">
             <h2 id="comments-heading" className="m-0 text-xl font-medium text-[var(--relay-ink)]">
               Comments {openComments > 0 ? `· ${openComments} open` : ""}
             </h2>
+            {canComment ? (
+              <form
+                className="mt-4 flex flex-col gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!props.planId || !draft.trim()) return;
+                  const body = draft.trim();
+                  const parentId = replyTo;
+                  const anchor = anchorText;
+                  startTransition(async () => {
+                    await addCommentAction({
+                      workstreamId: props.id,
+                      planId: props.planId!,
+                      body,
+                      anchorText: parentId ? null : anchor,
+                      parentId,
+                    });
+                    setDraft("");
+                    setAnchorText(null);
+                    setReplyTo(null);
+                    setFlash(parentId ? "Reply added." : "Comment added.");
+                  });
+                }}
+              >
+                {flash ? (
+                  <p className="m-0 text-[13px] text-[var(--relay-brand-fg)]">{flash}</p>
+                ) : null}
+                {replyTo ? (
+                  <p className="m-0 text-[13px] text-[var(--relay-ink-muted)]">
+                    Replying to a comment.{" "}
+                    <button
+                      type="button"
+                      className="text-[var(--relay-brand-fg)] hover:underline"
+                      onClick={() => setReplyTo(null)}
+                    >
+                      Cancel reply
+                    </button>
+                  </p>
+                ) : null}
+                {anchorText && !replyTo ? (
+                  <p className="m-0 text-[13px] text-[var(--relay-ink-muted)]">
+                    Anchor: “{anchorText}”.{" "}
+                    <button
+                      type="button"
+                      className="text-[var(--relay-brand-fg)] hover:underline"
+                      onClick={() => setAnchorText(null)}
+                    >
+                      Clear
+                    </button>
+                  </p>
+                ) : null}
+                <label className="sr-only" htmlFor="rl-comment-body">
+                  Comment
+                </label>
+                <textarea
+                  id="rl-comment-body"
+                  className="rl-input w-full py-3"
+                  rows={3}
+                  value={draft}
+                  disabled={pending}
+                  placeholder={
+                    replyTo
+                      ? "Write a reply…"
+                      : anchorText
+                        ? "Write an anchored comment…"
+                        : "Add a comment, or select plan text to anchor one…"
+                  }
+                  onChange={(e) => setDraft(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="rl-btn-second self-start"
+                  disabled={pending || !draft.trim()}
+                >
+                  {pending ? "Saving…" : replyTo ? "Post reply" : "Post comment"}
+                </button>
+              </form>
+            ) : (
+              <p className="mt-3 text-sm text-[var(--relay-ink-muted)]">
+                Viewers can read comments but cannot add or resolve them.
+              </p>
+            )}
             {props.comments.length === 0 ? (
               <p className="mt-3 text-sm text-[var(--relay-ink-muted)]">
                 No comments yet. Select text in the plan to leave an anchored note.
@@ -247,16 +359,38 @@ export function WorkstreamDetail(props: {
                     <p className="mt-1.5 text-[var(--relay-ink)]">{comment.body}</p>
                     {comment.resolved ? (
                       <p className="mt-2 text-[13px] text-[var(--relay-success)]">Resolved</p>
-                    ) : (
+                    ) : canComment ? (
                       <div className="mt-2 flex gap-3 text-xs font-medium text-[var(--relay-brand-fg)]">
-                        <button type="button" className="hover:underline">
+                        <button
+                          type="button"
+                          className="hover:underline"
+                          disabled={pending}
+                          onClick={() => {
+                            setReplyTo(comment.id);
+                            setAnchorText(null);
+                            setFlash(`Replying to ${comment.authorName}`);
+                          }}
+                        >
                           Reply
                         </button>
-                        <button type="button" className="hover:underline">
+                        <button
+                          type="button"
+                          className="hover:underline"
+                          disabled={pending}
+                          onClick={() => {
+                            startTransition(async () => {
+                              await resolveCommentAction({
+                                workstreamId: props.id,
+                                commentId: comment.id,
+                              });
+                              setFlash("Comment resolved.");
+                            });
+                          }}
+                        >
                           Resolve
                         </button>
                       </div>
-                    )}
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -265,7 +399,12 @@ export function WorkstreamDetail(props: {
         </div>
       </div>
 
-      <ActionBar state={props.actionState} role={props.role} />
+      <ActionBar
+        workstreamId={props.id}
+        planId={props.planId}
+        state={props.actionState}
+        role={props.role}
+      />
     </div>
   );
 }
