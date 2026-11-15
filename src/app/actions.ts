@@ -10,18 +10,28 @@ import { getDemoUser } from "@/lib/demo-data";
 import { WorkstreamOrigin, WorkstreamPriority, WorkstreamStage } from "@prisma/client";
 
 export async function switchUser(userId: string) {
+  let name: string | null = null;
   if (useDemoFixtures()) {
     const user = getDemoUser(userId);
     if (!user || user.id !== userId) return;
+    name = user.name;
   } else {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return;
+    name = user.name;
   }
   const jar = await cookies();
   jar.set(SESSION_COOKIE, userId, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
+  });
+  const { recordAudit } = await import("@/lib/audit");
+  await recordAudit({
+    action: "role_switch",
+    userId,
+    userName: name,
+    detail: `Switched session to ${name}`,
   });
   revalidatePath("/");
 }
