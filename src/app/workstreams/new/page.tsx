@@ -3,19 +3,28 @@ import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewWorkstreamPage() {
+export default async function NewWorkstreamPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ title?: string }>;
+}) {
   const user = await getCurrentUser();
+  const params = searchParams ? await searchParams : {};
   if (!user) {
     return <p className="text-sm text-[var(--relay-ink-muted)]">Sign in required.</p>;
   }
 
   return (
-    <div className="mx-auto max-w-2xl rounded-xl border border-[var(--relay-border)] bg-white p-6">
-      <h1 className="font-display text-xl font-semibold">New workstream</h1>
-      <p className="mt-1 text-sm text-[var(--relay-ink-muted)]">
-        Capture the problem. You can start research from the workstream once Scout is wired.
-      </p>
-      <form action={createWorkstream} className="mt-6 space-y-4">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+      <div>
+        <h1 className="m-0 text-[clamp(30px,3.4vw,42px)] font-medium leading-[1.1] tracking-[-0.03em] text-[var(--relay-ink)]">
+          New workstream
+        </h1>
+        <p className="mt-2 text-[var(--relay-ink-muted)]">
+          Capture the problem. You can start research from the workstream once Scout is wired.
+        </p>
+      </div>
+      <form action={createWorkstream} className="rl-sheet flex flex-col gap-4 p-6">
         <input type="hidden" name="ownerId" value={user.id} />
         <div className="block text-sm">
           <label htmlFor="title" className="mb-1 block text-[var(--relay-ink-muted)]">
@@ -26,7 +35,8 @@ export default async function NewWorkstreamPage() {
             name="title"
             required
             autoComplete="off"
-            className="w-full rounded-xl border border-[var(--relay-border)] px-3 py-2 placeholder:text-[var(--relay-ink-subtle)]"
+            defaultValue={params.title ?? ""}
+            className="rl-input w-full"
             placeholder="Short name for the piece of work…"
           />
         </div>
@@ -43,7 +53,8 @@ export default async function NewWorkstreamPage() {
             required
             rows={5}
             autoComplete="off"
-            className="w-full rounded-xl border border-[var(--relay-border)] px-3 py-2 placeholder:text-[var(--relay-ink-subtle)]"
+            className="rl-input w-full py-3"
+            style={{ minHeight: 120 }}
             placeholder="What is broken or missing, and who feels it?"
           />
         </div>
@@ -56,7 +67,7 @@ export default async function NewWorkstreamPage() {
             name="jiraKey"
             autoComplete="off"
             spellCheck={false}
-            className="w-full rounded-xl border border-[var(--relay-border)] px-3 py-2 font-mono placeholder:text-[var(--relay-ink-subtle)]"
+            className="rl-input w-full font-mono"
             placeholder="INNO-123…"
           />
         </div>
@@ -67,7 +78,7 @@ export default async function NewWorkstreamPage() {
           <select
             id="origin"
             name="origin"
-            className="w-full rounded-xl border border-[var(--relay-border)] px-3 py-2"
+            className="rl-input w-full"
             defaultValue="internal_friction"
           >
             <option value="internal_friction">Internal friction</option>
@@ -75,10 +86,7 @@ export default async function NewWorkstreamPage() {
             <option value="roadmap">Roadmap</option>
           </select>
         </div>
-        <button
-          type="submit"
-          className="rounded-xl bg-[var(--relay-primary)] px-3 py-2 text-sm font-medium text-[var(--relay-primary-fg)] transition-relay hover:bg-[var(--relay-primary-hover)]"
-        >
+        <button type="submit" className="rl-btn-primary self-start">
           Create workstream
         </button>
       </form>

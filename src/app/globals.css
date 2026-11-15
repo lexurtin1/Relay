@@ -1,36 +1,102 @@
 @import "tailwindcss";
 
-:root {
-  --relay-brand: #3274c0;
-  --relay-brand-hover: #2b64a8;
+:root,
+[data-theme="dark"] {
+  --relay-brand: #2b6fd6;
+  --relay-brand-hover: #3f82e0;
+  --relay-brand-soft: rgba(63, 130, 224, 0.18);
+  --relay-brand-fg: #8dbbfa;
+  --relay-primary: #f2f5fa;
+  --relay-primary-hover: #ffffff;
+  --relay-primary-fg: #0d131f;
+  --relay-primary-soft: rgba(242, 245, 250, 0.12);
+  --relay-accent: #3f82e0;
+  --relay-accent-muted: #6fa9f5;
+  --relay-ink: #f2f5fa;
+  --relay-ink-muted: #a9b4c6;
+  --relay-ink-subtle: #8e9aaf;
+  --relay-ink-body: #d5dce8;
+  --relay-surface: #0d131f;
+  --relay-surface-muted: #060a12;
+  --relay-surface-sunken: #1a2233;
+  --relay-border: rgba(255, 255, 255, 0.12);
+  --relay-border-strong: rgba(255, 255, 255, 0.18);
+  --relay-danger: #f97066;
+  --relay-danger-soft: rgba(249, 112, 102, 0.12);
+  --relay-warning: #f5b24a;
+  --relay-warning-soft: rgba(245, 178, 74, 0.1);
+  --relay-success: #86d9ae;
+  --relay-success-soft: rgba(134, 217, 174, 0.12);
+  --relay-live: #6fa9f5;
+  --relay-seg-person: #dde4ef;
+  --relay-seg-agent: #3f82e0;
+  --relay-seg-wait-a: #f0a630;
+  --relay-seg-wait-b: #b8780f;
+  --relay-blob-blue: #2b6fd6;
+  --relay-blob-teal: #14908f;
+  --relay-blob-amber: #d9861c;
+  --relay-wire-teal: #80cbc4;
+  --relay-wire-blue: #1e88e5;
+  --relay-wire-opacity: 0.12;
+  --relay-glass-from: rgba(255, 255, 255, 0.15);
+  --relay-glass-to: rgba(255, 255, 255, 0.06);
+  --relay-glass-border: rgba(255, 255, 255, 0.18);
+  --relay-glass-inset: rgba(255, 255, 255, 0.38);
+  --relay-glass-shadow: rgba(0, 0, 0, 0.65);
+  --relay-input-bg: rgba(6, 10, 18, 0.55);
+  --relay-radius-control: 12px;
+  --relay-radius-card: 20px;
+  --relay-radius-panel: 26px;
+  --relay-font-ui: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --relay-font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --relay-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --relay-brand: #2b6fd6;
+  --relay-brand-hover: #245db8;
   --relay-brand-soft: #e8f1fb;
-  --relay-primary: #6b5ce7;
-  --relay-primary-hover: #5848d6;
+  --relay-brand-fg: #2b6fd6;
+  --relay-primary: #2b6fd6;
+  --relay-primary-hover: #245db8;
   --relay-primary-fg: #ffffff;
-  --relay-primary-soft: #f1effe;
-  --relay-accent: #6b5ce7;
-  --relay-accent-muted: #8b7ff0;
-  --relay-ink: #16181d;
+  --relay-primary-soft: #e8f1fb;
+  --relay-accent: #2b6fd6;
+  --relay-accent-muted: #3f82e0;
+  --relay-ink: #0d131f;
   --relay-ink-muted: #4a5562;
   --relay-ink-subtle: #667085;
+  --relay-ink-body: #1a2233;
   --relay-surface: #ffffff;
-  --relay-surface-muted: #f5f4fb;
-  --relay-surface-sunken: #eeebf8;
-  --relay-border: #ddd8ef;
-  --relay-border-strong: #c4bde0;
+  --relay-surface-muted: #f2f5fa;
+  --relay-surface-sunken: #e8edf5;
+  --relay-border: rgba(13, 19, 31, 0.12);
+  --relay-border-strong: rgba(13, 19, 31, 0.18);
   --relay-danger: #b42318;
   --relay-danger-soft: #fef3f2;
   --relay-warning: #b54708;
   --relay-warning-soft: #fffaeb;
   --relay-success: #027a48;
   --relay-success-soft: #ecfdf3;
-  --relay-radius-control: 10px;
-  --relay-radius-card: 14px;
-  --relay-radius-panel: 18px;
-  --relay-font-display: "Gill Sans MT", "Gill Sans", Calibri, sans-serif;
-  --relay-font-ui: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --relay-font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
-  --relay-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --relay-live: #2b6fd6;
+  --relay-seg-person: #c5cddb;
+  --relay-seg-agent: #2b6fd6;
+  --relay-seg-wait-a: #d9861c;
+  --relay-seg-wait-b: #9a5f0c;
+  --relay-blob-blue: #6fa9f5;
+  --relay-blob-teal: #4db6ac;
+  --relay-blob-amber: #f5b24a;
+  --relay-wire-teal: #0d7377;
+  --relay-wire-blue: #1a56a8;
+  --relay-wire-opacity: 0.1;
+  --relay-glass-from: rgba(255, 255, 255, 0.72);
+  --relay-glass-to: rgba(255, 255, 255, 0.48);
+  --relay-glass-border: rgba(13, 19, 31, 0.12);
+  --relay-glass-inset: rgba(255, 255, 255, 0.9);
+  --relay-glass-shadow: rgba(13, 19, 31, 0.12);
+  --relay-input-bg: rgba(255, 255, 255, 0.85);
+  color-scheme: light;
 }
 
 * {
@@ -42,25 +108,22 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-  background:
-    radial-gradient(1200px 500px at 10% -10%, color-mix(in srgb, var(--relay-primary) 10%, white), transparent 60%),
-    radial-gradient(900px 420px at 100% 0%, color-mix(in srgb, var(--relay-brand) 8%, white), transparent 55%),
-    var(--relay-surface-muted);
+  background: var(--relay-surface-muted);
   color: var(--relay-ink);
   font-family: var(--relay-font-ui);
+  font-size: 15px;
+  line-height: 1.45;
   font-feature-settings: "tnum" 1;
-}
-
-h1,
-h2,
-.font-display {
-  font-family: var(--relay-font-display);
-  letter-spacing: -0.02em;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: inherit;
+  color: var(--relay-brand-fg);
   text-decoration: none;
+}
+
+a:hover {
+  color: var(--relay-accent-muted);
 }
 
 button,
@@ -68,15 +131,16 @@ input,
 select,
 textarea {
   font: inherit;
+  color: inherit;
 }
 
 :focus-visible {
-  outline: 2px solid var(--relay-primary);
+  outline: 2px solid var(--relay-brand-fg);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--relay-primary) 24%, white);
+  background: color-mix(in srgb, var(--relay-brand) 32%, transparent);
   color: var(--relay-ink);
 }
 
@@ -90,27 +154,206 @@ kbd {
   font-variant-numeric: tabular-nums;
 }
 
-.rounded-relay {
+.rl-glass {
+  background: linear-gradient(180deg, var(--relay-glass-from), var(--relay-glass-to));
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  backdrop-filter: blur(26px) saturate(180%);
+  border: 1px solid var(--relay-glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--relay-glass-inset),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 24px 60px -16px var(--relay-glass-shadow);
+}
+
+.rl-sheet {
+  background: var(--relay-surface);
+  border: 1px solid color-mix(in srgb, var(--relay-border) 70%, transparent);
   border-radius: var(--relay-radius-card);
 }
 
-.rounded-relay-panel {
-  border-radius: var(--relay-radius-panel);
+.rl-chip {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--relay-border-strong);
+  background: transparent;
+  font-size: 13px;
+  color: var(--relay-ink-body);
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--relay-ease),
+    color 150ms var(--relay-ease),
+    border-color 150ms var(--relay-ease);
 }
 
-.rounded-relay-control {
-  border-radius: var(--relay-radius-control);
+.rl-chip:hover {
+  background: color-mix(in srgb, var(--relay-ink) 8%, transparent);
 }
 
-@keyframes relay-pulse {
+.rl-chip-on {
+  background: var(--relay-primary);
+  color: var(--relay-primary-fg);
+  border-color: var(--relay-primary);
+}
+
+.rl-chip-on:hover {
+  background: var(--relay-primary-hover);
+}
+
+.rl-btn-primary {
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: 16px;
+  border: 0;
+  background: var(--relay-primary);
+  color: var(--relay-primary-fg);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 150ms var(--relay-ease);
+}
+
+.rl-btn-primary:hover {
+  background: var(--relay-primary-hover);
+}
+
+.rl-btn-primary:disabled {
+  background: var(--relay-primary-soft);
+  color: var(--relay-ink-muted);
+  cursor: not-allowed;
+}
+
+.rl-btn-second {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid var(--relay-border-strong);
+  background: color-mix(in srgb, var(--relay-ink) 4%, transparent);
+  color: var(--relay-ink);
+  cursor: pointer;
+  transition: background-color 150ms var(--relay-ease);
+}
+
+.rl-btn-second:hover {
+  background: color-mix(in srgb, var(--relay-ink) 10%, transparent);
+}
+
+.rl-input {
+  min-height: 52px;
+  padding: 0 18px;
+  border-radius: 16px;
+  border: 1px solid var(--relay-border);
+  background: var(--relay-input-bg);
+  color: var(--relay-ink);
+  font-size: 16px;
+}
+
+.rl-input::placeholder {
+  color: var(--relay-ink-subtle);
+}
+
+.rl-seg {
+  flex-basis: 0;
+  flex-shrink: 1;
+  min-width: 4px;
+  height: 100%;
+  border-radius: 4px;
+  display: block;
+}
+
+.rl-seg-p {
+  background: var(--relay-seg-person);
+}
+
+.rl-seg-a {
+  background: var(--relay-seg-agent);
+}
+
+.rl-seg-w {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--relay-seg-wait-a) 0 5px,
+    var(--relay-seg-wait-b) 5px 10px
+  );
+}
+
+.rl-seg-live {
+  animation: rl-pulse 1.6s ease-in-out infinite;
+}
+
+.rl-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  pointer-events: none;
+}
+
+.rl-b1 {
+  width: 620px;
+  height: 620px;
+  left: -140px;
+  top: -220px;
+  background: var(--relay-blob-blue);
+  opacity: 0.5;
+  animation: rl-drift1 28s ease-in-out infinite alternate;
+}
+
+.rl-b2 {
+  width: 520px;
+  height: 520px;
+  right: -120px;
+  top: 120px;
+  background: var(--relay-blob-teal);
+  opacity: 0.3;
+  animation: rl-drift2 34s ease-in-out infinite alternate;
+}
+
+.rl-b3 {
+  width: 420px;
+  height: 420px;
+  left: 22%;
+  bottom: -240px;
+  background: var(--relay-blob-amber);
+  opacity: 0.2;
+  animation: rl-drift1 40s ease-in-out infinite alternate-reverse;
+}
+
+[data-theme="light"] .rl-b1 {
+  opacity: 0.28;
+}
+
+[data-theme="light"] .rl-b2 {
+  opacity: 0.18;
+}
+
+[data-theme="light"] .rl-b3 {
+  opacity: 0.14;
+}
+
+@keyframes rl-drift1 {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(120px, 80px) scale(1.15);
+  }
+}
+
+@keyframes rl-drift2 {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(-140px, -60px) scale(1.1);
+  }
+}
+
+@keyframes rl-pulse {
   0%,
   100% {
     opacity: 1;
-    transform: scale(1);
   }
   50% {
     opacity: 0.45;
-    transform: scale(0.85);
   }
 }
 
@@ -126,7 +369,7 @@ kbd {
 }
 
 .animate-relay-pulse {
-  animation: relay-pulse 1.4s var(--relay-ease) infinite;
+  animation: rl-pulse 1.6s ease-in-out infinite;
 }
 
 .animate-relay-in {
@@ -154,16 +397,19 @@ kbd {
   border-width: 0;
 }
 
-.font-display,
 h1,
 h2 {
   text-wrap: balance;
+  letter-spacing: -0.02em;
+  font-weight: 500;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-relay-pulse,
   .animate-relay-in,
-  .transition-relay {
+  .transition-relay,
+  .rl-blob,
+  .rl-seg-live {
     animation: none !important;
     transition: none !important;
   }

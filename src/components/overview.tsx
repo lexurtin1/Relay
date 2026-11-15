@@ -1,318 +1,260 @@
 "use client";
 
 import Link from "next/link";
-import { Lightbulb, Plus } from "lucide-react";
-import { Avatar } from "@/components/ui/avatar";
-import { formatRelativeTime, cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent, type KeyboardEvent } from "react";
 import {
-  PIPELINE_LABELS,
-  type AgentRunningItem,
-  type NeedsActionItem,
-  type OverviewStats,
-  type WorkstreamRowRow,
+  segsForStage,
+  statusToneClass,
+  TimelineLegend,
+  TimelineTrack,
+} from "@/components/timeline-track";
+import { formatRelativeTime } from "@/lib/utils";
+import type {
+  NeedsActionItem,
+  OverviewStats,
+  WorkstreamRowRow,
 } from "@/lib/overview";
 
-export function OverviewHeader(props: {
+const MODES = [
+  {
+    id: "research" as const,
+    label: "Research a problem",
+    ph: "Describe the problem. Scout searches the code and the connected sources.",
+    cta: "Start research",
+    href: "/workstreams/new",
+  },
+  {
+    id: "idea" as const,
+    label: "Log an idea",
+    ph: "Describe the friction or the external signal",
+    cta: "Log idea",
+    href: "/ideas",
+  },
+  {
+    id: "find" as const,
+    label: "Search knowledge",
+    ph: "Search Confluence, Jira, GitHub and the other connected sources",
+    cta: "Search",
+    href: "/knowledge",
+  },
+];
+
+export function OverviewPageView(props: {
+  stats: OverviewStats;
+  needsAction: NeedsActionItem[];
+  rows: WorkstreamRowRow[];
   workstreamCount: number;
   agentsActive: number;
 }) {
+  const needsN = props.needsAction.length;
+  const agentsN = props.agentsActive;
+  const summary = `${needsN} item${needsN === 1 ? "" : "s"} need${needsN === 1 ? "s" : ""} your input · ${agentsN} agent${agentsN === 1 ? "" : "s"} running · ${props.stats.mergedThisWeek} merged this week`;
+
   return (
-    <div className="rounded-2xl bg-[linear-gradient(135deg,#1a1740_0%,#243a6b_55%,#2f5aa0_100%)] px-5 py-5 text-white shadow-sm">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight">Overview</h1>
-          <p className="mt-1 text-sm text-white/75">
-            Innovation and Strategy · {props.workstreamCount} workstreams ·{" "}
-            {props.agentsActive} agents running
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/ideas"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/5 px-3 py-2 text-sm font-medium text-white transition-relay hover:bg-white/10"
-          >
-            <Lightbulb className="h-4 w-4" aria-hidden />
-            Log an idea
-          </Link>
-          <Link
-            href="/workstreams/new"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--relay-primary)] px-3 py-2 text-sm font-medium text-white transition-relay hover:bg-[var(--relay-primary-hover)]"
-          >
-            <Plus className="h-4 w-4" aria-hidden />
-            New workstream
-          </Link>
-        </div>
+    <div className="flex flex-col gap-9">
+      <div>
+        <h1 className="m-0 text-[clamp(30px,3.4vw,42px)] font-medium leading-[1.1] tracking-[-0.03em] text-[var(--relay-ink)]">
+          Overview
+        </h1>
+        <p className="mt-2 max-w-[68ch] text-[17px] text-[var(--relay-ink-body)]">{summary}</p>
       </div>
+
+      <StartWorkComposer />
+
+      <NeedsInputSection items={props.needsAction} />
+
+      <WorkstreamTimelines rows={props.rows} />
     </div>
   );
 }
 
-export function StatsRow(props: { stats: OverviewStats; activeFilter?: string }) {
-  const items = [
-    { key: "all", label: "All active", value: props.stats.allActive },
-    { key: "research", label: "Research", value: props.stats.research },
-    { key: "review", label: "In review", value: props.stats.inReview },
-    { key: "building", label: "Building", value: props.stats.building },
-    { key: "pr", label: "Pull request", value: props.stats.pullRequest },
-    { key: "merged", label: "Merged this week", value: props.stats.mergedThisWeek },
-  ];
+function StartWorkComposer() {
+  const router = useRouter();
+  const [mode, setMode] = useState<(typeof MODES)[number]["id"]>("research");
+  const [draft, setDraft] = useState("");
+  const current = MODES.find((m) => m.id === mode) ?? MODES[0]!;
+
+  function go(e?: FormEvent) {
+    e?.preventDefault();
+    const q = draft.trim();
+    if (mode === "find" && q) {
+      router.push(`/knowledge?q=${encodeURIComponent(q)}`);
+      return;
+    }
+    if (mode === "idea") {
+      router.push(q ? `/ideas?draft=${encodeURIComponent(q)}` : "/ideas");
+      return;
+    }
+    router.push(q ? `/workstreams/new?title=${encodeURIComponent(q)}` : "/workstreams/new");
+  }
+
+  function onKey(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") go();
+  }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-      {items.map((item, index) => {
-        const active = (props.activeFilter ?? "all") === item.key || (!props.activeFilter && index === 0);
-        return (
-          <div
-            key={item.key}
-            className={cn(
-              "rounded-2xl border bg-[var(--relay-surface)] px-4 py-3 shadow-sm",
-              active
-                ? "border-[var(--relay-primary)] ring-1 ring-[var(--relay-primary)]"
-                : "border-[var(--relay-border)]",
-            )}
-          >
-            <div className="text-xs font-medium text-[var(--relay-ink-muted)]">{item.label}</div>
-            <div className="mt-1 text-2xl font-semibold tabular text-[var(--relay-ink)]">
-              {item.value}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-export function NeedsActionPanel(props: { items: NeedsActionItem[] }) {
-  return (
-    <section className="rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface)] shadow-sm">
-      <header className="flex items-center gap-2 border-b border-[var(--relay-border)] px-4 py-3">
-        <h2 className="font-display text-sm font-semibold text-[var(--relay-ink)]">
-          Needs your action
-        </h2>
-        <span className="rounded-full bg-[var(--relay-warning-soft)] px-2 py-0.5 text-xs font-semibold tabular text-[var(--relay-warning)]">
-          {props.items.length}
-        </span>
-      </header>
-      {props.items.length === 0 ? (
-        <p className="px-4 py-6 text-sm text-[var(--relay-ink-muted)]">
-          Nothing waiting on you. Agents will surface questions and plan comments here.
-        </p>
-      ) : (
-        <ul className="divide-y divide-[var(--relay-border)]">
-          {props.items.map((item) => (
-            <li key={item.id} className="relative px-4 py-3 pl-5 animate-relay-in">
-              <span
-                className="absolute bottom-3 left-0 top-3 w-1 rounded-full bg-[var(--relay-warning)]"
-                aria-hidden
-              />
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="text-xs text-[var(--relay-ink-subtle)]">
-                    {item.jiraKey ? (
-                      <span className="font-mono text-[var(--relay-ink-muted)]">{item.jiraKey}</span>
-                    ) : null}
-                    {item.jiraKey ? " · " : null}
-                    {item.summary} · {formatRelativeTime(item.createdAt)}
-                  </div>
-                  <p className="mt-1 text-sm font-medium text-[var(--relay-ink)]">{item.title}</p>
-                  {item.detail ? (
-                    <p className="mt-1 text-sm text-[var(--relay-ink-muted)]">{item.detail}</p>
-                  ) : null}
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {item.options.map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    className="rounded-xl border border-[var(--relay-border)] bg-[var(--relay-surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--relay-ink)] transition-relay hover:border-[var(--relay-primary)]"
-                  >
-                    {option}
-                  </button>
-                ))}
-                <Link
-                  href={`/workstreams/${item.id.replace(/-q$|-c$/, "")}`}
-                  className="rounded-xl bg-[var(--relay-primary)] px-2.5 py-1.5 text-xs font-medium text-white transition-relay hover:bg-[var(--relay-primary-hover)]"
-                >
-                  {item.actionLabel}
-                </Link>
-              </div>
-            </li>
+    <section aria-labelledby="rl-start-h" className="flex flex-col gap-3">
+      <h2 id="rl-start-h" className="m-0 text-xl font-medium tracking-[-0.01em] text-[var(--relay-ink)]">
+        Start work
+      </h2>
+      <div className="rl-glass flex flex-col gap-3 rounded-[26px] p-3.5">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Type of work">
+          {MODES.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              className={`rl-chip ${mode === m.id ? "rl-chip-on" : ""}`}
+              aria-pressed={mode === m.id}
+              onClick={() => setMode(m.id)}
+            >
+              {m.label}
+            </button>
           ))}
-        </ul>
-      )}
+        </div>
+        <form className="flex flex-wrap gap-2.5" onSubmit={go}>
+          <label className="sr-only" htmlFor="rl-ask-in">
+            Describe what you need
+          </label>
+          <input
+            id="rl-ask-in"
+            className="rl-input min-w-0 flex-[1_1_280px]"
+            type="text"
+            value={draft}
+            placeholder={current.ph}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={onKey}
+            autoComplete="off"
+          />
+          <button type="submit" className="rl-btn-primary">
+            {current.cta}
+          </button>
+        </form>
+      </div>
     </section>
   );
 }
 
-export function AgentsRunningPanel(props: { items: AgentRunningItem[] }) {
+function NeedsInputSection(props: { items: NeedsActionItem[] }) {
   return (
-    <section className="rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface)] shadow-sm">
-      <header className="border-b border-[var(--relay-border)] px-4 py-3">
-        <h2 className="font-display text-sm font-semibold text-[var(--relay-ink)]">
-          Agents running
-        </h2>
-      </header>
+    <section aria-labelledby="rl-wait-h">
+      <h2 id="rl-wait-h" className="m-0 text-xl font-medium tracking-[-0.01em] text-[var(--relay-ink)]">
+        Needs your input
+      </h2>
       {props.items.length === 0 ? (
-        <p className="px-4 py-6 text-sm text-[var(--relay-ink-muted)]">
-          No agents running. Hand off an approved plan or start research to see live activity.
+        <p className="mt-4 text-[var(--relay-ink-muted)]">
+          Nothing needs your input. Agents that pause with a question are listed here.
         </p>
       ) : (
-        <ul className="divide-y divide-[var(--relay-border)]">
+        <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(340px,100%),1fr))] gap-4">
           {props.items.map((item) => {
-            const pct =
-              item.stepsTotal > 0
-                ? Math.round((item.stepsCompleted / item.stepsTotal) * 100)
-                : 35;
+            const wsId = item.id.replace(/-q$|-c$/, "");
             return (
-              <li key={item.id} className="px-4 py-3 animate-relay-in">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="text-xs text-[var(--relay-ink-subtle)]">
-                      <span className="font-medium text-[var(--relay-brand)]">{item.kind}</span>
-                      {item.jiraKey ? (
-                        <>
-                          {" "}
-                          <span className="font-mono">{item.jiraKey}</span>
-                        </>
-                      ) : null}
-                    </div>
+              <article
+                key={item.id}
+                className="rl-sheet flex flex-col gap-2.5 p-[22px] animate-relay-in"
+              >
+                <p className="m-0 text-[13px] text-[var(--relay-ink-muted)]">
+                  {item.jiraKey ? (
+                    <span className="font-mono">{item.jiraKey}</span>
+                  ) : null}
+                  {item.jiraKey ? " · " : null}
+                  <span className="text-[var(--relay-warning)]">{item.summary}</span>
+                </p>
+                <h3 className="m-0 text-[17px] font-medium tracking-[-0.01em] text-[var(--relay-ink)]">
+                  {item.title}
+                </h3>
+                {item.detail ? (
+                  <p className="m-0 text-[var(--relay-ink-body)]">{item.detail}</p>
+                ) : null}
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {item.options.slice(0, 3).map((option) => (
                     <Link
-                      href={`/workstreams/${item.workstreamId}`}
-                      className="mt-0.5 block truncate text-sm font-medium text-[var(--relay-ink)] hover:underline"
+                      key={option}
+                      href={`/workstreams/${wsId}`}
+                      className="rl-btn-second inline-flex items-center no-underline"
                     >
-                      {item.title}
+                      {option}
                     </Link>
-                    <p className="mt-1 text-xs text-[var(--relay-ink-muted)]">{item.statusLine}</p>
-                  </div>
-                  <span className="shrink-0 text-xs tabular text-[var(--relay-ink-subtle)]">
-                    {formatRelativeTime(item.startedAt)}
-                  </span>
+                  ))}
+                  <Link
+                    href={`/workstreams/${wsId}`}
+                    className="rl-btn-second inline-flex items-center no-underline"
+                  >
+                    {item.actionLabel}
+                  </Link>
                 </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--relay-surface-sunken)]">
-                  <div
-                    className="h-full rounded-full bg-[var(--relay-primary)]"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </li>
+              </article>
             );
           })}
-        </ul>
+        </div>
       )}
     </section>
   );
 }
 
-export function WorkstreamsTable(props: { rows: WorkstreamRowRow[] }) {
+function WorkstreamTimelines(props: { rows: WorkstreamRowRow[] }) {
   return (
-    <section className="rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface)] shadow-sm">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--relay-border)] px-4 py-3">
+    <section aria-labelledby="rl-relay-h">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="font-display text-sm font-semibold text-[var(--relay-ink)]">
-            Workstreams
+          <h2
+            id="rl-relay-h"
+            className="m-0 text-xl font-medium tracking-[-0.01em] text-[var(--relay-ink)]"
+          >
+            Workstream timelines
           </h2>
-          <p className="text-xs text-[var(--relay-ink-muted)]">
-            Progress from research to pull request
+          <p className="mt-2 max-w-[68ch] text-[var(--relay-ink-muted)]">
+            One bar per workstream, from first write-up on the left to now on the right. Colour is
+            the state. Width is the share of elapsed time.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-[var(--relay-ink-muted)]">
-          <span className="rounded-xl border border-[var(--relay-border)] px-2 py-1">
-            Owner: everyone
-          </span>
-          <span className="rounded-xl border border-[var(--relay-border)] px-2 py-1">
-            Sort: last updated
-          </span>
-        </div>
-      </header>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-[var(--relay-border)] text-xs text-[var(--relay-ink-subtle)]">
-            <tr>
-              <th className="px-4 py-2.5 font-medium">Workstream</th>
-              <th className="px-4 py-2.5 font-medium">Owner</th>
-              {PIPELINE_LABELS.map((col) => (
-                <th key={col.key} className="px-2 py-2.5 font-medium">
-                  {col.label}
-                </th>
-              ))}
-              <th className="px-4 py-2.5 font-medium text-right">Updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            {props.rows.map((row) => (
-              <tr
-                key={row.id}
-                className="border-b border-[var(--relay-border)] last:border-0 hover:bg-[var(--relay-primary-soft)]/40"
-              >
-                <td className="px-4 py-3 align-top">
-                  <Link
-                    href={`/workstreams/${row.id}`}
-                    className="font-medium text-[var(--relay-ink)] hover:underline"
-                  >
-                    {row.title}
-                  </Link>
+        <TimelineLegend />
+      </div>
+      <div className="rl-sheet mt-4 flex flex-col p-2">
+        {props.rows.map((row) => {
+          const segs = segsForStage(row.stage, row.progressTone);
+          const tone =
+            row.progressTone === "waiting"
+              ? "w"
+              : row.progressTone === "done"
+                ? "d"
+                : row.progressTone === "active"
+                  ? "a"
+                  : "p";
+          return (
+            <Link
+              key={row.id}
+              href={`/workstreams/${row.id}`}
+              className="flex w-full flex-wrap items-center gap-x-7 gap-y-3.5 rounded-[14px] px-3.5 py-4 text-left text-[var(--relay-ink)] no-underline transition-relay hover:bg-[color-mix(in_srgb,var(--relay-ink)_4.5%,transparent)]"
+            >
+              <span className="flex min-w-0 flex-[1_1_300px] flex-col gap-0.5">
+                <span className="text-base font-medium">{row.title}</span>
+                <span className="text-[13px] text-[var(--relay-ink-muted)]">
                   {row.jiraKey ? (
-                    <div className="mt-0.5 font-mono text-xs text-[var(--relay-ink-subtle)]">
-                      {row.jiraKey}
-                    </div>
-                  ) : null}
-                </td>
-                <td className="px-4 py-3 align-top">
-                  <div className="flex items-center gap-2">
-                    <Avatar initials={row.ownerInitials} name={row.ownerName} />
-                    <span className="text-[var(--relay-ink-muted)]">
-                      {row.ownerName.split(" ")[0]?.[0]}. {row.ownerName.split(" ").slice(-1)}
-                    </span>
-                  </div>
-                </td>
-                {PIPELINE_LABELS.map((col, index) => {
-                  const reached = index <= row.stepperIndex;
-                  const current = index === row.stepperIndex;
-                  return (
-                    <td key={col.key} className="px-2 py-3 align-top">
-                      <div className="flex items-center gap-1">
-                        <span
-                          className={cn(
-                            "h-2.5 w-2.5 rounded-full border",
-                            current && row.progressTone === "waiting"
-                              ? "border-[var(--relay-warning)] bg-[var(--relay-warning)]"
-                              : current && row.progressTone === "done"
-                                ? "border-[var(--relay-success)] bg-[var(--relay-success)]"
-                                : current
-                                  ? "border-[var(--relay-primary)] bg-[var(--relay-primary)]"
-                                  : reached
-                                    ? "border-[var(--relay-brand)] bg-[var(--relay-brand)]"
-                                    : "border-[var(--relay-border-strong)] bg-[var(--relay-surface)]",
-                          )}
-                          aria-hidden
-                        />
-                        {current ? (
-                          <span
-                            className={cn(
-                              "max-w-[110px] truncate text-[11px]",
-                              row.progressTone === "waiting"
-                                ? "text-[var(--relay-warning)]"
-                                : row.progressTone === "done"
-                                  ? "text-[var(--relay-success)]"
-                                  : "text-[var(--relay-ink-muted)]",
-                            )}
-                          >
-                            {row.progressLabel}
-                          </span>
-                        ) : null}
-                      </div>
-                    </td>
-                  );
-                })}
-                <td className="px-4 py-3 align-top text-right text-xs tabular text-[var(--relay-ink-subtle)]">
-                  {formatRelativeTime(row.updatedAt)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    <span className="font-mono">{row.jiraKey}</span>
+                  ) : (
+                    <span className="font-mono">{row.id.slice(0, 8)}</span>
+                  )}
+                  {" · "}
+                  {row.ownerName}
+                  {" · "}
+                  {row.progressLabel}
+                </span>
+              </span>
+              <TimelineTrack
+                segs={segs}
+                ariaLabel={`${row.title}. ${row.progressLabel}.`}
+              />
+              <span className="flex min-w-0 flex-[0_1_230px] flex-col gap-0.5 text-sm">
+                <span className={statusToneClass(tone)}>{row.progressLabel}</span>
+                <span className="text-[13px] text-[var(--relay-ink-muted)]">
+                  Updated {formatRelativeTime(row.updatedAt)}
+                </span>
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

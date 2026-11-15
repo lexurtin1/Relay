@@ -1,47 +1,75 @@
 /**
  * Brand tokens for Relay (white-labelled Calastone / SS&C).
- * Calastone blue from the logo PNG (#3274C0), with a SaaS purple accent
- * for interactive chrome throughout.
+ * Dark glass workspace from the approved mockup; light theme is a composed alternate.
+ * Calastone blues for primary / live; no SaaS purple.
  */
 export const brand = {
   nameSource: "APP_NAME",
   fonts: {
-    display: '"Gill Sans MT", "Gill Sans", Calibri, sans-serif',
     ui: "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif",
     mono: "var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
   },
   radius: {
-    control: "10px",
-    card: "14px",
-    panel: "18px",
+    control: "12px",
+    card: "20px",
+    panel: "26px",
+    pill: "999px",
   },
   colors: {
-    // Calastone / SS&C
-    brand: "#3274C0",
-    brandHover: "#2B64A8",
-    brandSoft: "#E8F1FB",
-    // SaaS purple accent (interactive)
-    primary: "#6B5CE7",
-    primaryHover: "#5848D6",
-    primaryFg: "#FFFFFF",
-    primarySoft: "#F1EFFE",
-    accent: "#6B5CE7",
-    accentMuted: "#8B7FF0",
-    ink: "#16181D",
+    // Calastone blues
+    brand: "#2B6FD6",
+    brandHover: "#3F82E0",
+    brandSoft: "rgba(63, 130, 224, 0.18)",
+    brandFg: "#8DBBFA",
+    primary: "#F2F5FA",
+    primaryHover: "#FFFFFF",
+    primaryFg: "#0D131F",
+    primarySoft: "rgba(242, 245, 250, 0.12)",
+    accent: "#3F82E0",
+    accentMuted: "#6FA9F5",
+    // Dark ground (default)
+    ink: "#F2F5FA",
+    inkMuted: "#A9B4C6",
+    inkSubtle: "#8E9AAF",
+    inkBody: "#D5DCE8",
+    surface: "#0D131F",
+    surfaceMuted: "#060A12",
+    surfaceSunken: "#1A2233",
+    border: "rgba(255, 255, 255, 0.12)",
+    borderStrong: "rgba(255, 255, 255, 0.18)",
+    // Status
+    danger: "#F97066",
+    dangerSoft: "rgba(249, 112, 102, 0.12)",
+    warning: "#F5B24A",
+    warningSoft: "rgba(245, 178, 74, 0.1)",
+    success: "#86D9AE",
+    successSoft: "rgba(134, 217, 174, 0.12)",
+    live: "#6FA9F5",
+    // Timeline segments
+    segPerson: "#DDE4EF",
+    segAgent: "#3F82E0",
+    segWaitA: "#F0A630",
+    segWaitB: "#B8780F",
+    // Atmosphere blobs
+    blobBlue: "#2B6FD6",
+    blobTeal: "#14908F",
+    blobAmber: "#D9861C",
+  },
+  light: {
+    ink: "#0D131F",
     inkMuted: "#4A5562",
     inkSubtle: "#667085",
+    inkBody: "#1A2233",
     surface: "#FFFFFF",
-    surfaceMuted: "#F5F4FB",
-    surfaceSunken: "#EEEBF8",
-    border: "#DDD8EF",
-    borderStrong: "#C4BDE0",
-    danger: "#B42318",
-    dangerSoft: "#FEF3F2",
-    warning: "#B54708",
-    warningSoft: "#FFFAEB",
-    success: "#027A48",
-    successSoft: "#ECFDF3",
-    live: "#3274C0",
+    surfaceMuted: "#F2F5FA",
+    surfaceSunken: "#E8EDF5",
+    border: "rgba(13, 19, 31, 0.12)",
+    borderStrong: "rgba(13, 19, 31, 0.18)",
+    primary: "#2B6FD6",
+    primaryHover: "#245DB8",
+    primaryFg: "#FFFFFF",
+    primarySoft: "#E8F1FB",
+    brandSoft: "#E8F1FB",
   },
 } as const;
 
