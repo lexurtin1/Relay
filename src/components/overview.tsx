@@ -80,21 +80,21 @@ export function OverviewPageView(props: {
         </h1>
       </div>
 
-      <section
-        aria-label="Key metrics"
-        className="grid shrink-0 grid-cols-2 gap-3 lg:grid-cols-4"
-      >
-        {kpis.map((kpi) => (
-          <article key={kpi.label} className="rl-sheet rl-sheet-elevated px-4 py-3.5">
-            <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--relay-ink-muted)]">
-              {kpi.label}
-            </p>
-            <p className="m-0 mt-1.5 text-[28px] font-semibold leading-none tracking-[-0.03em] tabular text-[var(--relay-ink)]">
-              {kpi.value}
-            </p>
-            <p className="m-0 mt-1.5 text-[12px] text-[var(--relay-ink-subtle)]">{kpi.hint}</p>
-          </article>
-        ))}
+      <section aria-label="Key metrics" className="rl-kpi-stage shrink-0">
+        <div className="rl-kpi-wash" aria-hidden />
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {kpis.map((kpi) => (
+            <article key={kpi.label} className="rl-sheet rl-sheet-elevated px-4 py-3.5">
+              <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--relay-ink-muted)]">
+                {kpi.label}
+              </p>
+              <p className="m-0 mt-1.5 text-[28px] font-semibold leading-none tracking-[-0.03em] tabular text-[var(--relay-ink)]">
+                {kpi.value}
+              </p>
+              <p className="m-0 mt-1.5 text-[12px] text-[var(--relay-ink-subtle)]">{kpi.hint}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)]">

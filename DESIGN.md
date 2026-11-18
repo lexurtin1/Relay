@@ -8,7 +8,7 @@ Operate
 
 ## World
 
-Light-first Calastone agent workspace. Pale ground, white elevated sheets with soft shadows, slim header, and a left sidebar. Subtle atmosphere blobs and teal-to-blue wireframe polyhedra stay low-opacity so status and actions lead. Dark theme remains a composed alternate via the theme toggle.
+Light-first Calastone agent workspace. Pale ground with soft teal/blue washes, white elevated sheets with soft shadows, slim header, and a left sidebar. Teal-to-blue wireframe polyhedra and blue/teal/green atmosphere blobs stay subordinate so status and actions lead. Overview KPI row sits on a soft green-to-ink light gradient. Dark theme remains a composed alternate via the theme toggle.
 
 ## Surfaces
 
@@ -18,7 +18,7 @@ Light-first Calastone agent workspace. Pale ground, white elevated sheets with s
 - Ideas board: four status columns with colour-strip cards, workstream legend, composer honouring `?draft=` from Overview.
 - Research activity: calm Orbit-inspired feed (user ask bubble, numbered steps, connector disclosures, live Tools line, Ask anything composer). Keep Calastone light theme; no Orbit purple.
 - Hand off to Runner modal: title, workspace subtitle, optional context, compact model and profile selectors, Cancel + Hand off.
-- Atmosphere: soft blue / teal / amber blobs plus slow-rotating Calastone wireframe icosahedra at low opacity (especially on light).
+- Atmosphere: soft blue / teal / green blobs plus slow-rotating Calastone wireframe icosahedra in teal-to-blue strokes. Overview KPI band uses a soft green + ink light wash behind the metric sheets.
 
 ## Tokens
 
@@ -27,6 +27,7 @@ Source of truth: `theme/brand.ts` and `src/app/globals.css` (`data-theme="light"
 - Ground light `#F2F5FA`, sheets `#FFFFFF` with soft elevation shadow, ink `#0D131F` / muted `#4A5562` / body `#1A2233`.
 - Dark alternate: ground `#060A12`, sheets `#0D131F`, ink `#F2F5FA`.
 - Calastone blues `#2B6FD6` / `#3F82E0` / `#8DBBFA` for live states, links, and sidebar active fill. No SaaS purple.
+- Atmosphere primitives: wire teal `#0F766E` → wire blue `#1D4ED8`; blobs blue / teal `#0D9488` / green `#059669`; Overview KPI wash green → ink `#0D131F` on light.
 - Primary actions: blue fill on light; light fill on dark.
 - Status: amber needs-you, green done, red failed. Timeline: person `#DDE4EF`, agent `#3F82E0`, waiting hatch amber.
 - Strategy workstream palette (linked tickets inherit): Context `#2B6FD6`, Rail `#0D9488`, Trust `#D97706`, Collective `#059669`, Standards `#475569`, unlinked neutral `#94A3B8`.
