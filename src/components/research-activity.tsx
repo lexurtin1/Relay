@@ -39,7 +39,7 @@ export function ResearchActivity(props: {
   };
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(260px,1fr)]" data-tour="research">
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(260px,1fr)]">
       <section className="rl-sheet flex flex-col gap-4 p-5" aria-labelledby="rl-research-h">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>

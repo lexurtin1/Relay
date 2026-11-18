@@ -13,10 +13,10 @@ import { cn } from "@/lib/utils";
 import { WORKSTREAM_COLOURS } from "@relay/core/domain";
 
 const COLUMNS: Array<{ key: IdeaBoardItem["status"]; label: string; hint: string }> = [
-  { key: "new", label: "New", hint: "Logged by anyone" },
-  { key: "triaged", label: "Triaged", hint: "Worth a closer look" },
+  { key: "new", label: "New", hint: "Not reviewed" },
+  { key: "triaged", label: "Triaged", hint: "Reviewed, decision pending" },
   { key: "promoted", label: "Promoted", hint: "Linked to a workstream" },
-  { key: "parked", label: "Parked", hint: "Not now, with a reason" },
+  { key: "parked", label: "Parked", hint: "Not planned" },
 ];
 
 export function IdeasBoard(props: {
@@ -76,9 +76,9 @@ export function IdeasBoard(props: {
     <div className="flex flex-col gap-5">
       <PageHero
         id="ideas"
-        eyebrow="Strategy intake"
-        title="Where work starts: friction and signals, triaged in the open"
-        purpose="Anyone logs an idea. Leads and architects triage it, park it with a reason, or promote it into a workstream that Scout can start researching straight away."
+        eyebrow="Ideas"
+        title="Idea intake"
+        purpose="Log internal friction or external signals. Leads and architects review each idea and either park it or promote it into a new or existing workstream."
         stats={[
           { label: "New", value: count("new"), tone: count("new") > 0 ? "waiting" : "default" },
           { label: "Triaged", value: count("triaged") },

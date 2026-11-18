@@ -81,7 +81,7 @@ export type ActionGate = {
 };
 
 export type NextMove = {
-  /** Who holds the baton right now. */
+  /** Who is responsible for the current step. */
   holder: { kind: "agent" | "person"; name: string; detail: string };
   headline: string;
   body: string;

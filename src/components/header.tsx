@@ -59,9 +59,8 @@ export function Header(props: {
     ? [
         {
           type: "section" as const,
-          title: "Presenter",
+          title: "Demo",
           items: [
-            { label: "Take the guided tour", onClick: () => actions.setTour({ active: true, step: 0 }) },
             {
               label: demo.speed > 1 ? "Agents at normal speed" : "Agents at 4x speed",
               description: "How fast Scout, the Planner and the Runner move",
@@ -89,7 +88,7 @@ export function Header(props: {
             aria-hidden
           />
           <span className="tabular">
-            {agents > 0 ? `${agents} agent${agents === 1 ? "" : "s"} working` : "Agents idle"}
+            {agents > 0 ? `${agents} agent${agents === 1 ? "" : "s"} running` : "Agents idle"}
           </span>
           {props.mockMode ? <span className="hidden text-[var(--relay-ink-muted)] lg:inline">· Mock data</span> : null}
         </div>

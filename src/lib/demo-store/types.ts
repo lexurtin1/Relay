@@ -203,8 +203,6 @@ export type AuditEntry = {
   detail: string;
 };
 
-export type TourState = { active: boolean; step: number; wsId?: string | null };
-
 export type DemoState = {
   schemaVersion: number;
   seededAt: number;
@@ -218,8 +216,6 @@ export type DemoState = {
   audit: AuditEntry[];
   ui: {
     heroCollapsed: Record<string, boolean>;
-    tour: TourState | null;
-    tourPromptDismissed: boolean;
   };
 };
 

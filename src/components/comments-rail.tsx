@@ -59,7 +59,7 @@ export function CommentsRail(props: {
   };
 
   return (
-    <section className="rl-sheet flex flex-col gap-3 p-4" aria-labelledby="comments-h" data-tour="comments">
+    <section className="rl-sheet flex flex-col gap-3 p-4" aria-labelledby="comments-h">
       <div className="flex items-baseline justify-between gap-2">
         <h2 id="comments-h" className="m-0 text-[15px] font-medium text-[var(--relay-ink)]">
           Review comments

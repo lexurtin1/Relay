@@ -64,7 +64,7 @@ export function ActionBar(props: {
 
   return (
     <TooltipProvider>
-      <div className="rl-glass sticky bottom-4 z-20 mx-auto mt-2 flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-3 rounded-[22px] p-3.5" data-tour="action-bar">
+      <div className="rl-glass sticky bottom-4 z-20 mx-auto mt-2 flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-3 rounded-[22px] p-3.5">
         <p className="m-0 min-w-0 flex-1 text-[13px] text-[var(--relay-ink-body)]">
           {props.status}
           {blocked?.switchTo ? (

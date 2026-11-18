@@ -7,11 +7,11 @@ import { createWorkstream } from "@/app/actions";
 import { useRelayActions } from "@/lib/demo-store/provider";
 
 const NEXT = [
-  { icon: Search, title: "Scout researches", body: "Reads Jira, Confluence, Datadog and GitHub, read only, and writes findings." },
-  { icon: ListChecks, title: "The Planner drafts", body: "Turns findings into ordered steps with files, tests and risk." },
-  { icon: UserCheck, title: "People review", body: "Teammates comment; an architect or lead approves." },
-  { icon: Hammer, title: "The Runner builds", body: "Works in an isolated workspace and pauses to ask you." },
-  { icon: GitPullRequest, title: "You merge", body: "Checks pass, you merge, Metrics and Audit update." },
+  { icon: Search, title: "Research", body: "Scout reads Jira, Confluence, Datadog and GitHub (read only) and writes findings." },
+  { icon: ListChecks, title: "Plan", body: "The Planner turns findings into ordered steps with files, tests and risk." },
+  { icon: UserCheck, title: "Review", body: "Teammates comment. An architect or lead approves." },
+  { icon: Hammer, title: "Build", body: "The Runner works in an isolated workspace and asks the owner when a decision is needed." },
+  { icon: GitPullRequest, title: "Pull request", body: "After checks pass, the owner merges. Metrics and Audit update." },
 ];
 
 export function NewWorkstreamForm(props: { ownerId: string; defaultTitle: string }) {
@@ -84,9 +84,9 @@ export function NewWorkstreamForm(props: { ownerId: string; defaultTitle: string
 
       <aside className="rl-sheet flex flex-col gap-4 p-6" aria-labelledby="next-h">
         <div>
-          <p className="rl-eyebrow">What happens next</p>
+          <p className="rl-eyebrow">Process</p>
           <h2 id="next-h" className="m-0 mt-1 text-[17px] font-medium text-[var(--relay-ink)]">
-            The relay, leg by leg
+            Stages after creation
           </h2>
         </div>
         <ol className="m-0 flex list-none flex-col gap-3 p-0">

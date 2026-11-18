@@ -3,7 +3,7 @@
 import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FilePlus2, Play, RotateCcw, Search, ShieldCheck } from "lucide-react";
+import { FilePlus2, RotateCcw, Search, ShieldCheck } from "lucide-react";
 import type { WorkstreamStage } from "@relay/core/domain";
 import { stageLabel } from "@relay/core/domain";
 import { useDemo, useRelayActions } from "@/lib/demo-store/provider";
@@ -78,17 +78,6 @@ export function CommandPalette(props: { workstreams: CommandWorkstream[] }) {
             </Command.Item>
             {actions.mode === "demo" ? (
               <>
-                <Command.Item
-                  value="take the guided tour demo"
-                  onSelect={() => {
-                    setOpen(false);
-                    actions.setTour({ active: true, step: 0 });
-                  }}
-                  className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-2 text-[var(--relay-ink)] aria-selected:bg-[var(--relay-surface-sunken)]"
-                >
-                  <Play className="h-4 w-4 text-[var(--relay-primary)]" aria-hidden />
-                  <span>Take the guided tour</span>
-                </Command.Item>
                 <Command.Item
                   value="open audit log"
                   onSelect={() => {

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const STATUS_LABEL: Record<RunnerView["status"], string> = {
   provisioning: "Creating workspace",
   running: "Building",
-  awaiting_input: "Paused for you",
+  awaiting_input: "Waiting for input",
   pr_open: "Pull request open",
   merged: "Merged",
 };
@@ -67,7 +67,7 @@ export function RunnerConsole(props: {
   };
 
   return (
-    <div className="flex flex-col gap-4" data-tour="runner">
+    <div className="flex flex-col gap-4">
       <section className="rl-sheet rl-sheet-elevated flex flex-col gap-4 p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -133,12 +133,11 @@ export function RunnerConsole(props: {
         <section
           className="rl-sheet flex flex-col gap-3 border-[color-mix(in_srgb,var(--relay-warning)_40%,transparent)] p-5"
           aria-labelledby="runner-q"
-          data-tour="question"
         >
           <div className="flex items-center gap-2">
             <MessageCircleQuestion className="h-5 w-5 text-[var(--relay-warning)]" aria-hidden />
             <h3 id="runner-q" className="m-0 text-[16px] font-medium text-[var(--relay-ink)]">
-              The Runner is waiting on you
+              Runner question
             </h3>
           </div>
           <p className="m-0 text-[15px] text-[var(--relay-ink)]">{question.text}</p>
@@ -172,7 +171,7 @@ export function RunnerConsole(props: {
       ) : null}
 
       {r.pr ? (
-        <section className="rl-sheet flex flex-wrap items-center justify-between gap-3 p-5" aria-label="Pull request" data-tour="pr">
+        <section className="rl-sheet flex flex-wrap items-center justify-between gap-3 p-5" aria-label="Pull request">
           <div className="flex items-center gap-3">
             <GitPullRequest className="h-6 w-6" style={{ color: props.color }} aria-hidden />
             <div>

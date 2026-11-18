@@ -55,8 +55,6 @@ export type DemoAction =
   | { type: "PROMOTE_IDEA"; id: string; workstreamId: string | null; newWorkstreamId: string }
   | { type: "SET_SPEED"; speed: number }
   | { type: "SET_HERO"; page: string; collapsed: boolean }
-  | { type: "SET_TOUR"; tour: DemoState["ui"]["tour"] }
-  | { type: "DISMISS_TOUR_PROMPT" }
   | { type: "TICK" }
   | { type: "RESET"; seed: DemoState };
 
@@ -238,12 +236,6 @@ export function reduce(state: DemoState, action: DemoAction, now: number): DemoS
 
     case "SET_HERO":
       return { ...state, ui: { ...state.ui, heroCollapsed: { ...state.ui.heroCollapsed, [action.page]: action.collapsed } } };
-
-    case "SET_TOUR":
-      return { ...state, ui: { ...state.ui, tour: action.tour, tourPromptDismissed: true } };
-
-    case "DISMISS_TOUR_PROMPT":
-      return { ...state, ui: { ...state.ui, tourPromptDismissed: true } };
 
     case "SWITCH_USER": {
       const target = state.users.find((u) => u.id === action.userId);

@@ -493,6 +493,6 @@ export function buildDemoSeed(now: number): DemoState {
     order,
     ideas,
     audit: rows,
-    ui: { heroCollapsed: {}, tour: null, tourPromptDismissed: false },
+    ui: { heroCollapsed: {} },
   };
 }

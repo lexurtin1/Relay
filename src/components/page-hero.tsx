@@ -15,7 +15,7 @@ export type HeroStat = {
 
 /**
  * Compact operational hero: what this page is for, the live numbers that
- * matter, and the next move. Collapses to a one-line strip; the choice is
+ * matter, and the primary action. Collapses to a one-line strip; the choice is
  * remembered per page in the demo store.
  */
 export function PageHero(props: {

@@ -142,7 +142,7 @@ describe("full relay journey", () => {
     for (const expected of ["workstream_created", "model_call", "request_review", "comment", "revise", "approval", "hand_off", "question_answered", "merge"]) {
       expect(actions).toContain(expected);
     }
-    expect(selectDetail(s, "ws-test")?.nextMove.headline).toBe("Shipped");
+    expect(selectDetail(s, "ws-test")?.nextMove.headline).toBe("Merged");
   });
 });
 

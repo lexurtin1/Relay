@@ -47,7 +47,7 @@ export function WorkstreamDetail(props: { model: WorkstreamDetailModel }) {
   const [hover, setHover] = useState<string | null>(null);
   const lastStage = useRef(m.stage);
 
-  // Follow the baton: when the stage moves, open the tab where the work now is.
+  // When the stage changes, open the tab for the new stage.
   useEffect(() => {
     if (lastStage.current !== m.stage) {
       lastStage.current = m.stage;
@@ -128,9 +128,8 @@ export function WorkstreamDetail(props: { model: WorkstreamDetailModel }) {
         <aside
           className="flex flex-col gap-3 rounded-[18px] border border-[var(--relay-border)] bg-[var(--relay-surface)] p-5 shadow-[var(--relay-sheet-shadow)]"
           aria-labelledby="next-move-h"
-          data-tour="next-move"
         >
-          <p className="rl-eyebrow">Next move</p>
+          <p className="rl-eyebrow">Next step</p>
           <div className="flex items-center gap-3">
             {m.nextMove.holder.kind === "agent" ? (
               <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--relay-brand-soft)] text-[var(--relay-brand-fg)]">
@@ -174,7 +173,7 @@ export function WorkstreamDetail(props: { model: WorkstreamDetailModel }) {
           ) : m.nextMove.holder.kind === "agent" ? (
             <p className="m-0 inline-flex items-center gap-1.5 text-[12.5px] text-[var(--relay-brand-fg)]">
               <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
-              Nothing for you to do yet. This updates live.
+              No action needed. This updates automatically.
             </p>
           ) : null}
         </aside>
@@ -227,7 +226,7 @@ export function WorkstreamDetail(props: { model: WorkstreamDetailModel }) {
               <PlanSkeleton kind={m.planDrafting} />
             ) : m.plan ? (
               <div className="grid gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,1fr)]">
-                <section className="rl-sheet flex flex-col gap-4 p-6" aria-labelledby="plan-heading" data-tour="plan">
+                <section className="rl-sheet flex flex-col gap-4 p-6" aria-labelledby="plan-heading">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <h2 id="plan-heading" className="m-0 text-[18px] font-medium text-[var(--relay-ink)]">
@@ -358,9 +357,9 @@ function ActivityPanel(props: { model: WorkstreamDetailModel }) {
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(260px,1fr)]">
       <section className="rl-sheet p-5" aria-labelledby="activity-h">
         <h2 id="activity-h" className="m-0 text-[16px] font-medium text-[var(--relay-ink)]">
-          Everything that happened
+          Activity history
         </h2>
-        <p className="m-0 mt-1 text-[13px] text-[var(--relay-ink-muted)]">Agents and people, newest first. The same entries appear in Audit.</p>
+        <p className="m-0 mt-1 text-[13px] text-[var(--relay-ink-muted)]">Agent and person actions, newest first. The same entries appear in Audit.</p>
         <ol className="m-0 mt-4 flex list-none flex-col gap-3 p-0">
           {m.history.length === 0 ? <li className="text-sm text-[var(--relay-ink-muted)]">No activity yet.</li> : null}
           {m.history.map((item) => (

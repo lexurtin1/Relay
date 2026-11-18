@@ -11,7 +11,6 @@ import { Atmosphere } from "@/components/atmosphere";
 import { CalastoneWireframes } from "@/components/calastone-wireframes";
 import { ThemeProvider, themeBootScript } from "@/components/theme-provider";
 import { AstryxProviders } from "@/components/providers";
-import { TourCoach } from "@/components/tour/tour-coach";
 import { getAppName, isMockMode } from "@/lib/config";
 import { isDemoMode } from "@/lib/db";
 import { DemoStoreProvider } from "@/lib/demo-store/provider";
@@ -86,7 +85,6 @@ export default async function RootLayout({
           }))}
         />
       ) : null}
-      {demo ? <TourCoach /> : null}
       <Toaster
         position="bottom-right"
         toastOptions={{

@@ -135,8 +135,6 @@ export type RelayActions = {
   setIdeaStatus: (id: string, status: IdeaStatus) => void;
   promoteIdea: (id: string, workstreamId: string | null) => string | null;
   setHero: (page: string, collapsed: boolean) => void;
-  setTour: (tour: DemoState["ui"]["tour"]) => void;
-  dismissTourPrompt: () => void;
   setSpeed: (speed: number) => void;
   reset: () => Promise<void>;
 };
@@ -205,8 +203,6 @@ export function useRelayActions(): RelayActions {
         setIdeaStatus: () => run({ type: "TICK" }),
         promoteIdea: () => (toast.info(DB_ONLY), null),
         setHero: () => {},
-        setTour: () => toast.info(DB_ONLY),
-        dismissTourPrompt: () => {},
         setSpeed: () => {},
         reset: async () => {},
       };
@@ -247,8 +243,6 @@ export function useRelayActions(): RelayActions {
         return ok ? (workstreamId ?? newWorkstreamId) : null;
       },
       setHero: (page, collapsed) => void run({ type: "SET_HERO", page, collapsed }),
-      setTour: (tour) => void run({ type: "SET_TOUR", tour }),
-      dismissTourPrompt: () => void run({ type: "DISMISS_TOUR_PROMPT" }),
       setSpeed: (speed) => void run({ type: "SET_SPEED", speed }),
       reset: async () => {
         try {

@@ -68,12 +68,12 @@ export function WorkstreamsList(props: { rows: WorkstreamRowRow[]; stageCounts: 
       <PageHero
         id="workstreams"
         eyebrow="Workstreams"
-        title="Every piece of work, and who holds the baton"
-        purpose="Each workstream runs Research, Plan, Review, Build and Pull request. Agents carry the routine legs; people decide at review, at questions and at merge."
+        title="All workstreams"
+        purpose="Workstreams grouped by stage. Agents run research, planning and build. People review and approve plans, answer Runner questions and merge pull requests."
         stats={[
           { label: "Active", value: props.rows.filter((r) => r.stage !== "merged" && r.stage !== "killed").length },
-          { label: "Waiting on a person", value: props.rows.filter((r) => r.progressTone === "waiting").length, tone: props.rows.filter((r) => r.progressTone === "waiting").length > 0 ? "waiting" : "default" },
-          { label: "Agents working", value: props.agentsActive, tone: props.agentsActive > 0 ? "live" : "default" },
+          { label: "Waiting for input", value: props.rows.filter((r) => r.progressTone === "waiting").length, tone: props.rows.filter((r) => r.progressTone === "waiting").length > 0 ? "waiting" : "default" },
+          { label: "Agents running", value: props.agentsActive, tone: props.agentsActive > 0 ? "live" : "default" },
           { label: "Merged", value: props.rows.filter((r) => r.stage === "merged").length },
         ]}
         actions={

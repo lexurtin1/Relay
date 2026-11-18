@@ -577,7 +577,7 @@ h2 {
 }
 
 /* ------------------------------------------------------------------ Heroes
-   Compact operational heroes: one purpose line, live numbers, one next move.
+   Page headers: one purpose line, live numbers, one primary action.
    Status colour stays on status; the hero itself uses Calastone blue and teal. */
 
 .rl-hero {
@@ -637,7 +637,7 @@ h2 {
   background: linear-gradient(90deg, var(--relay-border-strong), color-mix(in srgb, var(--relay-brand) 45%, var(--relay-border-strong)), var(--relay-border-strong));
 }
 
-.rl-pipeline-baton {
+.rl-pipeline-marker {
   position: absolute;
   top: -4px;
   width: 10px;
@@ -646,10 +646,10 @@ h2 {
   border-radius: 999px;
   background: var(--relay-brand);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--relay-brand) 22%, transparent), 0 0 18px var(--relay-brand);
-  animation: rl-baton 6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  animation: rl-marker 6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
-@keyframes rl-baton {
+@keyframes rl-marker {
   0% { left: 0%; opacity: 0; }
   6% { opacity: 1; }
   94% { opacity: 1; }
@@ -733,23 +733,13 @@ h2 {
   animation: rl-pulse 1s steps(1) infinite;
 }
 
-/* ------------------------------------------------------------------ Tour */
-
-.rl-tour-target {
-  outline: 2px solid var(--relay-brand);
-  outline-offset: 4px;
-  border-radius: 14px;
-  box-shadow: 0 0 0 8px color-mix(in srgb, var(--relay-brand) 14%, transparent);
-  transition: outline-color 150ms var(--relay-ease), box-shadow 150ms var(--relay-ease);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .rl-pipeline-baton,
+  .rl-pipeline-marker,
   .rl-pipeline-icon[data-live="true"]::after,
   .rl-caret::after {
     animation: none !important;
   }
-  .rl-pipeline-baton {
+  .rl-pipeline-marker {
     display: none;
   }
 }

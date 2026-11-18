@@ -262,7 +262,7 @@ function nextMoveFor(state: DemoState, ws: Workstream): NextMove {
   if (ws.runner?.question && !ws.runner.question.answer) {
     return {
       holder: ownerHolder,
-      headline: "The Runner needs a decision",
+      headline: "Runner question needs an answer",
       body: ws.runner.question.text,
       primary: "answer_question",
     };
@@ -278,8 +278,8 @@ function nextMoveFor(state: DemoState, ws: Workstream): NextMove {
   if (ws.research.status === "running") {
     return {
       holder: { kind: "agent", name: "Scout", detail: "Researching" },
-      headline: "Scout is reading company sources",
-      body: "Jira, Confluence, Datadog and GitHub, read only. Findings appear as each source is read.",
+      headline: "Scout is researching",
+      body: "Reading Jira, Confluence, Datadog and GitHub (read only). Each source appears below as it is read.",
       primary: null,
     };
   }
@@ -287,35 +287,35 @@ function nextMoveFor(state: DemoState, ws: Workstream): NextMove {
     const { completed, total } = stepsDone(ws);
     return {
       holder: { kind: "agent", name: "Runner", detail: `Step ${Math.min(completed + 1, total)} of ${total}` },
-      headline: "The Runner is building in an isolated workspace",
-      body: `Working on ${ws.runner.branch}. It will pause here if it needs you.`,
+      headline: "Runner is building",
+      body: `Working on ${ws.runner.branch} in an isolated workspace. If it needs a decision, the question appears here.`,
       primary: null,
     };
   }
   if (ws.runner?.status === "pr_open") {
     return ws.runner.pr?.checks === "passed"
-      ? { holder: ownerHolder, headline: "Ready to merge", body: `Pull request #${ws.runner.pr.number} passed every check.`, primary: "merge_pr" }
+      ? { holder: ownerHolder, headline: "Ready to merge", body: `Pull request #${ws.runner.pr.number} passed all checks.`, primary: "merge_pr" }
       : { holder: { kind: "agent", name: "CI", detail: "Checks running" }, headline: "Checks are running", body: "Lint, unit and contract tests run on the pull request.", primary: null };
   }
   if (ws.stage === "merged") {
-    return { holder: ownerHolder, headline: "Shipped", body: "Merged. Cycle time and token use now show in Metrics.", primary: null };
+    return { holder: ownerHolder, headline: "Merged", body: "The pull request is merged. Cycle time and token use are included in Metrics.", primary: null };
   }
   if (plan?.status === "approved") {
-    return { holder: ownerHolder, headline: "Approved. Hand it to the Runner", body: "The Runner builds the approved plan in an isolated workspace with no production data.", primary: "hand_off" };
+    return { holder: ownerHolder, headline: "Plan approved", body: "Hand the plan to the Runner. It builds in an isolated workspace with no production data.", primary: "hand_off" };
   }
   if (plan?.status === "in_review") {
     const open = openComments(plan);
     return open > 0
-      ? { holder: ownerHolder, headline: `${open} comment${open === 1 ? "" : "s"} to address`, body: "Resolve each comment or let the Planner revise the plan from them.", primary: "revise_plan" }
+      ? { holder: ownerHolder, headline: `${open} comment${open === 1 ? "" : "s"} to address`, body: "Resolve each comment, or ask the Planner to revise the plan using them.", primary: "revise_plan" }
       : { holder: { kind: "person", name: "Architect", detail: "Approval" }, headline: "Waiting for approval", body: "An architect or lead approves the plan before any code is written.", primary: "approve_plan" };
   }
   if (plan?.status === "draft") {
-    return { holder: ownerHolder, headline: "Draft plan ready", body: "Read it, then send it for review so teammates can comment.", primary: "request_review" };
+    return { holder: ownerHolder, headline: "Draft plan ready", body: "Review the draft, then request review so teammates can comment.", primary: "request_review" };
   }
   if (ws.research.status === "succeeded") {
-    return { holder: ownerHolder, headline: "Findings are ready", body: "Ask the Planner to turn them into a plan.", primary: "generate_plan" };
+    return { holder: ownerHolder, headline: "Research complete", body: "Generate a plan from the findings.", primary: "generate_plan" };
   }
-  return { holder: ownerHolder, headline: "Start with research", body: "Scout reads the same company sources as the chatbot and reports back.", primary: "start_research" };
+  return { holder: ownerHolder, headline: "Research not started", body: "Scout reads the same company sources as the chatbot and writes findings.", primary: "start_research" };
 }
 
 const VERBS: ActionVerb[] = [

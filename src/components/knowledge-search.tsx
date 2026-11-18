@@ -67,8 +67,8 @@ export function KnowledgeSearch(props: {
       <PageHero
         id="knowledge"
         eyebrow="Knowledge"
-        title="Search what Scout reads"
-        purpose="The same read-only company sources Scout and the chatbot use: Salesforce, Jira, Confluence, Databricks, Datadog, GitHub and Power BI. Mock mode serves fictional Calastone demo documents."
+        title="Knowledge search"
+        purpose="Read-only search across the sources Scout and the chatbot use: Salesforce, Jira, Confluence, Databricks, Datadog, GitHub and Power BI. Mock mode returns fictional demo documents."
         stats={[
           { label: "Connectors ready", value: `${props.health.filter((h) => h.ok).length} of ${props.health.length}` },
           { label: "Mode", value: props.health[0]?.mode ?? "mock" },

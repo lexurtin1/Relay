@@ -159,8 +159,8 @@ export function AuditView(props: { rows: AuditRow[] | null }) {
       <PageHero
         id="audit"
         eyebrow="Audit"
-        title="Every approval, hand-off and model call, on the record"
-        purpose="Agents and people write to the same log. Filter it, follow a workstream end to end, or export it for compliance review."
+        title="Audit log"
+        purpose="Approvals, hand-offs, answers, comments and model calls, with the person or agent responsible. Filter by action, actor or workstream, or export as CSV."
         stats={[
           { label: "Events", value: all.length },
           { label: "Approvals", value: count("approval") },
@@ -177,7 +177,7 @@ export function AuditView(props: { rows: AuditRow[] | null }) {
 
       {props.rows === null ? (
         <div className="rl-sheet p-8">
-          <EmptyState title="Audit rows arrive with the worker" description="In database mode the audit table fills once actions write AuditLog rows. The demo records every action today." />
+          <EmptyState title="Audit rows need the worker" description="In database mode the audit table fills once actions write AuditLog rows. The demo records every action today." />
         </div>
       ) : (
         <section className="rl-sheet rl-sheet-elevated flex flex-col gap-3 p-4" aria-label="Audit log">

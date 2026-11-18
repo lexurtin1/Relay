@@ -12,7 +12,7 @@ import type { MetricsModel } from "@/lib/demo-store/selectors";
 const SERIES = [
   { key: "agent", label: "Agent working", color: "var(--relay-chart-agent)" },
   { key: "person", label: "Person working", color: "var(--relay-chart-person)" },
-  { key: "waiting", label: "Waiting on a person", color: "var(--relay-chart-waiting)" },
+  { key: "waiting", label: "Waiting for input", color: "var(--relay-chart-waiting)" },
 ];
 
 const days = (v: number) => (v < 1 ? `${Math.round(v * 24)}h` : `${v.toFixed(1)}d`);
@@ -26,14 +26,14 @@ export function MetricsView(props: { metrics: MetricsModel | null }) {
       <PageHero
         id="metrics"
         eyebrow="Metrics"
-        title="How fast work moves, and who carries it"
-        purpose="Cycle time from problem to merge, the share of time agents carry versus people, and model use through the AI Gateway. Every number comes from the same events as the audit log."
+        title="Delivery metrics"
+        purpose="Cycle time from workstream creation to merge, time split between agents and people, and model token use through the AI Gateway. Calculated from audit log events."
         stats={
           m
             ? [
                 { label: "Merged", value: m.totals.merged },
                 { label: "Median cycle time", value: m.totals.medianCycleDays === null ? "None" : days(m.totals.medianCycleDays) },
-                { label: "Time carried by agents", value: `${Math.round(m.totals.agentShare * 100)}%`, tone: "live" },
+                { label: "Agent share of time", value: `${Math.round(m.totals.agentShare * 100)}%`, tone: "live" },
                 { label: "Tokens this week", value: compact(m.totals.tokensWeek) },
               ]
             : []
@@ -48,7 +48,7 @@ export function MetricsView(props: { metrics: MetricsModel | null }) {
       {!m ? (
         <div className="rl-sheet p-8">
           <EmptyState
-            title="Metrics arrive with the worker"
+            title="Metrics need the worker"
             description="In database mode these charts need agent events from the worker (Milestone 6). The demo shows them from browser data today."
           />
         </div>
@@ -64,8 +64,8 @@ export function MetricsView(props: { metrics: MetricsModel | null }) {
             </ChartFrame>
 
             <ChartFrame
-              title="Who carried the work"
-              subtitle="Hours by workstream, split by who held the baton"
+              title="Time by actor"
+              subtitle="Hours per workstream: agent running, person working, waiting for input"
               legend={
                 <div className="flex flex-wrap gap-3">
                   {SERIES.map((s) => (
@@ -96,8 +96,8 @@ export function MetricsView(props: { metrics: MetricsModel | null }) {
 
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              { label: "Plans approved", value: m.totals.approvals, hint: "Every approval is in the audit log" },
-              { label: "Runner questions answered", value: m.totals.questionsAnswered, hint: "Times a person unblocked an agent" },
+              { label: "Plans approved", value: m.totals.approvals, hint: "Plan versions approved by an architect or lead" },
+              { label: "Runner questions answered", value: m.totals.questionsAnswered, hint: "Runner questions with an answer" },
               { label: "Agent share of elapsed time", value: `${Math.round(m.totals.agentShare * 100)}%`, hint: "Across the busiest eight workstreams" },
             ].map((t) => (
               <section key={t.label} className="rl-sheet p-5">

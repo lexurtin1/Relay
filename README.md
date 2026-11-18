@@ -4,11 +4,6 @@ White-labelled internal agent workspace for Calastone Innovation and Strategy. P
 
 ![Overview](docs/screenshots/relay-overview.png)
 
-## Try it in two minutes
-
-1. Run it (below) or open the Vercel deployment.
-2. On the Overview, select **Take the tour**. The coach card walks one problem all the way to a merged pull request, switching between the owner and the architect as needed. Each step has a "Do it for me" button.
-
 ## Demo mode (no database)
 
 When `DATABASE_URL` is empty (the Vercel case) or `RELAY_DEMO_FIXTURES=1`, Relay runs entirely in the browser:

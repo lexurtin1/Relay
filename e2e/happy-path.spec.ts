@@ -1,46 +1,57 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-test("guided tour takes a problem to a merged pull request", async ({ page }) => {
+/** Switch the acting user from the header menu. */
+async function actAs(page: Page, name: string) {
+  await page.getByRole("button", { name: /Switch user/ }).click();
+  await page.getByRole("menuitem", { name: new RegExp(name) }).click();
+  await expect(page.getByRole("button", { name: new RegExp(`Signed in as ${name}`) })).toBeVisible();
+}
+
+/** Click the first enabled button with this name, waiting for agents to finish. */
+async function press(page: Page, name: string, timeout = 30_000) {
+  const button = page.getByRole("button", { name, exact: true }).first();
+  await expect(button).toBeEnabled({ timeout });
+  await button.click();
+}
+
+test("a problem goes from creation to a merged pull request", async ({ page }) => {
   await page.goto("/?speed=20", { waitUntil: "networkidle" });
-  const coach = page.getByRole("complementary", { name: "Guided tour" });
-  // Retry until hydrated: a click before React attaches handlers is lost.
+
+  // Create from the Overview composer. Retry until hydrated: an early click is lost.
+  const input = page.getByLabel("Describe what you need");
   await expect(async () => {
-    await page.getByRole("button", { name: "Take the tour" }).click();
-    await expect(coach).toBeVisible({ timeout: 1_000 });
+    await input.fill("E2E: faster exception triage");
+    await page.getByRole("button", { name: "Start research", exact: true }).click();
+    await expect(page).toHaveURL(/\/workstreams\/ws-/, { timeout: 2_000 });
   }).toPass({ timeout: 20_000 });
-  const next = coach.getByRole("button", { name: "Next" });
 
-  const step = async (doLabel?: string) => {
-    if (doLabel) {
-      const doIt = coach.getByRole("button", { name: doLabel });
-      await expect(doIt).toBeEnabled({ timeout: 30_000 });
-      await doIt.click();
-    }
-    await expect(next).toBeEnabled({ timeout: 30_000 });
-    await next.click();
-  };
+  // Scout finishes on its own, then the owner generates and sends the plan.
+  await press(page, "Generate plan");
+  await press(page, "Request review");
 
-  await step(); // the relay
-  await step("Create the workstream");
-  await expect(page).toHaveURL(/\/workstreams\/ws-/);
-  const wsUrl = page.url();
-  await step(); // Scout finishes on its own
-  await step("Generate plan");
-  await step("Request review");
-  await step("Add Aisha's comment");
-  await step("Revise from comments");
-  await step("Approve as Aisha");
-  await step("Hand off");
-  await step("Answer: smallest safe change");
-  await step("Merge");
+  // Architect comments; approval stays blocked while the comment is open.
+  await actAs(page, "Aisha Rahman");
+  const review = page.getByRole("region", { name: "Review comments" });
+  await review.getByLabel("New comment").fill("Name the flag service and who owns it.");
+  await review.getByRole("button", { name: "Comment", exact: true }).click();
+  await expect(review.getByText("Name the flag service and who owns it.")).toBeVisible();
 
-  await expect(page).toHaveURL(/\/metrics/);
-  await step(); // metrics
-  await expect(page).toHaveURL(/\/audit/);
-  await coach.getByRole("button", { name: "Finish" }).click();
+  // Owner revises from the comment into version 2.
+  await actAs(page, "Alex Curtin");
+  await press(page, "Revise from comments");
+  await expect(page.getByRole("heading", { name: "Plan v2" })).toBeVisible({ timeout: 30_000 });
 
-  await page.goto(wsUrl);
-  await expect(page.getByRole("heading", { name: "Shipped" })).toBeVisible();
+  await actAs(page, "Aisha Rahman");
+  await press(page, "Approve plan");
+
+  await actAs(page, "Alex Curtin");
+  await press(page, "Hand off to Runner");
+  await page.getByRole("dialog").getByRole("button", { name: "Hand off", exact: true }).click();
+
+  // The Runner pauses with a question, then opens a PR once answered.
+  await press(page, "Smallest safe change");
+  await press(page, "Merge pull request");
+  await expect(page.getByRole("complementary", { name: "Merged" }).getByRole("heading", { name: "Merged" })).toBeVisible();
 
   await page.goto("/audit");
   const log = page.getByRole("region", { name: "Audit log" });

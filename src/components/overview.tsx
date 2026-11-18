@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { mapStageToStepper, type StepperStage } from "@relay/core/domain";
 import { ColourDot } from "@/components/colour-dot";
 import { PageHero } from "@/components/page-hero";
@@ -62,40 +62,28 @@ export function OverviewPageView(props: OverviewProps) {
   );
 
   return (
-    <div className="flex flex-col gap-4 pb-[8.5rem]">
+    <div className="flex flex-col gap-4 pb-24">
       <PageHero
         id="overview"
         eyebrow="Innovation and Strategy workspace"
-        title={`${props.appName} moves work from problem to merged pull request`}
+        title="Workstream overview"
         purpose={
           <>
-            Scout researches company sources, the Planner drafts a plan, teammates review and an
-            architect approves, then the Runner builds in an isolated workspace and asks when it
-            needs you. People only step in where judgement matters.
+            Each workstream goes through five stages: research (Scout), planning (Planner), review
+            and approval (people), build (Runner) and pull request (owner merges). This page shows
+            the stage of each workstream and the items that need your input.
           </>
         }
         stats={[
-          { label: "Need you", value: needsN, tone: needsN > 0 ? "waiting" : "default" },
-          { label: "Agents working", value: props.agentsActive, tone: props.agentsActive > 0 ? "live" : "default" },
+          { label: "Need your input", value: needsN, tone: needsN > 0 ? "waiting" : "default" },
+          { label: "Agents running", value: props.agentsActive, tone: props.agentsActive > 0 ? "live" : "default" },
           { label: "In review", value: props.stats.inReview },
           { label: "Merged this week", value: props.stats.mergedThisWeek },
         ]}
         actions={
-          <>
-            <button type="button" className="rl-btn-primary rl-btn-compact" onClick={() => composerRef.current?.focus()}>
-              Start work
-            </button>
-            {actions.mode === "demo" ? (
-              <button
-                type="button"
-                className="rl-btn-second rl-btn-compact inline-flex items-center gap-1.5"
-                onClick={() => actions.setTour({ active: true, step: 0 })}
-              >
-                <Play className="h-3.5 w-3.5" aria-hidden />
-                Take the tour
-              </button>
-            ) : null}
-          </>
+          <button type="button" className="rl-btn-primary rl-btn-compact" onClick={() => composerRef.current?.focus()}>
+            Start work
+          </button>
         }
         visual={<RelayPipeline counts={props.stageCounts} selected={stage} onSelect={setStage} />}
       />
@@ -150,14 +138,13 @@ function StartWorkComposer(props: { inputRef: React.RefObject<HTMLInputElement |
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 max-[900px]:pl-[calc(var(--relay-sidebar-rail)+12px)] min-[901px]:pl-[calc(var(--relay-sidebar-width)+16px)]">
       <section
         aria-labelledby="rl-start-h"
-        data-tour="composer"
-        className="rl-glass pointer-events-auto w-full max-w-[720px] rounded-[22px] p-3.5 shadow-[0_16px_48px_-18px_rgba(13,19,31,0.45)]"
+        className="rl-glass pointer-events-auto w-full max-w-[1100px] rounded-[18px] px-2.5 py-2 shadow-[0_16px_48px_-18px_rgba(13,19,31,0.45)]"
       >
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h2 id="rl-start-h" className="m-0 text-[14px] font-medium tracking-[-0.01em] text-[var(--relay-ink)]">
-            Start work
-          </h2>
-          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Type of work">
+        <h2 id="rl-start-h" className="sr-only">
+          Start work
+        </h2>
+        <form className="flex flex-wrap items-center gap-2" onSubmit={go}>
+          <div className="flex shrink-0 gap-1" role="group" aria-label="Type of work">
             {MODES.map((m) => (
               <button
                 key={m.id}
@@ -170,8 +157,6 @@ function StartWorkComposer(props: { inputRef: React.RefObject<HTMLInputElement |
               </button>
             ))}
           </div>
-        </div>
-        <form className="flex flex-wrap gap-2" onSubmit={go}>
           <label className="sr-only" htmlFor="rl-ask-in">
             Describe what you need
           </label>
@@ -199,7 +184,6 @@ function NeedsInputSection(props: { items: NeedsActionItem[] }) {
   return (
     <section
       aria-labelledby="rl-wait-h"
-      data-tour="needs"
       className="rl-sheet rl-sheet-elevated flex max-h-[640px] min-h-0 flex-col overflow-hidden"
     >
       <div className="flex shrink-0 items-baseline justify-between gap-2 border-b border-[var(--relay-border)] px-4 py-3">

@@ -15,7 +15,7 @@ export default async function NewWorkstreamPage({ searchParams }: { searchParams
       <div>
         <p className="rl-eyebrow">New workstream</p>
         <h1 className="m-0 mt-1 text-[clamp(26px,3vw,36px)] font-medium leading-[1.12] tracking-[-0.03em] text-[var(--relay-ink)]">
-          Describe the problem. Scout takes it from there.
+          Create a workstream
         </h1>
       </div>
       <NewWorkstreamForm ownerId={user.id} defaultTitle={params.title ?? ""} />
