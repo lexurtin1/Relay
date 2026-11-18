@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { handOffToRunner } from "@/app/actions/ideas";
-import { cn } from "@/lib/utils";
+import { Dialog, DialogHeader } from "@/components/ui/astryx";
+import { useRelayActions } from "@/lib/demo-store/provider";
 
 const MODELS = [
   { id: "claude-opus-5-5", label: "Claude Opus" },
@@ -11,148 +12,110 @@ const MODELS = [
 ];
 
 const PROFILES = [
-  { id: "default", label: "default" },
-  { id: "careful", label: "careful" },
-  { id: "fast", label: "fast" },
+  { id: "default", label: "Default", hint: "Pauses once if a step changes shared behaviour" },
+  { id: "careful", label: "Careful", hint: "Asks before every medium or high risk step" },
+  { id: "fast", label: "Fast", hint: "Only pauses when blocked" },
 ];
 
+/** Controlled hand-off dialog. The page decides when it opens. */
 export function HandOffModal(props: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   workstreamId: string;
   planId: string | null;
-  canHandOff: boolean;
-  handOffReason?: string;
+  planVersion: number | null;
+  stepsTotal: number;
   color?: string;
+  onDone?: () => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const actions = useRelayActions();
+  const [context, setContext] = useState("");
+  const [model, setModel] = useState(MODELS[0]!.id);
+  const [profile, setProfile] = useState(PROFILES[0]!.id);
 
-  if (!props.canHandOff) {
-    return (
-      <button
-        type="button"
-        disabled
-        title={props.handOffReason}
-        className="rl-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        Hand off to Runner
-      </button>
-    );
-  }
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (actions.mode === "demo") {
+      if (actions.handOff(props.workstreamId, { model, profile, context })) {
+        props.onOpenChange(false);
+        setContext("");
+        props.onDone?.();
+      }
+      return;
+    }
+    const fd = new FormData();
+    fd.set("workstreamId", props.workstreamId);
+    fd.set("planId", props.planId ?? "");
+    fd.set("additionalContext", context);
+    fd.set("modelId", model);
+    fd.set("profile", profile);
+    await handOffToRunner(fd);
+    props.onOpenChange(false);
+    props.onDone?.();
+  };
 
   return (
-    <>
-      <button
-        type="button"
-        className="rl-btn-primary"
-        onClick={() => setOpen(true)}
-        style={
-          props.color
-            ? { boxShadow: `0 8px 20px -12px ${props.color}` }
-            : undefined
-        }
-      >
-        Hand off to Runner
-      </button>
-      {open ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--relay-ink)_35%,transparent)] p-4"
-          role="presentation"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="handoff-title"
-            className="rl-sheet rl-sheet-elevated w-full max-w-[520px] p-5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2
-                  id="handoff-title"
-                  className="m-0 text-[18px] font-semibold tracking-[-0.02em] text-[var(--relay-ink)]"
-                >
-                  Hand off to Runner
-                </h2>
-                <p className="mt-1.5 text-[13.5px] text-[var(--relay-ink-muted)]">
-                  A new workspace for your Runner will be created.
-                </p>
-              </div>
-              <button
-                type="button"
-                className="rl-btn-second rl-btn-tiny"
-                onClick={() => setOpen(false)}
-                aria-label="Close"
-              >
-                Close
-              </button>
-            </div>
-
-            <form
-              action={async (fd) => {
-                await handOffToRunner(fd);
-                setOpen(false);
-              }}
-              className="mt-4 flex flex-col gap-3"
-            >
-              <input type="hidden" name="workstreamId" value={props.workstreamId} />
-              <input type="hidden" name="planId" value={props.planId ?? ""} />
-              <label className="sr-only" htmlFor="handoff-context">
-                Additional context
-              </label>
-              <textarea
-                id="handoff-context"
-                name="additionalContext"
-                className="rl-input min-h-[120px] py-3"
-                placeholder="Add additional context (optional)"
-              />
-              <div className="flex flex-wrap gap-2">
-                <select
-                  name="modelId"
-                  className="rl-input rl-input-compact max-w-[200px] text-[13px]"
-                  defaultValue={MODELS[0]!.id}
-                >
-                  {MODELS.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.label}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  name="profile"
-                  className="rl-input rl-input-compact max-w-[160px] text-[13px]"
-                  defaultValue={PROFILES[0]!.id}
-                >
-                  {PROFILES.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="mt-1 flex justify-end gap-2">
-                <button
-                  type="button"
-                  className="rl-btn-second"
-                  onClick={() => setOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className={cn("rl-btn-primary")}
-                  style={
-                    props.color
-                      ? { background: props.color, borderColor: props.color }
-                      : undefined
-                  }
-                >
-                  Hand off
-                </button>
-              </div>
-            </form>
-          </div>
+    <Dialog isOpen={props.open} onOpenChange={props.onOpenChange} purpose="form" width={540}>
+      <DialogHeader
+        title="Hand off to the Runner"
+        subtitle={`Plan v${props.planVersion ?? 1}, ${props.stepsTotal} steps. The Runner gets its own workspace with no production data.`}
+        onOpenChange={props.onOpenChange}
+      />
+      <form onSubmit={submit} className="flex flex-col gap-4 p-5">
+        <div>
+          <label htmlFor="handoff-context" className="mb-1.5 block text-[13px] font-medium text-[var(--relay-ink)]">
+            Extra context <span className="font-normal text-[var(--relay-ink-muted)]">(optional)</span>
+          </label>
+          <textarea
+            id="handoff-context"
+            value={context}
+            onChange={(e) => setContext(e.target.value)}
+            className="rl-input min-h-[96px] w-full py-3"
+            placeholder="Anything the plan does not say, for example a test account to use"
+          />
         </div>
-      ) : null}
-    </>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label htmlFor="handoff-model" className="mb-1.5 block text-[13px] font-medium text-[var(--relay-ink)]">
+              Model
+            </label>
+            <select id="handoff-model" value={model} onChange={(e) => setModel(e.target.value)} className="rl-input rl-input-compact w-full text-[13px]">
+              {MODELS.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+            <p className="m-0 mt-1 text-[11.5px] text-[var(--relay-ink-subtle)]">Every call goes through the SS&amp;C AI Gateway.</p>
+          </div>
+          <fieldset className="m-0 border-0 p-0">
+            <legend className="mb-1.5 text-[13px] font-medium text-[var(--relay-ink)]">Runner profile</legend>
+            <div className="flex flex-col gap-1.5">
+              {PROFILES.map((p) => (
+                <label key={p.id} className="flex cursor-pointer items-start gap-2 text-[13px]">
+                  <input type="radio" name="profile" value={p.id} checked={profile === p.id} onChange={() => setProfile(p.id)} className="mt-1" />
+                  <span>
+                    <span className="font-medium text-[var(--relay-ink)]">{p.label}</span>
+                    <span className="block text-[11.5px] text-[var(--relay-ink-muted)]">{p.hint}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+        <div className="flex justify-end gap-2 border-t border-[var(--relay-border)] pt-4">
+          <button type="button" className="rl-btn-second" onClick={() => props.onOpenChange(false)}>
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="rl-btn-primary"
+            style={props.color ? { background: props.color, borderColor: props.color } : undefined}
+          >
+            Hand off
+          </button>
+        </div>
+      </form>
+    </Dialog>
   );
 }

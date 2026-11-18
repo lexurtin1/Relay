@@ -3,9 +3,11 @@
 import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FilePlus2, Search } from "lucide-react";
-import type { WorkstreamStage } from "@relay/core";
-import { stageLabel } from "@relay/core";
+import { FilePlus2, RotateCcw, Search, ShieldCheck } from "lucide-react";
+import type { WorkstreamStage } from "@relay/core/domain";
+import { stageLabel } from "@relay/core/domain";
+import { useDemo, useRelayActions } from "@/lib/demo-store/provider";
+import { selectCommandItems } from "@/lib/demo-store/selectors";
 
 export type CommandWorkstream = {
   id: string;
@@ -17,6 +19,9 @@ export type CommandWorkstream = {
 export function CommandPalette(props: { workstreams: CommandWorkstream[] }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const actions = useRelayActions();
+  const live = useDemo(selectCommandItems);
+  const workstreams = live ?? props.workstreams;
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -71,12 +76,38 @@ export function CommandPalette(props: { workstreams: CommandWorkstream[] }) {
               <FilePlus2 className="h-4 w-4 text-[var(--relay-primary)]" aria-hidden />
               <span>New workstream</span>
             </Command.Item>
+            {actions.mode === "demo" ? (
+              <>
+                <Command.Item
+                  value="open audit log"
+                  onSelect={() => {
+                    setOpen(false);
+                    router.push("/audit");
+                  }}
+                  className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-2 text-[var(--relay-ink)] aria-selected:bg-[var(--relay-surface-sunken)]"
+                >
+                  <ShieldCheck className="h-4 w-4 text-[var(--relay-primary)]" aria-hidden />
+                  <span>Open audit log</span>
+                </Command.Item>
+                <Command.Item
+                  value="reset demo data"
+                  onSelect={() => {
+                    setOpen(false);
+                    void actions.reset();
+                  }}
+                  className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-2 text-[var(--relay-ink)] aria-selected:bg-[var(--relay-surface-sunken)]"
+                >
+                  <RotateCcw className="h-4 w-4 text-[var(--relay-primary)]" aria-hidden />
+                  <span>Reset demo data</span>
+                </Command.Item>
+              </>
+            ) : null}
           </Command.Group>
           <Command.Group
             heading="Workstreams"
             className="px-1 py-1 text-xs text-[var(--relay-ink-subtle)]"
           >
-            {props.workstreams.map((item) => (
+            {workstreams.map((item) => (
               <Command.Item
                 key={item.id}
                 value={`${item.title} ${item.jiraKey ?? ""} ${item.stage}`}

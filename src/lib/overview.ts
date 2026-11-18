@@ -22,7 +22,9 @@ export type NeedsActionItem = {
   id: string;
   jiraKey: string | null;
   title: string;
-  kind: "question" | "comments";
+  kind: "question" | "comments" | "approval" | "merge" | "handoff";
+  /** Explicit link target; older rows derive it from the id suffix. */
+  workstreamId?: string;
   summary: string;
   detail: string | null;
   options: string[];

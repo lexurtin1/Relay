@@ -1,5 +1,6 @@
 "use server";
 
+import { assertDatabase } from "@/lib/db";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -8,6 +9,7 @@ import { SESSION_COOKIE } from "@/lib/session";
 import { WorkstreamOrigin, WorkstreamPriority, WorkstreamStage } from "@prisma/client";
 
 export async function switchUser(userId: string) {
+  assertDatabase();
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) return;
   const jar = await cookies();
@@ -20,6 +22,7 @@ export async function switchUser(userId: string) {
 }
 
 export async function createWorkstream(formData: FormData) {
+  assertDatabase();
   const title = String(formData.get("title") ?? "").trim();
   const problemStatement = String(formData.get("problemStatement") ?? "").trim();
   const jiraKey = String(formData.get("jiraKey") ?? "").trim() || null;

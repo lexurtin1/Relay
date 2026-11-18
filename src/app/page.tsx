@@ -1,12 +1,18 @@
+import { OverviewContainer } from "@/components/containers/overview-container";
 import { OverviewPageView } from "@/components/overview";
+import { stageCountsFromRows } from "@/lib/stage-counts";
+import { getAppName } from "@/lib/config";
+import { isDemoMode } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { getOverviewData } from "@/lib/overview";
 
 export const dynamic = "force-dynamic";
 
 export default async function OverviewPage() {
-  const user = await getCurrentUser();
+  const appName = getAppName();
+  if (isDemoMode()) return <OverviewContainer appName={appName} />;
 
+  const user = await getCurrentUser();
   if (!user) {
     return (
       <div className="rl-sheet p-6 text-sm text-[var(--relay-ink-muted)]">
@@ -17,14 +23,14 @@ export default async function OverviewPage() {
   }
 
   const data = await getOverviewData();
-
   return (
     <OverviewPageView
+      appName={appName}
       stats={data.stats}
       needsAction={data.needsAction}
       rows={data.rows}
-      workstreamCount={data.workstreamCount}
       agentsActive={data.agentsActive}
+      stageCounts={stageCountsFromRows(data.rows)}
     />
   );
 }

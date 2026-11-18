@@ -1,0 +1,56 @@
+/*
+ * Relay theme bridge for Astryx.
+ *
+ * Astryx components read --color-*, --radius-*, --shadow-* and --font-family-*
+ * custom properties. Relay's own tokens (--relay-*) switch with
+ * html[data-theme], so pointing the Astryx variables at them gives Astryx
+ * components Calastone colours in both light and dark mode with no separate
+ * theme build. Unlayered on purpose: it must beat the neutral theme layer.
+ */
+[data-astryx-theme] {
+  --font-family-body: var(--relay-font-ui);
+  --font-family-heading: var(--relay-font-ui);
+  --font-family-code: var(--relay-font-mono);
+
+  --color-accent: var(--relay-brand);
+  --color-accent-muted: var(--relay-brand-soft);
+  --color-on-accent: #ffffff;
+  --color-icon-accent: var(--relay-brand-fg);
+
+  --color-background-body: var(--relay-surface-muted);
+  --color-background-surface: var(--relay-surface);
+  --color-background-card: var(--relay-surface);
+  --color-background-popover: var(--relay-surface);
+  --color-background-muted: var(--relay-surface-sunken);
+
+  --color-text-primary: var(--relay-ink);
+  --color-text-secondary: var(--relay-ink-muted);
+  --color-icon-primary: var(--relay-ink);
+  --color-icon-secondary: var(--relay-ink-muted);
+
+  --color-border: var(--relay-border);
+  --color-border-emphasized: var(--relay-border-strong);
+
+  --color-success: var(--relay-success);
+  --color-success-muted: var(--relay-success-soft);
+  --color-warning: var(--relay-warning);
+  --color-warning-muted: var(--relay-warning-soft);
+  --color-error: var(--relay-danger);
+  --color-error-muted: var(--relay-danger-soft);
+  --color-info: var(--relay-brand);
+  --color-info-muted: var(--relay-brand-soft);
+
+  --radius-inner: 8px;
+  --radius-element: var(--relay-radius-control);
+  --radius-container: var(--relay-radius-card);
+  --radius-page: var(--relay-radius-panel);
+
+  --shadow-low: var(--relay-sheet-shadow);
+  --shadow-med: 0 12px 32px -12px rgba(13, 19, 31, 0.22);
+  --shadow-high: 0 24px 60px -16px rgba(13, 19, 31, 0.32);
+}
+
+/* The Theme wrapper must not change layout of the app shell. */
+body > div[data-astryx-theme] {
+  display: contents;
+}

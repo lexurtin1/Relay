@@ -10,6 +10,7 @@ import {
 } from "@/lib/knowledge-shared";
 import type { ConnectorHealthRow, SourceItem } from "@/lib/knowledge";
 import { cn } from "@/lib/utils";
+import { PageHero } from "@/components/page-hero";
 
 const ALL_SOURCES = listConnectorIds();
 
@@ -63,18 +64,18 @@ export function KnowledgeSearch(props: {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="m-0 text-[clamp(30px,3.4vw,42px)] font-medium leading-[1.1] tracking-[-0.03em] text-[var(--relay-ink)]">
-          Knowledge search
-        </h1>
-        <p className="mt-2 max-w-[68ch] text-[var(--relay-ink-muted)]">
-          Search the same company sources Scout and the chatbot use: Salesforce, Jira,
-          Confluence, Databricks, Datadog, GitHub and Power BI. Read-only. Mock mode serves
-          fictional Calastone demo documents.
-        </p>
-      </div>
-
-      <ConnectorHealthStrip health={props.health} />
+      <PageHero
+        id="knowledge"
+        eyebrow="Knowledge"
+        title="Knowledge search"
+        purpose="Read-only search across the sources Scout and the chatbot use: Salesforce, Jira, Confluence, Databricks, Datadog, GitHub and Power BI. Mock mode returns fictional demo documents."
+        stats={[
+          { label: "Connectors ready", value: `${props.health.filter((h) => h.ok).length} of ${props.health.length}` },
+          { label: "Mode", value: props.health[0]?.mode ?? "mock" },
+          { label: "Access", value: "Read only" },
+        ]}
+        visual={<ConnectorHealthStrip health={props.health} />}
+      />
 
       <form
         className="rl-glass flex flex-col gap-3 rounded-[26px] p-3.5"
@@ -135,64 +136,53 @@ export function KnowledgeSearch(props: {
         </p>
       ) : null}
 
-      <ResultsList results={results} query={query} pending={pending} />
+      <ResultsList
+        results={results}
+        query={query}
+        pending={pending}
+        onSuggest={(q) => {
+          setQuery(q);
+          runSearch(q, source);
+        }}
+      />
     </div>
   );
 }
 
 function ConnectorHealthStrip(props: { health: ConnectorHealthRow[] }) {
-  const healthy = props.health.filter((h) => h.ok).length;
   return (
-    <section aria-labelledby="conn-health-h" className="rl-sheet p-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 id="conn-health-h" className="m-0 text-base font-medium text-[var(--relay-ink)]">
-            Connector health
-          </h2>
-          <p className="mt-1 text-[13px] text-[var(--relay-ink-muted)]">
-            {healthy} of {props.health.length} ready · mode{" "}
-            {props.health[0]?.mode ?? "mock"}
-          </p>
-        </div>
-      </div>
-      <ul className="mt-3 m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2 p-0">
-        {props.health.map((row) => (
-          <li
-            key={row.id}
-            className="rounded-[14px] border border-[var(--relay-border)] px-3 py-2"
-            title={row.detail}
-          >
-            <div className="flex items-center gap-2 text-sm text-[var(--relay-ink)]">
-              <span
-                className={cn(
-                  "inline-block h-2 w-2 rounded-full",
-                  row.ok ? "bg-[var(--relay-success)]" : "bg-[var(--relay-warning)]",
-                )}
-                aria-hidden
-              />
-              {row.label}
-            </div>
-            <div className="mt-0.5 text-[11px] text-[var(--relay-ink-subtle)]">
-              {row.ok ? "Ready" : "Needs config"}
-            </div>
-          </li>
-        ))}
-      </ul>
-    </section>
+    <ul className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-2 p-0" aria-label="Connector health">
+      {props.health.map((row) => (
+        <li key={row.id} className="rounded-[14px] border border-[var(--relay-border)] bg-[var(--relay-surface)] px-3 py-2" title={row.detail}>
+          <div className="flex items-center gap-2 text-sm text-[var(--relay-ink)]">
+            <span className={cn("inline-block h-2 w-2 rounded-full", row.ok ? "bg-[var(--relay-success)]" : "bg-[var(--relay-warning)]")} aria-hidden />
+            {row.label}
+          </div>
+          <div className="mt-0.5 text-[11px] text-[var(--relay-ink-subtle)]">{row.ok ? "Ready" : "Needs config"}</div>
+        </li>
+      ))}
+    </ul>
   );
 }
+
+const SUGGESTIONS = ["ISIN", "NAV exception", "onboarding", "settlement", "dealing rules"];
 
 function ResultsList(props: {
   results: SourceItem[];
   query: string;
   pending: boolean;
+  onSuggest: (q: string) => void;
 }) {
   if (!props.query.trim()) {
     return (
-      <p className="text-[var(--relay-ink-muted)]">
-        Enter a query to search connected sources. Try &quot;ISIN&quot;, &quot;NAV
-        exception&quot;, or &quot;onboarding&quot;.
-      </p>
+      <div className="flex flex-wrap items-center gap-2 text-[var(--relay-ink-muted)]">
+        <span>Try</span>
+        {SUGGESTIONS.map((q) => (
+          <button key={q} type="button" className="rl-chip rl-chip-compact" onClick={() => props.onSuggest(q)}>
+            {q}
+          </button>
+        ))}
+      </div>
     );
   }
 

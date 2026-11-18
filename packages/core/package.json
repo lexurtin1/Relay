@@ -8,6 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./config": "./src/config.ts",
+    "./domain": "./src/domain.ts",
+    "./agents/planner-template": "./src/agents/planner-template.ts",
     "./llm/gateway": "./src/llm/gateway.ts"
   },
   "scripts": {

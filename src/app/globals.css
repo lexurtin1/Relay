@@ -1,4 +1,12 @@
+/* Layer order: Tailwind theme and preflight first, then Astryx components and
+   theme, then Relay components and Tailwind utilities. Relay element defaults
+   live in the base layer so Astryx component styles can win over them. */
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+
 @import "tailwindcss";
+@import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/theme-neutral/theme.css";
+@import "./astryx-theme.css";
 
 :root,
 [data-theme="dark"] {
@@ -109,49 +117,51 @@
   color-scheme: light;
 }
 
-* {
-  box-sizing: border-box;
-}
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-  background: var(--relay-surface-muted);
-  color: var(--relay-ink);
-  font-family: var(--relay-font-ui);
-  font-size: 15px;
-  line-height: 1.45;
-  font-feature-settings: "tnum" 1;
-  -webkit-font-smoothing: antialiased;
-}
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: var(--relay-surface-muted);
+    color: var(--relay-ink);
+    font-family: var(--relay-font-ui);
+    font-size: 15px;
+    line-height: 1.45;
+    font-feature-settings: "tnum" 1;
+    -webkit-font-smoothing: antialiased;
+  }
 
-a {
-  color: var(--relay-brand-fg);
-  text-decoration: none;
-}
+  a {
+    color: var(--relay-brand-fg);
+    text-decoration: none;
+  }
 
-a:hover {
-  color: var(--relay-accent-muted);
-}
+  a:hover {
+    color: var(--relay-accent-muted);
+  }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-  color: inherit;
-}
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
 
-:focus-visible {
-  outline: 2px solid var(--relay-brand-fg);
-  outline-offset: 2px;
-}
+  :focus-visible {
+    outline: 2px solid var(--relay-brand-fg);
+    outline-offset: 2px;
+  }
 
-::selection {
-  background: color-mix(in srgb, var(--relay-brand) 32%, transparent);
-  color: var(--relay-ink);
+  ::selection {
+    background: color-mix(in srgb, var(--relay-brand) 32%, transparent);
+    color: var(--relay-ink);
+  }
 }
 
 .font-mono,
@@ -564,4 +574,195 @@ h2 {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* ------------------------------------------------------------------ Heroes
+   Page headers: one purpose line, live numbers, one primary action.
+   Status colour stays on status; the hero itself uses Calastone blue and teal. */
+
+.rl-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--relay-brand) 9%, transparent) 0%, transparent 55%),
+    radial-gradient(80% 120% at 0% 100%, color-mix(in srgb, var(--relay-blob-teal) 7%, transparent) 0%, transparent 60%),
+    var(--relay-surface);
+  border: 1px solid color-mix(in srgb, var(--relay-border) 55%, transparent);
+  border-radius: var(--relay-radius-panel);
+  box-shadow: var(--relay-sheet-shadow);
+}
+
+.rl-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--relay-brand), var(--relay-blob-teal) 60%, transparent);
+}
+
+.rl-eyebrow {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--relay-brand-fg);
+}
+
+.rl-stat-value {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  /* Colour inherits so status tones (amber, live blue) can apply. */
+}
+
+/* ---------------------------------------------------------------- Pipeline */
+
+.rl-pipeline {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.rl-pipeline-track {
+  position: absolute;
+  top: 27px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--relay-border-strong), color-mix(in srgb, var(--relay-brand) 45%, var(--relay-border-strong)), var(--relay-border-strong));
+}
+
+.rl-pipeline-marker {
+  position: absolute;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 999px;
+  background: var(--relay-brand);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--relay-brand) 22%, transparent), 0 0 18px var(--relay-brand);
+  animation: rl-marker 6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes rl-marker {
+  0% { left: 0%; opacity: 0; }
+  6% { opacity: 1; }
+  94% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+.rl-pipeline-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 4px 8px;
+  border-radius: 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 150ms var(--relay-ease), border-color 150ms var(--relay-ease);
+}
+
+.rl-pipeline-node:hover,
+.rl-pipeline-node[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--relay-brand) 6%, transparent);
+  border-color: color-mix(in srgb, var(--relay-brand) 22%, transparent);
+}
+
+.rl-pipeline-icon {
+  position: relative;
+  display: inline-flex;
+  height: 44px;
+  width: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--relay-surface);
+  border: 1.5px solid var(--relay-border-strong);
+  color: var(--relay-ink-muted);
+}
+
+.rl-pipeline-icon[data-agent="true"] {
+  border-color: color-mix(in srgb, var(--relay-brand) 55%, transparent);
+  color: var(--relay-brand-fg);
+}
+
+.rl-pipeline-icon[data-live="true"]::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--relay-brand) 40%, transparent);
+  animation: rl-ring 1.8s ease-out infinite;
+}
+
+@keyframes rl-ring {
+  0% { transform: scale(0.85); opacity: 1; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+
+/* ---------------------------------------------------------------- Runner */
+
+.rl-console {
+  background: #0b111c;
+  color: #d5dce8;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--relay-font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.rl-caret::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  margin-left: 4px;
+  vertical-align: -2px;
+  background: #6fa9f5;
+  animation: rl-pulse 1s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rl-pipeline-marker,
+  .rl-pipeline-icon[data-live="true"]::after,
+  .rl-caret::after {
+    animation: none !important;
+  }
+  .rl-pipeline-marker {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ Charts
+   Validated with the dataviz palette checker (lightness band, chroma, CVD and
+   contrast) against each theme's surface. Agent, person, waiting. */
+:root,
+[data-theme="dark"] {
+  --relay-chart-agent: #4a8be6;
+  --relay-chart-person: #1fa899;
+  --relay-chart-waiting: #c77a12;
+  --relay-chart-grid: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="light"] {
+  --relay-chart-agent: #2b6fd6;
+  --relay-chart-person: #0d9488;
+  --relay-chart-waiting: #c77a12;
+  --relay-chart-grid: rgba(13, 19, 31, 0.07);
+}
+
+.rl-btn-second:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }

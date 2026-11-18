@@ -1,10 +1,22 @@
 # Relay
 
-White-labelled internal agent workspace for Calastone Innovation and Strategy. Prototype modelled on Stripe Orbit: research, plan, review, hand off to an isolated Runner, and track everything on one dashboard.
+White-labelled internal agent workspace for Calastone Innovation and Strategy. Prototype modelled on Stripe Orbit: Scout researches company sources, the Planner drafts a plan, teammates review and an architect approves, the Runner builds in an isolated workspace and asks when it needs you, and everything is tracked on one dashboard.
 
-**Milestones 1–2 are implemented:** monorepo, Docker Compose, Prisma schema, demo seed, glass branded shell, dashboard, mock connectors, and knowledge search.
+![Overview](docs/screenshots/relay-overview.png)
 
-## Quick start (Docker)
+## Demo mode (no database)
+
+When `DATABASE_URL` is empty (the Vercel case) or `RELAY_DEMO_FIXTURES=1`, Relay runs entirely in the browser:
+
+- Every action works: create workstreams, ask Scout, generate and revise plans, comment, resolve, approve, hand off, answer the Runner, merge, triage and promote ideas.
+- Scout, the Planner and the Runner are simulated from stored timestamps, so they keep moving and a reload picks up where they were.
+- Planner calls still go through the LLM gateway (`draftPlan` server action); in mock mode a deterministic template supplies the plan.
+- State lives in `localStorage` under `relay.demo.v1` in this browser only. Use the user menu (top right) to switch roles, change agent speed, or **Reset demo data**.
+- Add `?speed=20` to any URL to run agents twenty times faster.
+
+The store is in `src/lib/demo-store/` (reducer, permissions, selectors, simulation, seed).
+
+## Quick start (Docker, with Postgres)
 
 Requires Docker Desktop.
 
@@ -15,12 +27,16 @@ docker compose up --build
 
 Open [http://localhost:3000](http://localhost:3000).
 
-You should see five seeded workstreams, a Mock mode badge, and a user switcher in the header.
-
-## Local development without full Compose
+## Local development
 
 ```bash
 pnpm install
+pnpm dev            # demo mode when DATABASE_URL is empty
+```
+
+With Postgres:
+
+```bash
 # Start Postgres and Redis (for example: docker compose up postgres redis)
 cp .env.example .env
 pnpm db:migrate:dev
@@ -30,43 +46,43 @@ pnpm dev
 
 ## What works now
 
-- Light-first branded shell with sidebar nav, theme toggle, and Calastone wireframe atmosphere
-- Mock mode badge and role switcher (engineer / architect / lead / viewer)
-- Overview with KPI row, Start work composer, needs-you tickets on the right, and workstream timelines
-- Workstream detail with plan, comments, and stage stepper
-- Knowledge search across Salesforce, Power BI, Jira, Confluence, Databricks, GitHub (mock corpus; live health when env vars are set)
-- New workstream form (creates a DB record)
-- Worker heartbeat process
-- Full Prisma domain model and story seed
+- Story-led pages: every page opens with a compact hero (purpose, live numbers, next move) that collapses to a strip
+- Overview with the relay pipeline (five legs, live counts, who holds the baton), actionable "Needs your input" cards and a Start work composer
+- Workstream detail with a stage hero and **Next move** card, plus Research, Plan, Build and Activity tabs
+- Anchored review: select plan text or use a step's Comment button, reply, resolve, revise into a new version
+- Role-gated actions with the reason shown and a "Switch to" shortcut for presenters
+- Runner console: step checklist, live log, question card, pull request with checks and merge
+- Ideas board (New, Triaged, Promoted, Parked) with promotion into workstreams
+- Metrics: cycle time, who carried the work (agent, person, waiting), tokens per day
+- Audit: every approval, hand-off, answer and model call, filterable, with CSV export
+- Knowledge search across Salesforce, Power BI, Jira, Confluence, Databricks, Datadog and GitHub (mock corpus)
+- Astryx (Meta's design system) for dialogs, tabs, tables, badges, avatars, menus and empty states, themed with Calastone tokens
 
 ## Not yet
 
-- Scout / Planner agents and SSE (Milestone 3)
-- Anchored review workflow (Milestone 4)
-- Runner worktrees and ask_human (Milestone 5)
-- Ideas / Metrics / Audit screens (Milestone 6)
-- Playwright happy path (Milestone 7)
+- Real Scout, Planner and Runner job processors in the worker, and SSE (database mode shows records but agents do not run)
+- Database-mode server actions for comments, approval and answers (they work in demo mode)
+
+## Testing
+
+```bash
+pnpm test                                   # unit tests, including the demo store journey
+PW_CHANNEL=msedge pnpm exec playwright test # browser happy path (use chrome or omit as available)
+```
 
 ## Screenshots
 
-### Before (Milestone 1 shell)
+| | |
+|---|---|
+| ![Workstream](docs/screenshots/relay-workstream.png) | ![Runner](docs/screenshots/relay-build.png) |
+| ![Metrics](docs/screenshots/relay-metrics.png) | ![Audit](docs/screenshots/relay-audit.png) |
 
-![Before dashboard](docs/screenshots/before-dashboard.png)
-
-![Before workstream](docs/screenshots/before-workstream.png)
-
-### After (Operate redesign)
-
-![After dashboard](docs/screenshots/after-dashboard.png)
-
-![After workstream](docs/screenshots/after-workstream.png)
-
+Earlier milestones: `docs/screenshots/before-*.png` and `after-*.png`.
 
 ## Branding
 
 - Logos: SS&C Calastone `logo-header.png` / `logo-on-dark.png`; Relay `relay.svg` / `relay-mark.svg`
-- Theme tokens: `theme/brand.ts` + `src/app/globals.css` (dark glass default, light theme option, Calastone blues)
-
+- Tokens: `src/app/globals.css` (light first, dark via toggle, Calastone blues). Astryx components read the same tokens through `src/app/astryx-theme.css`.
 
 ## Config
 

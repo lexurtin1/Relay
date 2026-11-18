@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { WorkstreamStage } from "@relay/core";
+import type { WorkstreamStage } from "@relay/core/domain";
 
 export type TimelineSegKind = "p" | "a" | "w";
 

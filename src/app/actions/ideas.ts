@@ -1,5 +1,6 @@
 "use server";
 
+import { assertDatabase } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { prisma, WORKSTREAM_COLOURS } from "@relay/core";
 import {
@@ -14,6 +15,7 @@ import {
 import { getCurrentUser } from "@/lib/session";
 
 export async function createIdea(formData: FormData) {
+  assertDatabase();
   const user = await getCurrentUser();
   if (!user) throw new Error("Sign in required.");
 
@@ -37,6 +39,7 @@ export async function createIdea(formData: FormData) {
 }
 
 export async function setIdeaStatus(formData: FormData) {
+  assertDatabase();
   const user = await getCurrentUser();
   if (!user) throw new Error("Sign in required.");
   if (user.role === "viewer" || user.role === "engineer") {
@@ -62,6 +65,7 @@ export async function setIdeaStatus(formData: FormData) {
 }
 
 export async function promoteIdea(formData: FormData) {
+  assertDatabase();
   const user = await getCurrentUser();
   if (!user) throw new Error("Sign in required.");
   if (user.role === "viewer" || user.role === "engineer") {
@@ -114,6 +118,7 @@ export async function promoteIdea(formData: FormData) {
 }
 
 export async function handOffToRunner(formData: FormData) {
+  assertDatabase();
   const user = await getCurrentUser();
   if (!user) throw new Error("Sign in required.");
 
@@ -172,6 +177,7 @@ export async function handOffToRunner(formData: FormData) {
 }
 
 export async function continueResearch(formData: FormData) {
+  assertDatabase();
   const user = await getCurrentUser();
   if (!user) throw new Error("Sign in required.");
 

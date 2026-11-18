@@ -1,9 +1,10 @@
 "use client";
 
-import { HandOffModal } from "@/components/hand-off-modal";
 import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
+import type { ActionGate, ActionVerb, PlanView } from "@/lib/view-models";
 import { cn } from "@/lib/utils";
 
+/** Legacy shape used by the database page; maps onto gates. */
 export type ActionBarState = {
   canGeneratePlan: boolean;
   canRequestReview: boolean;
@@ -18,84 +19,83 @@ export type ActionBarState = {
   reviseReason?: string;
 };
 
-export function planActionStatus(state: ActionBarState): string {
-  if (state.openCommentCount > 0) {
-    return `${state.openCommentCount} comment${state.openCommentCount === 1 ? "" : "s"} must be resolved before approval.`;
+const LABELS: Partial<Record<ActionVerb, string>> = {
+  generate_plan: "Generate plan",
+  request_review: "Request review",
+  revise_plan: "Revise from comments",
+  approve_plan: "Approve plan",
+  hand_off: "Hand off to Runner",
+};
+
+/** Which plan actions apply at this point, in workflow order. */
+export function applicableVerbs(plan: PlanView | null, hasRunner: boolean, researchDone: boolean, drafting: boolean): ActionVerb[] {
+  if (drafting) return [];
+  if (!plan) return researchDone ? ["generate_plan"] : [];
+  if (plan.status === "draft") return plan.openComments > 0 ? ["revise_plan", "request_review"] : ["request_review"];
+  if (plan.status === "in_review") return plan.openComments > 0 ? ["revise_plan", "approve_plan"] : ["approve_plan"];
+  if (plan.status === "approved" && !hasRunner) return ["hand_off"];
+  return [];
+}
+
+export function planActionStatus(plan: PlanView | null, drafting: boolean): string {
+  if (drafting) return "The Planner is drafting. This takes a few seconds.";
+  if (!plan) return "No plan yet. Generate one from Scout's findings.";
+  if (plan.status === "draft") return `Plan v${plan.version} is a draft. Send it for review when it reads right.`;
+  if (plan.status === "in_review") {
+    return plan.openComments > 0
+      ? `${plan.openComments} open comment${plan.openComments === 1 ? "" : "s"}. Resolve them or let the Planner revise.`
+      : "All comments resolved. An architect or lead can approve.";
   }
-  if (state.canHandOff) {
-    return "Plan approved. Hand it off to start the build.";
-  }
-  if (state.canApprove) {
-    return "All comments resolved. The plan can be approved.";
-  }
-  return "Actions apply to the current plan version.";
+  if (plan.status === "approved") return `Plan v${plan.version} approved by ${plan.approvals.map((a) => a.name).join(", ") || "an architect"}.`;
+  return `Plan v${plan.version}.`;
 }
 
 export function ActionBar(props: {
-  state: ActionBarState;
-  role: string;
-  workstreamId: string;
-  planId: string | null;
+  verbs: ActionVerb[];
+  gates: Record<ActionVerb, ActionGate>;
+  status: string;
+  primary: ActionVerb | null;
+  onRun: (verb: ActionVerb) => void;
+  onSwitch: (userId: string) => void;
   color?: string;
 }) {
-  const secondary: Array<{
-    id: string;
-    label: string;
-    enabled: boolean;
-    reason: string;
-  }> = [
-    {
-      id: "revise",
-      label: "Revise plan using comments",
-      enabled: props.state.canRevise,
-      reason: props.state.reviseReason ?? "Open comments are required to revise.",
-    },
-    {
-      id: "approve",
-      label: "Approve plan",
-      enabled: props.state.canApprove,
-      reason:
-        props.state.approveReason ??
-        (props.role !== "architect" && props.role !== "lead"
-          ? "Only architects and leads can approve plans."
-          : "Plan must be in review with comments addressed."),
-    },
-  ];
+  if (props.verbs.length === 0) return null;
+  const blocked = props.verbs.map((v) => props.gates[v]).find((g) => !g.ok && g.switchTo);
 
   return (
     <TooltipProvider>
-      <div className="rl-glass sticky bottom-4 z-20 mx-auto mt-6 flex max-w-[1120px] flex-col gap-3 rounded-[22px] p-3.5">
+      <div className="rl-glass sticky bottom-4 z-20 mx-auto mt-2 flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-3 rounded-[22px] p-3.5">
+        <p className="m-0 min-w-0 flex-1 text-[13px] text-[var(--relay-ink-body)]">
+          {props.status}
+          {blocked?.switchTo ? (
+            <button type="button" className="ml-2 font-medium text-[var(--relay-brand-fg)] hover:underline" onClick={() => props.onSwitch(blocked.switchTo!.id)}>
+              Switch to {blocked.switchTo.name} ({blocked.switchTo.role})
+            </button>
+          ) : null}
+        </p>
         <div className="flex flex-wrap items-center justify-end gap-2">
-          {secondary.map((action) => {
+          {props.verbs.map((verb) => {
+            const gate = props.gates[verb];
+            const isPrimary = verb === props.primary || props.verbs.length === 1;
             const button = (
               <button
-                key={action.id}
+                key={verb}
                 type="button"
-                disabled={!action.enabled}
-                className={cn(
-                  "rl-btn-second",
-                  "disabled:cursor-not-allowed disabled:opacity-50",
-                )}
+                disabled={!gate.ok}
+                onClick={() => props.onRun(verb)}
+                className={cn(isPrimary ? "rl-btn-primary" : "rl-btn-second", "disabled:cursor-not-allowed disabled:opacity-50")}
+                style={isPrimary && gate.ok && props.color && verb === "hand_off" ? { background: props.color, borderColor: props.color } : undefined}
               >
-                {action.label}
+                {LABELS[verb] ?? verb}
               </button>
             );
-
-            if (action.enabled) return button;
-
+            if (gate.ok) return button;
             return (
-              <Tooltip key={action.id} content={action.reason}>
+              <Tooltip key={verb} content={gate.reason ?? "Not available"}>
                 <span className="inline-flex">{button}</span>
               </Tooltip>
             );
           })}
-          <HandOffModal
-            workstreamId={props.workstreamId}
-            planId={props.planId}
-            canHandOff={props.state.canHandOff}
-            handOffReason={props.state.handOffReason}
-            color={props.color}
-          />
         </div>
       </div>
     </TooltipProvider>

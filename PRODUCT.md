@@ -38,14 +38,14 @@ Used at a desk in a corporate environment alongside Jira, Confluence, Salesforce
 ## Brand Commitments
 
 - Name: Relay (configurable via `APP_NAME`). Parent brand: SS&C Calastone.
-- Voice: calm, precise, dense. Internal ops tool, not marketing.
+- Voice: calm, precise, dense. Internal ops tool, not marketing. Pages open with compact operational heroes that explain the stage and the next move with live numbers; no stock imagery or promotional copy.
 - Visual constraints (binding from product owner): light-first Calastone Operate shell (sidebar + elevated white sheets) with dark theme via toggle. Soft colour atmosphere blobs and subtle teal-to-blue wireframe polyhedra stay subordinate to status and actions. No emoji. Calastone blues from `theme/brand.ts` for live states, links, and sidebar active; no SaaS purple. Status colours only on status indicators (amber = needs you, green = done, red = failed). Typography: Geist Sans for UI; Geist Mono for IDs, paths, and code. Tabular numbers for counts. Logo assets under `public/brand/` remain available; shell brand line uses product name plus SS&C Calastone subtitle.
 - Do not invent real Calastone clients, systems, or unconfirmed brand colours.
 
 ## Evidence on Hand
 
 - Logo assets: official SS&C Calastone lockup (`public/brand/logo-header.png`, `logo-on-dark.png`); Relay mark + wordmark (`public/brand/relay.svg`, `relay-mark.svg`).
-- Theme tokens: `theme/brand.ts` and `src/app/globals.css` (light default `#F2F5FA` sheets on pale ground; dark `data-theme` alternate; Calastone blues `#2B6FD6` / `#3F82E0`).
+- Theme tokens: `src/app/globals.css` (Astryx bridge in `src/app/astryx-theme.css`) (light default `#F2F5FA` sheets on pale ground; dark `data-theme` alternate; Calastone blues `#2B6FD6` / `#3F82E0`).
 - Seeded demo story: five coloured strategy workstreams, 12–18 Ideas board tickets, Datadog in the connector set, fictional users.
 - Screenshots: `docs/screenshots/` (Milestone 1 baseline).
 
