@@ -150,7 +150,7 @@ function runnerLog(ws: Workstream, start: number, steps: number): Runner["log"] 
 const HISTORICAL = [
   {
     id: "demo-ws-hist-labels",
-    title: "Tidy exception codes in the ops runbook",
+    title: "Tag Unity Catalog columns for privacy",
     jiraKey: "INNO-301",
     owner: "demo-owen",
     color: WORKSTREAM_COLOURS.collective,
@@ -159,7 +159,7 @@ const HISTORICAL = [
   },
   {
     id: "demo-ws-hist-digest",
-    title: "Weekly pipeline digest for the team",
+    title: "Sign off governed metric definitions with finance",
     jiraKey: "INNO-304",
     owner: "demo-alex",
     color: WORKSTREAM_COLOURS.context,
@@ -168,7 +168,7 @@ const HISTORICAL = [
   },
   {
     id: "demo-ws-hist-isin",
-    title: "Shared ISIN check in the demo MCP server",
+    title: "Enrich fund master with FE fundinfo sectors",
     jiraKey: "INNO-306",
     owner: "demo-aisha",
     color: WORKSTREAM_COLOURS.standards,
@@ -257,15 +257,15 @@ export function buildDemoSeed(now: number): DemoState {
         const draft = draftPlanFromTemplate({ title: ws.title, problemStatement: ws.problemStatement, findings: ws.research.findings });
         const plan = planVersion(ws.id, 1, "in_review", draft.markdown, draft.steps, planAt, {
           comments: [
-            comment(`${ws.id}-c1`, lead.id, "Keep the note to two numbers and one sentence.", "Measure and report", reviewAt + HOUR),
-            comment(`${ws.id}-c2`, architect.id, "Which flag service does step 2 use? Name it in the plan.", "flag", reviewAt + 2 * HOUR),
+            comment(`${ws.id}-c1`, lead.id, "Keep segment cells to five firms minimum and no single firm dominant.", "Measure and report", reviewAt + HOUR),
+            comment(`${ws.id}-c2`, architect.id, "Name the policy service that enforces the data rule on every query.", "flag", reviewAt + 2 * HOUR),
           ],
         });
         ws = { ...ws, plans: [plan] };
         audit.push(modelCall(ws, planAt, "Planner", "Drafted plan v1", 4_100, 1_300));
         audit.push(personEvent(ws, reviewAt, owner.id, "request_review", "Requested review of plan v1"));
-        audit.push(personEvent(ws, reviewAt + HOUR, lead.id, "comment", "Commented: Keep the note to two numbers and one sentence."));
-        audit.push(personEvent(ws, reviewAt + 2 * HOUR, architect.id, "comment", "Commented: Which flag service does step 2 use?"));
+        audit.push(personEvent(ws, reviewAt + HOUR, lead.id, "comment", "Commented: Keep segment cells to five firms minimum and no single firm dominant."));
+        audit.push(personEvent(ws, reviewAt + 2 * HOUR, architect.id, "comment", "Commented: Name the policy service that enforces the data rule."));
         break;
       }
 
@@ -349,7 +349,14 @@ export function buildDemoSeed(now: number): DemoState {
             question: null,
             questionOverride:
               row.id === "demo-ws-rail" && fixture?.openQuestion
-                ? { text: fixture.openQuestion, options: ["Regular savings", "Model rebalance", "Ask the architect"] }
+                ? {
+                    text: fixture.openQuestion,
+                    options: [
+                      "Rejection prediction only",
+                      "Full orchestration with chasing",
+                      "Ask the architect",
+                    ],
+                  }
                 : null,
             pr: null,
             sim: newClock(handOffAt),

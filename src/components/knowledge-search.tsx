@@ -165,7 +165,13 @@ function ConnectorHealthStrip(props: { health: ConnectorHealthRow[] }) {
   );
 }
 
-const SUGGESTIONS = ["ISIN", "NAV exception", "onboarding", "settlement", "dealing rules"];
+const SUGGESTIONS = [
+  "client key",
+  "flow statement",
+  "transfer rejection",
+  "dealing rules",
+  "consent",
+];
 
 function ResultsList(props: {
   results: SourceItem[];

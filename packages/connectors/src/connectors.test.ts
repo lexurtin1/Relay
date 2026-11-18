@@ -31,11 +31,11 @@ describe("connectors registry", () => {
     expect(getConnectorMode()).toBe("mock");
   });
 
-  it("searches mock confluence for ISIN", async () => {
-    const items = await getConnector("confluence").search("ISIN MCP");
+  it("searches mock confluence for private MCP", async () => {
+    const items = await getConnector("confluence").search("private MCP dealing");
     expect(items.length).toBeGreaterThan(0);
     expect(items[0]?.connectorId).toBe("confluence");
-    expect(items[0]?.title.toLowerCase()).toMatch(/isin|mcp/);
+    expect(items[0]?.title.toLowerCase()).toMatch(/mcp|dealing|client key|consent/);
   });
 
   it("gets a document by id", async () => {
@@ -51,7 +51,7 @@ describe("connectors registry", () => {
   });
 
   it("searches across sources", async () => {
-    const items = await searchKnowledge({ query: "NAV exception", limit: 10 });
+    const items = await searchKnowledge({ query: "flow statement", limit: 10 });
     expect(items.length).toBeGreaterThan(0);
     const sources = new Set(items.map((i) => i.connectorId));
     expect(sources.size).toBeGreaterThan(1);

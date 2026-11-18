@@ -26,7 +26,7 @@ Used at a desk in a corporate environment alongside Jira, Confluence, Salesforce
 
 - Workstreams progress through stages: idea, research, planning, in_review, approved, building, awaiting_input, pr_open, merged, killed.
 - Ideas board is strategy intake: New → Triaged → Promoted → Parked. Promoted ideas link to a workstream and inherit its colour.
-- About ten demo workstreams and a fuller Ideas board. Each workstream carries a stable colour (Context blue, Rail teal, Trust amber, Collective green, Standards slate), shown as a circle on cards and lists. Circles flash when a ticket needs a decision. Unlinked ideas stay neutral.
+- About ten demo workstreams and a fuller Ideas board. Each workstream carries a stable colour mapped to the AI technical roadmap layers (Context blue, Transaction/Rail teal, Trust amber, Intelligence/Collective green, Applications & channels/Standards slate), shown as a circle on cards and lists. Circles flash when a ticket needs a decision. Unlinked ideas stay neutral. Sample tickets follow the practical Q1 to Q3 2027 build: client key and private MCP, flow statement, Data Insights, transfer completion, AI intake, and agent profile work.
 - Roles: engineer, architect, lead, viewer. Architect approval required before Runner hand-off.
 - Hand off to Runner opens a modal (optional context, model, Runner profile) and creates an isolated Runner workspace from an approved plan.
 - Workstream detail shows Orbit-style research activity: user ask, numbered Scout steps with connector disclosures, live tool line, and an Ask anything follow-up.
@@ -46,7 +46,7 @@ Used at a desk in a corporate environment alongside Jira, Confluence, Salesforce
 
 - Logo assets: official SS&C Calastone lockup (`public/brand/logo-header.png`, `logo-on-dark.png`); Relay mark + wordmark (`public/brand/relay.svg`, `relay-mark.svg`).
 - Theme tokens: `src/app/globals.css` (Astryx bridge in `src/app/astryx-theme.css`) (light default `#F2F5FA` sheets on pale ground; dark `data-theme` alternate; Calastone blues `#2B6FD6` / `#3F82E0`).
-- Seeded demo story: five coloured strategy workstreams, 12–18 Ideas board tickets, Datadog in the connector set, fictional users.
+- Seeded demo story: five coloured strategy layers from the Calastone AI technical roadmap, ~24 Ideas board tickets, Datadog in the connector set, fictional users.
 - Screenshots: `docs/screenshots/` (Milestone 1 baseline).
 
 ## Product Principles

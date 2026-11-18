@@ -45,7 +45,7 @@ describe("demo seed", () => {
     const rail = seed.workstreams["demo-ws-rail"]!;
     expect(rail.stage).toBe("awaiting_input");
     expect(rail.runner?.question?.answer).toBeNull();
-    expect(rail.runner?.question?.text).toMatch(/regular savings/i);
+    expect(rail.runner?.question?.text).toMatch(/transfer completion|rejection prediction/i);
 
     const context = seed.workstreams["demo-ws-context"]!;
     expect(latestPlan(context)?.status).toBe("in_review");
