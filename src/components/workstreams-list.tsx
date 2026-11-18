@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { stageLabel, type WorkstreamStage } from "@relay/core";
+import { CommandBar } from "@/components/command-bar";
 import {
   segsForStage,
   statusToneClass,
@@ -33,8 +34,10 @@ export function WorkstreamsList(props: { rows: WorkstreamRowRow[] }) {
 
   return (
     <div className="flex flex-col gap-6">
+      <CommandBar defaultMode="research" />
+
       <div>
-        <h1 className="m-0 text-[clamp(30px,3.4vw,42px)] font-medium leading-[1.1] tracking-[-0.03em] text-[var(--relay-ink)]">
+        <h1 className="m-0 text-[clamp(26px,3vw,36px)] font-medium leading-[1.1] tracking-[-0.03em] text-[var(--relay-ink)]">
           Workstreams
         </h1>
         <p className="mt-2 max-w-[68ch] text-[var(--relay-ink-muted)]">

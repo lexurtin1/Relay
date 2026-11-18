@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { KnowledgeSearch } from "@/components/knowledge-search";
+import { KnowledgeChat } from "@/components/knowledge-chat";
 import {
   getConnectorHealth,
   runKnowledgeSearch,
@@ -26,7 +26,7 @@ export default async function KnowledgePage({
 
   return (
     <Suspense fallback={<KnowledgeFallback />}>
-      <KnowledgeSearch
+      <KnowledgeChat
         initialQuery={query}
         initialSource={source}
         health={health}
@@ -38,6 +38,8 @@ export default async function KnowledgePage({
 
 function KnowledgeFallback() {
   return (
-    <div className="text-[var(--relay-ink-muted)]">Loading knowledge search…</div>
+    <div className="rl-knowledge-chat flex min-h-0 flex-1 items-center justify-center text-[var(--relay-ink-muted)]">
+      Loading knowledge…
+    </div>
   );
 }
