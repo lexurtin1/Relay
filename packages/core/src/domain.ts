@@ -87,11 +87,11 @@ export const WORKSTREAM_COLOUR_LABELS: Record<
   Exclude<WorkstreamColourKey, "neutral">,
   string
 > = {
-  context: "Context layer MCP",
-  rail: "Agent transaction rail",
-  trust: "Trust and identity",
-  collective: "Collective intelligence",
-  standards: "Standards and industry",
+  context: "Share dealing info",
+  rail: "Approved write pilots",
+  trust: "Who can act",
+  collective: "Spot failing orders",
+  standards: "Market standards",
 };
 
 export function resolveWorkstreamColour(

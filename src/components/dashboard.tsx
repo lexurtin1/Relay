@@ -10,6 +10,7 @@ import {
   type WorkstreamStage,
 } from "@relay/core";
 import { ArrowRight, Plus } from "lucide-react";
+import { ColourDot } from "@/components/colour-dot";
 import { Avatar } from "@/components/ui/avatar";
 import { StatusPill } from "@/components/ui/status-pill";
 import { formatTimeInStage } from "@/lib/utils";
@@ -217,15 +218,20 @@ function WorkstreamCard(props: { card: WorkstreamCardModel }) {
     <Link
       href={`/workstreams/${card.id}`}
       className="block rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface)] p-3 shadow-sm transition-relay hover:border-[var(--relay-primary)] hover:shadow-md"
-      style={{ borderLeftWidth: 4, borderLeftColor: card.color }}
     >
       <div className="flex items-start gap-2">
+        <ColourDot
+          color={card.color}
+          pulse={card.needsYou}
+          className="mt-1"
+          label={card.needsYou ? "Needs a decision" : undefined}
+        />
         <h3 className="min-w-0 flex-1 text-sm font-semibold leading-snug text-[var(--relay-ink)]">
           {card.title}
         </h3>
         {card.agentActive ? (
           <span
-            className="mt-1 inline-flex h-2 w-2 shrink-0 rounded-full bg-[var(--relay-brand)] animate-relay-pulse"
+            className="mt-1 inline-flex h-2 w-2 shrink-0 rounded-full bg-[var(--relay-gateway-purple)] animate-relay-pulse"
             title="Agent actively running"
             aria-label="Agent actively running"
           />

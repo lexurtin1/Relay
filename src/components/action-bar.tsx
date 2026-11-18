@@ -18,22 +18,28 @@ export type ActionBarState = {
   reviseReason?: string;
 };
 
+export function planActionStatus(state: ActionBarState): string {
+  if (state.openCommentCount > 0) {
+    return `${state.openCommentCount} comment${state.openCommentCount === 1 ? "" : "s"} must be resolved before approval.`;
+  }
+  if (state.canHandOff) {
+    return "Plan approved. Hand it off to start the build.";
+  }
+  if (state.canApprove) {
+    return "All comments resolved. The plan can be approved.";
+  }
+  return "Actions apply to the current plan version.";
+}
+
 export function ActionBar(props: {
   state: ActionBarState;
   role: string;
   workstreamId: string;
   planId: string | null;
   color?: string;
+  /** Compact control cluster for the ticket header (no sticky dock). */
+  inline?: boolean;
 }) {
-  const statusLeft =
-    props.state.openCommentCount > 0
-      ? `${props.state.openCommentCount} comment${props.state.openCommentCount === 1 ? "" : "s"} must be resolved before approval.`
-      : props.state.canHandOff
-        ? "Plan approved. Hand it off to start the build."
-        : props.state.canApprove
-          ? "All comments resolved. The plan can be approved."
-          : "Actions apply to the current plan version.";
-
   const secondary: Array<{
     id: string;
     label: string;
@@ -42,13 +48,13 @@ export function ActionBar(props: {
   }> = [
     {
       id: "revise",
-      label: "Revise plan using comments",
+      label: props.inline ? "Revise" : "Revise plan using comments",
       enabled: props.state.canRevise,
       reason: props.state.reviseReason ?? "Open comments are required to revise.",
     },
     {
       id: "approve",
-      label: "Approve plan",
+      label: props.inline ? "Approve" : "Approve plan",
       enabled: props.state.canApprove,
       reason:
         props.state.approveReason ??
@@ -58,43 +64,50 @@ export function ActionBar(props: {
     },
   ];
 
+  const buttons = (
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      {secondary.map((action) => {
+        const button = (
+          <button
+            key={action.id}
+            type="button"
+            disabled={!action.enabled}
+            className={cn(
+              props.inline ? "rl-btn-second rl-btn-compact" : "rl-btn-second",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+            )}
+          >
+            {action.label}
+          </button>
+        );
+
+        if (action.enabled) return button;
+
+        return (
+          <Tooltip key={action.id} content={action.reason}>
+            <span className="inline-flex">{button}</span>
+          </Tooltip>
+        );
+      })}
+      <HandOffModal
+        workstreamId={props.workstreamId}
+        planId={props.planId}
+        canHandOff={props.state.canHandOff}
+        handOffReason={props.state.handOffReason}
+        color={props.color}
+      />
+    </div>
+  );
+
   return (
     <TooltipProvider>
-      <div className="rl-glass sticky bottom-4 z-20 mx-auto mt-6 flex max-w-[1120px] flex-col gap-3 rounded-[22px] p-3.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="mr-auto text-sm text-[var(--relay-ink-muted)]">{statusLeft}</div>
-          {secondary.map((action) => {
-            const button = (
-              <button
-                key={action.id}
-                type="button"
-                disabled={!action.enabled}
-                className={cn(
-                  "rl-btn-second",
-                  "disabled:cursor-not-allowed disabled:opacity-50",
-                )}
-              >
-                {action.label}
-              </button>
-            );
-
-            if (action.enabled) return button;
-
-            return (
-              <Tooltip key={action.id} content={action.reason}>
-                <span className="inline-flex">{button}</span>
-              </Tooltip>
-            );
-          })}
-          <HandOffModal
-            workstreamId={props.workstreamId}
-            planId={props.planId}
-            canHandOff={props.state.canHandOff}
-            handOffReason={props.state.handOffReason}
-            color={props.color}
-          />
+      {props.inline ? (
+        buttons
+      ) : (
+        <div className="rl-glass sticky bottom-4 z-20 mx-auto mt-6 flex max-w-[1120px] flex-col gap-3 rounded-[22px] p-3.5">
+          {buttons}
         </div>
-      </div>
+      )}
     </TooltipProvider>
   );
 }

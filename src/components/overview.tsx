@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { ColourDot } from "@/components/colour-dot";
+import { StartWorkDock } from "@/components/start-work-dock";
 import {
   segsForStage,
   statusToneClass,
@@ -15,30 +15,6 @@ import type {
   OverviewStats,
   WorkstreamRowRow,
 } from "@/lib/overview";
-
-const MODES = [
-  {
-    id: "research" as const,
-    label: "Research",
-    ph: "Describe the problem. Scout searches code and connected sources.",
-    cta: "Start research",
-    href: "/workstreams/new",
-  },
-  {
-    id: "idea" as const,
-    label: "Log idea",
-    ph: "Describe the friction or the external signal",
-    cta: "Log idea",
-    href: "/ideas",
-  },
-  {
-    id: "find" as const,
-    label: "Search",
-    ph: "Search Confluence, Jira, Datadog, GitHub and connected sources",
-    cta: "Search",
-    href: "/knowledge",
-  },
-];
 
 export function OverviewPageView(props: {
   stats: OverviewStats;
@@ -73,7 +49,7 @@ export function OverviewPageView(props: {
   ];
 
   return (
-    <div className="rl-overview flex h-full min-h-0 flex-col gap-3">
+    <div className="rl-overview flex h-full min-h-0 flex-col gap-3 pb-16">
       <div className="flex shrink-0 items-end justify-between gap-3">
         <h1 className="m-0 text-[26px] font-medium leading-none tracking-[-0.03em] text-[var(--relay-ink-muted)]">
           Overview
@@ -98,82 +74,12 @@ export function OverviewPageView(props: {
       </section>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)]">
-        <div className="flex min-h-0 flex-col gap-3">
-          <StartWorkComposer />
-          <WorkstreamTimelines rows={props.rows} />
-        </div>
+        <WorkstreamTimelines rows={props.rows} />
         <NeedsInputSection items={props.needsAction} />
       </div>
+
+      <StartWorkDock />
     </div>
-  );
-}
-
-function StartWorkComposer() {
-  const router = useRouter();
-  const [mode, setMode] = useState<(typeof MODES)[number]["id"]>("research");
-  const [draft, setDraft] = useState("");
-  const current = MODES.find((m) => m.id === mode) ?? MODES[0]!;
-
-  function go(e?: FormEvent) {
-    e?.preventDefault();
-    const q = draft.trim();
-    if (mode === "find" && q) {
-      router.push(`/knowledge?q=${encodeURIComponent(q)}`);
-      return;
-    }
-    if (mode === "idea") {
-      router.push(q ? `/ideas?draft=${encodeURIComponent(q)}` : "/ideas");
-      return;
-    }
-    router.push(q ? `/workstreams/new?title=${encodeURIComponent(q)}` : "/workstreams/new");
-  }
-
-  function onKey(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") go();
-  }
-
-  return (
-    <section aria-labelledby="rl-start-h" className="rl-sheet rl-sheet-elevated shrink-0 p-3">
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <h2
-          id="rl-start-h"
-          className="m-0 text-[14px] font-medium tracking-[-0.01em] text-[var(--relay-ink)]"
-        >
-          Start work
-        </h2>
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Type of work">
-          {MODES.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              className={`rl-chip rl-chip-compact ${mode === m.id ? "rl-chip-on" : ""}`}
-              aria-pressed={mode === m.id}
-              onClick={() => setMode(m.id)}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
-      </div>
-      <form className="flex flex-wrap gap-2" onSubmit={go}>
-        <label className="sr-only" htmlFor="rl-ask-in">
-          Describe what you need
-        </label>
-        <input
-          id="rl-ask-in"
-          className="rl-input rl-input-compact min-w-0 flex-[1_1_200px]"
-          type="text"
-          value={draft}
-          placeholder={current.ph}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={onKey}
-          autoComplete="off"
-        />
-        <button type="submit" className="rl-btn-primary rl-btn-compact">
-          {current.cta}
-        </button>
-      </form>
-    </section>
   );
 }
 
@@ -206,15 +112,22 @@ function NeedsInputSection(props: { items: NeedsActionItem[] }) {
               <article
                 key={item.id}
                 className="flex flex-col gap-2 rounded-[14px] border border-[var(--relay-border)] bg-[var(--relay-surface-muted)] p-3.5 animate-relay-in"
-                style={{ borderLeftWidth: 4, borderLeftColor: item.color }}
               >
-                <p className="m-0 text-[12px] text-[var(--relay-ink-muted)]">
-                  {item.jiraKey ? (
-                    <span className="font-mono">{item.jiraKey}</span>
-                  ) : null}
-                  {item.jiraKey ? " · " : null}
-                  <span className="text-[var(--relay-warning)]">{item.summary}</span>
-                </p>
+                <div className="flex items-start gap-2">
+                  <ColourDot
+                    color={item.color}
+                    pulse
+                    className="mt-1"
+                    label="Needs a decision"
+                  />
+                  <p className="m-0 min-w-0 flex-1 text-[12px] text-[var(--relay-ink-muted)]">
+                    {item.jiraKey ? (
+                      <span className="font-mono">{item.jiraKey}</span>
+                    ) : null}
+                    {item.jiraKey ? " · " : null}
+                    <span className="text-[var(--relay-warning)]">{item.summary}</span>
+                  </p>
+                </div>
                 <h3 className="m-0 text-[14.5px] font-medium tracking-[-0.01em] text-[var(--relay-ink)]">
                   {item.title}
                 </h3>
@@ -281,10 +194,11 @@ function WorkstreamTimelines(props: { rows: WorkstreamRowRow[] }) {
               href={`/workstreams/${row.id}`}
               className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-[12px] px-3 py-2 text-left text-[var(--relay-ink)] no-underline transition-relay hover:bg-[color-mix(in_srgb,var(--relay-ink)_4%,transparent)]"
             >
-              <span
-                className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
-                style={{ background: row.color }}
-                aria-hidden
+              <ColourDot
+                color={row.color}
+                pulse={row.progressTone === "waiting"}
+                className="mt-1.5"
+                label={row.progressTone === "waiting" ? "Needs a decision" : undefined}
               />
               <span className="flex min-w-0 flex-[1_1_160px] flex-col gap-0.5">
                 <span className="truncate text-[13.5px] font-medium">{row.title}</span>
@@ -301,7 +215,8 @@ function WorkstreamTimelines(props: { rows: WorkstreamRowRow[] }) {
               <TimelineTrack
                 segs={segs}
                 ariaLabel={`${row.title}. ${row.progressLabel}.`}
-                className="h-3 flex-[1.4_1_200px]"
+                className="flex-[1.4_1_200px]"
+                showLegend={false}
               />
               <span className="flex min-w-0 flex-[0_1_120px] flex-col gap-0.5 text-[12px]">
                 <span className={statusToneClass(tone)}>{row.progressLabel}</span>

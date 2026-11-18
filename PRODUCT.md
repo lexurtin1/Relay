@@ -26,7 +26,7 @@ Used at a desk in a corporate environment alongside Jira, Confluence, Salesforce
 
 - Workstreams progress through stages: idea, research, planning, in_review, approved, building, awaiting_input, pr_open, merged, killed.
 - Ideas board is strategy intake: New → Triaged → Promoted → Parked. Promoted ideas link to a workstream and inherit its colour.
-- Five strategy workstreams carry a stable colour (Context blue, Rail teal, Trust amber, Collective green, Standards slate). Linked tickets and Overview needs-input rows inherit that colour; unlinked ideas stay neutral.
+- About ten demo workstreams and a fuller Ideas board. Each workstream carries a stable colour (Context blue, Rail teal, Trust amber, Collective green, Standards slate), shown as a circle on cards and lists. Circles flash when a ticket needs a decision. Unlinked ideas stay neutral.
 - Roles: engineer, architect, lead, viewer. Architect approval required before Runner hand-off.
 - Hand off to Runner opens a modal (optional context, model, Runner profile) and creates an isolated Runner workspace from an approved plan.
 - Workstream detail shows Orbit-style research activity: user ask, numbered Scout steps with connector disclosures, live tool line, and an Ask anything follow-up.

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { searchKnowledgeAction } from "@/app/actions/knowledge";
@@ -9,7 +10,11 @@ import {
   type SourceConnectorId,
 } from "@/lib/knowledge-shared";
 import type { ConnectorHealthRow, SourceItem } from "@/lib/knowledge";
-import { cn } from "@/lib/utils";
+import {
+  readRecentKnowledge,
+  type RecentKnowledgeEntry,
+} from "@/lib/recent-knowledge";
+import { cn, formatRelativeTime } from "@/lib/utils";
 
 const ALL_SOURCES = listConnectorIds();
 
@@ -26,12 +31,24 @@ export function KnowledgeSearch(props: {
   const [results, setResults] = useState<SourceItem[]>(props.initialResults);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [recent, setRecent] = useState<RecentKnowledgeEntry[]>([]);
 
   useEffect(() => {
     setQuery(props.initialQuery);
     setSource(props.initialSource || "All");
     setResults(props.initialResults);
   }, [props.initialQuery, props.initialSource, props.initialResults]);
+
+  useEffect(() => {
+    const sync = () => setRecent(readRecentKnowledge());
+    sync();
+    window.addEventListener("relay-recent-knowledge", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("relay-recent-knowledge", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
 
   function syncUrl(nextQuery: string, nextSource: string) {
     const params = new URLSearchParams(searchParams?.toString() ?? "");
@@ -68,13 +85,54 @@ export function KnowledgeSearch(props: {
           Knowledge search
         </h1>
         <p className="mt-2 max-w-[68ch] text-[var(--relay-ink-muted)]">
-          Shared company MCP surface: Salesforce, Jira, Confluence, Databricks, Datadog,
-          GitHub and Power BI. Same connectors Scout and the company chatbot use. Research
-          connectors are read-only. Mock mode serves fictional Calastone demo documents.
+          Search the same company sources Scout and the chatbot use: Salesforce, Jira,
+          Confluence, Databricks, Datadog, GitHub and Power BI. Read-only. Mock mode serves
+          fictional Calastone demo documents.
         </p>
       </div>
 
       <ConnectorHealthStrip health={props.health} />
+
+      {recent.length > 0 ? (
+        <section className="rl-sheet p-4" aria-labelledby="recent-knowledge-h">
+          <h2
+            id="recent-knowledge-h"
+            className="m-0 text-base font-medium text-[var(--relay-ink)]"
+          >
+            From Start work
+          </h2>
+          <p className="mt-1 text-[13px] text-[var(--relay-ink-muted)]">
+            Searches started on Overview are logged here.
+          </p>
+          <ul className="mt-3 m-0 flex list-none flex-col gap-2 p-0">
+            {recent.slice(0, 6).map((entry) => (
+              <li key={entry.id}>
+                <button
+                  type="button"
+                  className="flex w-full flex-wrap items-baseline justify-between gap-2 rounded-[12px] border border-[var(--relay-border)] bg-[var(--relay-surface-muted)] px-3 py-2 text-left transition-relay hover:border-[var(--relay-brand-fg)]"
+                  onClick={() => {
+                    setQuery(entry.query);
+                    runSearch(entry.query, "All");
+                  }}
+                >
+                  <span className="min-w-0 truncate text-[14px] font-medium text-[var(--relay-ink)]">
+                    {entry.query}
+                  </span>
+                  <span className="shrink-0 text-[12px] text-[var(--relay-ink-muted)]">
+                    {entry.sourceCount} sources · {formatRelativeTime(entry.at)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <Link
+            href="/"
+            className="mt-3 inline-flex text-[13px] font-medium text-[var(--relay-brand-fg)] no-underline hover:underline"
+          >
+            Back to Overview
+          </Link>
+        </section>
+      ) : null}
 
       <form
         className="rl-glass flex flex-col gap-3 rounded-[26px] p-3.5"
