@@ -8,30 +8,31 @@ Operate
 
 ## World
 
-Dark glass Calastone agent workspace. Soft colour atmosphere, translucent chrome, and subtle teal-to-blue wireframe polyhedra in the background. Light theme is a composed alternate, not a mechanical invert.
+Light-first Calastone agent workspace. Pale ground, white elevated sheets with soft shadows, slim header, and a left sidebar. Subtle atmosphere blobs and teal-to-blue wireframe polyhedra stay low-opacity so status and actions lead. Dark theme remains a composed alternate via the theme toggle.
 
 ## Surfaces
 
-- Shell: fixed brand bar (Relay + SS&C Calastone subtitle), glass status pill, theme toggle, bottom glass dock (Overview, Workstreams, Ideas, Knowledge, Metrics). Audit linked from Metrics.
-- Overview: large title, Start work glass composer, Needs your input sheets, Workstream timelines with segmented bars.
-- Workstream list/detail: stage chips, timeline tracks, sheet panels, glass sticky action bar.
-- Atmosphere: drifting blue / teal / amber blobs plus slow-rotating Calastone wireframe icosahedra at low opacity.
+- Shell: slim top brand bar with Relay mark+wordmark and official SS&C Calastone lockup (PNG), command, theme toggle, user; left sidebar nav (Overview, Workstreams, Ideas, Knowledge, Metrics) with Calastone blue active state and Relay mark. Audit linked from Metrics.
+- Overview: compact title, horizontal KPI row, two-column body (Start work + timelines on the left; Needs your input tickets stacked on the right). Desktop viewport fits without page scroll; lists scroll internally when needed.
+- Workstream list/detail: stage chips, timeline tracks, sheet panels, sticky action bar.
+- Atmosphere: soft blue / teal / amber blobs plus slow-rotating Calastone wireframe icosahedra at low opacity (especially on light).
 
 ## Tokens
 
-Source of truth: `theme/brand.ts` and `src/app/globals.css` (`data-theme="dark"|"light"`).
+Source of truth: `theme/brand.ts` and `src/app/globals.css` (`data-theme="light"|"dark"`). Default theme is light.
 
-- Ground dark `#060A12`, sheets `#0D131F`, ink `#F2F5FA` / muted `#A9B4C6` / body `#D5DCE8`.
-- Calastone blues `#2B6FD6` / `#3F82E0` / `#8DBBFA` for live states and links. No SaaS purple.
-- Primary actions: light fill on dark (`#F2F5FA` on `#0D131F`); blue fill on light theme.
+- Ground light `#F2F5FA`, sheets `#FFFFFF` with soft elevation shadow, ink `#0D131F` / muted `#4A5562` / body `#1A2233`.
+- Dark alternate: ground `#060A12`, sheets `#0D131F`, ink `#F2F5FA`.
+- Calastone blues `#2B6FD6` / `#3F82E0` / `#8DBBFA` for live states, links, and sidebar active fill. No SaaS purple.
+- Primary actions: blue fill on light; light fill on dark.
 - Status: amber needs-you, green done, red failed. Timeline: person `#DDE4EF`, agent `#3F82E0`, waiting hatch amber.
 - Type: Geist Sans for UI; Geist Mono for IDs, paths, code. Tabular nums for counts.
-- Radii: controls 12px, sheets 20px, glass panels / dock 26px.
+- Radii: controls 12px, sheets 16px, panels 20px.
 
 ## Motion
 
-Glass transitions 150ms. Blob drift (28–40s). Wireframe slow rotation. Live agent pulse 1.6s. Respect `prefers-reduced-motion` (static wireframes, no drift/pulse).
+Transitions 150ms. Blob drift (28–40s). Wireframe slow rotation. Live agent pulse 1.6s. Respect `prefers-reduced-motion` (static wireframes, no drift/pulse).
 
 ## Components
 
-Theme toggle, dock nav, timeline tracks, avatar initials, status pills, command palette (⌘K), Sonner toasts, Lucide / inline SVG icons, react-markdown plan body.
+Theme toggle, sidebar nav, timeline tracks, avatar initials, status pills, command palette (⌘K), Sonner toasts, Lucide / inline SVG icons, react-markdown plan body.

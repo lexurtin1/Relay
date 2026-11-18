@@ -66,7 +66,7 @@ export function ActionBar(props: {
 
   return (
     <TooltipProvider>
-      <div className="rl-glass sticky bottom-24 z-20 mx-auto mt-6 flex max-w-[1120px] flex-col gap-3 rounded-[22px] p-3.5">
+      <div className="rl-glass sticky bottom-4 z-20 mx-auto mt-6 flex max-w-[1120px] flex-col gap-3 rounded-[22px] p-3.5">
         <div className="flex flex-wrap items-center gap-2">
           <div className="mr-auto text-sm text-[var(--relay-ink-muted)]">{statusLeft}</div>
           {actions.map((action) => {

@@ -44,9 +44,12 @@
   --relay-glass-inset: rgba(255, 255, 255, 0.38);
   --relay-glass-shadow: rgba(0, 0, 0, 0.65);
   --relay-input-bg: rgba(6, 10, 18, 0.55);
+  --relay-sheet-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+  --relay-sidebar-width: 212px;
+  --relay-sidebar-rail: 72px;
   --relay-radius-control: 12px;
-  --relay-radius-card: 20px;
-  --relay-radius-panel: 26px;
+  --relay-radius-card: 16px;
+  --relay-radius-panel: 20px;
   --relay-font-ui: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --relay-font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
   --relay-ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -71,8 +74,8 @@
   --relay-surface: #ffffff;
   --relay-surface-muted: #f2f5fa;
   --relay-surface-sunken: #e8edf5;
-  --relay-border: rgba(13, 19, 31, 0.12);
-  --relay-border-strong: rgba(13, 19, 31, 0.18);
+  --relay-border: rgba(13, 19, 31, 0.1);
+  --relay-border-strong: rgba(13, 19, 31, 0.16);
   --relay-danger: #b42318;
   --relay-danger-soft: #fef3f2;
   --relay-warning: #b54708;
@@ -89,13 +92,14 @@
   --relay-blob-amber: #f5b24a;
   --relay-wire-teal: #0d7377;
   --relay-wire-blue: #1a56a8;
-  --relay-wire-opacity: 0.1;
-  --relay-glass-from: rgba(255, 255, 255, 0.72);
-  --relay-glass-to: rgba(255, 255, 255, 0.48);
-  --relay-glass-border: rgba(13, 19, 31, 0.12);
-  --relay-glass-inset: rgba(255, 255, 255, 0.9);
-  --relay-glass-shadow: rgba(13, 19, 31, 0.12);
-  --relay-input-bg: rgba(255, 255, 255, 0.85);
+  --relay-wire-opacity: 0.04;
+  --relay-glass-from: rgba(255, 255, 255, 0.92);
+  --relay-glass-to: rgba(255, 255, 255, 0.78);
+  --relay-glass-border: rgba(13, 19, 31, 0.1);
+  --relay-glass-inset: rgba(255, 255, 255, 0.95);
+  --relay-glass-shadow: rgba(13, 19, 31, 0.08);
+  --relay-input-bg: #ffffff;
+  --relay-sheet-shadow: 0 1px 2px rgba(13, 19, 31, 0.04), 0 8px 24px -6px rgba(13, 19, 31, 0.08);
   color-scheme: light;
 }
 
@@ -169,6 +173,102 @@ kbd {
   background: var(--relay-surface);
   border: 1px solid color-mix(in srgb, var(--relay-border) 70%, transparent);
   border-radius: var(--relay-radius-card);
+}
+
+.rl-sheet-elevated {
+  box-shadow: var(--relay-sheet-shadow);
+  border-color: color-mix(in srgb, var(--relay-border) 55%, transparent);
+}
+
+.rl-main {
+  padding: 18px 20px 22px;
+}
+
+.rl-overview {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+@media (min-width: 1280px) {
+  .rl-overview {
+    height: 100%;
+  }
+
+  .rl-main:has(.rl-overview) {
+    overflow: hidden;
+  }
+}
+
+.rl-sidebar {
+  width: var(--relay-sidebar-width);
+}
+
+.rl-sidebar-link-active {
+  background: linear-gradient(90deg, var(--relay-brand) 0%, var(--relay-brand-hover) 100%);
+  color: #ffffff;
+  box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--relay-brand) 70%, transparent);
+}
+
+.rl-sidebar-link-active:hover {
+  background: linear-gradient(90deg, var(--relay-brand) 0%, var(--relay-brand-hover) 100%);
+  color: #ffffff;
+}
+
+.rl-chip-compact {
+  min-height: 30px;
+  padding: 0 11px;
+  font-size: 12px;
+}
+
+.rl-input-compact {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.rl-btn-compact {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-size: 13.5px;
+}
+
+.rl-btn-tiny {
+  min-height: 32px;
+  padding: 0 11px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .rl-sidebar {
+    width: var(--relay-sidebar-rail);
+  }
+
+  .rl-sidebar-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .rl-sidebar-link {
+    justify-content: center;
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+  }
+
+  .rl-main {
+    padding: 16px;
+  }
 }
 
 .rl-chip {
@@ -318,15 +418,21 @@ kbd {
 }
 
 [data-theme="light"] .rl-b1 {
-  opacity: 0.28;
+  opacity: 0.1;
 }
 
 [data-theme="light"] .rl-b2 {
-  opacity: 0.18;
+  opacity: 0.06;
 }
 
 [data-theme="light"] .rl-b3 {
-  opacity: 0.14;
+  opacity: 0.05;
+}
+
+[data-theme="light"] .rl-glass {
+  box-shadow:
+    inset 0 1px 0 var(--relay-glass-inset),
+    0 10px 28px -14px var(--relay-glass-shadow);
 }
 
 @keyframes rl-drift1 {

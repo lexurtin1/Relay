@@ -177,20 +177,23 @@ export function TimelineTrack(props: {
   );
 }
 
-export function TimelineLegend() {
+export function TimelineLegend(props: { compact?: boolean } = {}) {
+  const text = props.compact ? "text-[11.5px]" : "text-[13px]";
+  const gap = props.compact ? "gap-3" : "gap-4";
+  const swatch = props.compact ? "h-2 w-[18px]" : "h-2.5 w-[22px]";
   return (
-    <ul className="m-0 flex list-none flex-wrap gap-4 p-0 text-[13px] text-[var(--relay-ink-body)]">
-      <li className="flex items-center gap-2">
-        <span className="rl-seg rl-seg-p inline-block h-2.5 w-[22px]" />
-        Person working
+    <ul className={`m-0 flex list-none flex-wrap p-0 text-[var(--relay-ink-body)] ${text} ${gap}`}>
+      <li className="flex items-center gap-1.5">
+        <span className={`rl-seg rl-seg-p inline-block ${swatch}`} />
+        {props.compact ? "Person" : "Person working"}
       </li>
-      <li className="flex items-center gap-2">
-        <span className="rl-seg rl-seg-a inline-block h-2.5 w-[22px]" />
-        Agent running
+      <li className="flex items-center gap-1.5">
+        <span className={`rl-seg rl-seg-a inline-block ${swatch}`} />
+        {props.compact ? "Agent" : "Agent running"}
       </li>
-      <li className="flex items-center gap-2">
-        <span className="rl-seg rl-seg-w inline-block h-2.5 w-[22px]" />
-        Waiting on a person
+      <li className="flex items-center gap-1.5">
+        <span className={`rl-seg rl-seg-w inline-block ${swatch}`} />
+        {props.compact ? "Waiting" : "Waiting on a person"}
       </li>
     </ul>
   );
