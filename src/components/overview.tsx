@@ -74,7 +74,7 @@ export function OverviewPageView(props: {
   ];
 
   return (
-    <div className="rl-overview flex h-full min-h-0 flex-col gap-3">
+    <div className="rl-overview flex h-full min-h-0 flex-col gap-3 pb-[7.5rem]">
       <div className="flex shrink-0 items-end justify-between gap-3">
         <h1 className="m-0 text-[26px] font-medium leading-none tracking-[-0.03em] text-[var(--relay-ink-muted)]">
           Overview
@@ -99,12 +99,11 @@ export function OverviewPageView(props: {
       </section>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)]">
-        <div className="flex min-h-0 flex-col gap-3">
-          <StartWorkComposer />
-          <WorkstreamTimelines rows={props.rows} />
-        </div>
+        <WorkstreamTimelines rows={props.rows} />
         <NeedsInputSection items={props.needsAction} />
       </div>
+
+      <StartWorkComposer />
     </div>
   );
 }
@@ -134,47 +133,52 @@ function StartWorkComposer() {
   }
 
   return (
-    <section aria-labelledby="rl-start-h" className="rl-sheet rl-sheet-elevated shrink-0 p-3">
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <h2
-          id="rl-start-h"
-          className="m-0 text-[14px] font-medium tracking-[-0.01em] text-[var(--relay-ink)]"
-        >
-          Start work
-        </h2>
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Type of work">
-          {MODES.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              className={`rl-chip rl-chip-compact ${mode === m.id ? "rl-chip-on" : ""}`}
-              aria-pressed={mode === m.id}
-              onClick={() => setMode(m.id)}
-            >
-              {m.label}
-            </button>
-          ))}
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 max-[900px]:pl-[calc(var(--relay-sidebar-rail)+12px)] min-[901px]:pl-[calc(var(--relay-sidebar-width)+16px)]">
+      <section
+        aria-labelledby="rl-start-h"
+        className="rl-glass pointer-events-auto w-full max-w-[720px] rounded-[22px] p-3.5 shadow-[0_16px_48px_-18px_rgba(13,19,31,0.45)]"
+      >
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h2
+            id="rl-start-h"
+            className="m-0 text-[14px] font-medium tracking-[-0.01em] text-[var(--relay-ink)]"
+          >
+            Start work
+          </h2>
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Type of work">
+            {MODES.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                className={`rl-chip rl-chip-compact ${mode === m.id ? "rl-chip-on" : ""}`}
+                aria-pressed={mode === m.id}
+                onClick={() => setMode(m.id)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-      <form className="flex flex-wrap gap-2" onSubmit={go}>
-        <label className="sr-only" htmlFor="rl-ask-in">
-          Describe what you need
-        </label>
-        <input
-          id="rl-ask-in"
-          className="rl-input rl-input-compact min-w-0 flex-[1_1_200px]"
-          type="text"
-          value={draft}
-          placeholder={current.ph}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={onKey}
-          autoComplete="off"
-        />
-        <button type="submit" className="rl-btn-primary rl-btn-compact">
-          {current.cta}
-        </button>
-      </form>
-    </section>
+        <form className="flex flex-wrap gap-2" onSubmit={go}>
+          <label className="sr-only" htmlFor="rl-ask-in">
+            Describe what you need
+          </label>
+          <input
+            id="rl-ask-in"
+            className="rl-input rl-input-compact min-w-0 flex-[1_1_200px]"
+            type="text"
+            value={draft}
+            placeholder={current.ph}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={onKey}
+            autoComplete="off"
+          />
+          <button type="submit" className="rl-btn-primary rl-btn-compact">
+            {current.cta}
+          </button>
+        </form>
+      </section>
+    </div>
   );
 }
 
