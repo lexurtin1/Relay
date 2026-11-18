@@ -1,4 +1,4 @@
-import { STEPPER_STAGES, stepperIndex, type WorkstreamStage } from "@relay/core";
+import { STEPPER_STAGES, stepperIndex, type WorkstreamStage } from "@relay/core/domain";
 import { cn } from "@/lib/utils";
 
 const labels: Record<(typeof STEPPER_STAGES)[number], string> = {

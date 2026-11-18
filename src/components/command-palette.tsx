@@ -4,8 +4,8 @@ import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FilePlus2, Search } from "lucide-react";
-import type { WorkstreamStage } from "@relay/core";
-import { stageLabel } from "@relay/core";
+import type { WorkstreamStage } from "@relay/core/domain";
+import { stageLabel } from "@relay/core/domain";
 
 export type CommandWorkstream = {
   id: string;

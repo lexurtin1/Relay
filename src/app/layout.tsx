@@ -12,7 +12,7 @@ import { ThemeProvider, themeBootScript } from "@/components/theme-provider";
 import { getAppName, isMockMode } from "@/lib/config";
 import { getCurrentUser, listDemoUsers } from "@/lib/session";
 import { listWorkstreamCommandItems } from "@/lib/workstreams";
-import type { WorkstreamStage } from "@relay/core";
+import type { WorkstreamStage } from "@relay/core/domain";
 
 export const metadata: Metadata = {
   title: "Relay",

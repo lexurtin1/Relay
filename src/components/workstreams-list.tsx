@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { stageLabel, type WorkstreamStage } from "@relay/core";
+import { stageLabel, type WorkstreamStage } from "@relay/core/domain";
 import { ColourDot } from "@/components/colour-dot";
 import {
   segsForStage,

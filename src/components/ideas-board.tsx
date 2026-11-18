@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import {
   WORKSTREAM_COLOUR_LABELS,
   WORKSTREAM_COLOURS,
-} from "@relay/core";
+} from "@relay/core/domain";
 
 const COLUMNS: Array<{ key: IdeaBoardItem["status"]; label: string }> = [
   { key: "new", label: "New" },

@@ -1,4 +1,12 @@
+/* Layer order: Tailwind theme and preflight first, then Astryx components and
+   theme, then Relay components and Tailwind utilities. Relay element defaults
+   live in the base layer so Astryx component styles can win over them. */
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+
 @import "tailwindcss";
+@import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/theme-neutral/theme.css";
+@import "./astryx-theme.css";
 
 :root,
 [data-theme="dark"] {
@@ -109,49 +117,51 @@
   color-scheme: light;
 }
 
-* {
-  box-sizing: border-box;
-}
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-  background: var(--relay-surface-muted);
-  color: var(--relay-ink);
-  font-family: var(--relay-font-ui);
-  font-size: 15px;
-  line-height: 1.45;
-  font-feature-settings: "tnum" 1;
-  -webkit-font-smoothing: antialiased;
-}
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: var(--relay-surface-muted);
+    color: var(--relay-ink);
+    font-family: var(--relay-font-ui);
+    font-size: 15px;
+    line-height: 1.45;
+    font-feature-settings: "tnum" 1;
+    -webkit-font-smoothing: antialiased;
+  }
 
-a {
-  color: var(--relay-brand-fg);
-  text-decoration: none;
-}
+  a {
+    color: var(--relay-brand-fg);
+    text-decoration: none;
+  }
 
-a:hover {
-  color: var(--relay-accent-muted);
-}
+  a:hover {
+    color: var(--relay-accent-muted);
+  }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-  color: inherit;
-}
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
 
-:focus-visible {
-  outline: 2px solid var(--relay-brand-fg);
-  outline-offset: 2px;
-}
+  :focus-visible {
+    outline: 2px solid var(--relay-brand-fg);
+    outline-offset: 2px;
+  }
 
-::selection {
-  background: color-mix(in srgb, var(--relay-brand) 32%, transparent);
-  color: var(--relay-ink);
+  ::selection {
+    background: color-mix(in srgb, var(--relay-brand) 32%, transparent);
+    color: var(--relay-ink);
+  }
 }
 
 .font-mono,
