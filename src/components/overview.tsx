@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent, type KeyboardEvent } from "react";
 import { ColourDot } from "@/components/colour-dot";
+import { StartWorkDock } from "@/components/start-work-dock";
 import {
   segsForStage,
   statusToneClass,
@@ -16,30 +15,6 @@ import type {
   OverviewStats,
   WorkstreamRowRow,
 } from "@/lib/overview";
-
-const MODES = [
-  {
-    id: "research" as const,
-    label: "Research",
-    ph: "Describe the problem. Scout searches code and connected sources.",
-    cta: "Start research",
-    href: "/workstreams/new",
-  },
-  {
-    id: "idea" as const,
-    label: "Log idea",
-    ph: "Describe the friction or the external signal",
-    cta: "Log idea",
-    href: "/ideas",
-  },
-  {
-    id: "find" as const,
-    label: "Search",
-    ph: "Search Confluence, Jira, Datadog, GitHub and connected sources",
-    cta: "Search",
-    href: "/knowledge",
-  },
-];
 
 export function OverviewPageView(props: {
   stats: OverviewStats;
@@ -74,7 +49,7 @@ export function OverviewPageView(props: {
   ];
 
   return (
-    <div className="rl-overview flex h-full min-h-0 flex-col gap-3 pb-[7.5rem]">
+    <div className="rl-overview flex h-full min-h-0 flex-col gap-3 pb-16">
       <div className="flex shrink-0 items-end justify-between gap-3">
         <h1 className="m-0 text-[26px] font-medium leading-none tracking-[-0.03em] text-[var(--relay-ink-muted)]">
           Overview
@@ -103,81 +78,7 @@ export function OverviewPageView(props: {
         <NeedsInputSection items={props.needsAction} />
       </div>
 
-      <StartWorkComposer />
-    </div>
-  );
-}
-
-function StartWorkComposer() {
-  const router = useRouter();
-  const [mode, setMode] = useState<(typeof MODES)[number]["id"]>("research");
-  const [draft, setDraft] = useState("");
-  const current = MODES.find((m) => m.id === mode) ?? MODES[0]!;
-
-  function go(e?: FormEvent) {
-    e?.preventDefault();
-    const q = draft.trim();
-    if (mode === "find" && q) {
-      router.push(`/knowledge?q=${encodeURIComponent(q)}`);
-      return;
-    }
-    if (mode === "idea") {
-      router.push(q ? `/ideas?draft=${encodeURIComponent(q)}` : "/ideas");
-      return;
-    }
-    router.push(q ? `/workstreams/new?title=${encodeURIComponent(q)}` : "/workstreams/new");
-  }
-
-  function onKey(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") go();
-  }
-
-  return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 max-[900px]:pl-[calc(var(--relay-sidebar-rail)+12px)] min-[901px]:pl-[calc(var(--relay-sidebar-width)+16px)]">
-      <section
-        aria-labelledby="rl-start-h"
-        className="rl-glass pointer-events-auto w-full max-w-[720px] rounded-[22px] p-3.5 shadow-[0_16px_48px_-18px_rgba(13,19,31,0.45)]"
-      >
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h2
-            id="rl-start-h"
-            className="m-0 text-[14px] font-medium tracking-[-0.01em] text-[var(--relay-ink)]"
-          >
-            Start work
-          </h2>
-          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Type of work">
-            {MODES.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                className={`rl-chip rl-chip-compact ${mode === m.id ? "rl-chip-on" : ""}`}
-                aria-pressed={mode === m.id}
-                onClick={() => setMode(m.id)}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <form className="flex flex-wrap gap-2" onSubmit={go}>
-          <label className="sr-only" htmlFor="rl-ask-in">
-            Describe what you need
-          </label>
-          <input
-            id="rl-ask-in"
-            className="rl-input rl-input-compact min-w-0 flex-[1_1_200px]"
-            type="text"
-            value={draft}
-            placeholder={current.ph}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={onKey}
-            autoComplete="off"
-          />
-          <button type="submit" className="rl-btn-primary rl-btn-compact">
-            {current.cta}
-          </button>
-        </form>
-      </section>
+      <StartWorkDock />
     </div>
   );
 }
@@ -314,7 +215,8 @@ function WorkstreamTimelines(props: { rows: WorkstreamRowRow[] }) {
               <TimelineTrack
                 segs={segs}
                 ariaLabel={`${row.title}. ${row.progressLabel}.`}
-                className="h-3 flex-[1.4_1_200px]"
+                className="flex-[1.4_1_200px]"
+                showLegend={false}
               />
               <span className="flex min-w-0 flex-[0_1_120px] flex-col gap-0.5 text-[12px]">
                 <span className={statusToneClass(tone)}>{row.progressLabel}</span>

@@ -397,11 +397,25 @@ kbd {
 }
 
 .rl-seg-w {
-  background: repeating-linear-gradient(
+  background-image: repeating-linear-gradient(
     135deg,
     var(--relay-seg-wait-a) 0 5px,
     var(--relay-seg-wait-b) 5px 10px
   );
+  background-size: 20px 20px;
+}
+
+.rl-seg-w-flow {
+  animation: rl-wait-flow 2.2s linear infinite;
+}
+
+@keyframes rl-wait-flow {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 20px 0;
+  }
 }
 
 .rl-seg-live {
@@ -560,7 +574,8 @@ h2 {
   .animate-relay-in,
   .transition-relay,
   .rl-blob,
-  .rl-seg-live {
+  .rl-seg-live,
+  .rl-seg-w-flow {
     animation: none !important;
     transition: none !important;
   }

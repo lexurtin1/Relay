@@ -8,6 +8,8 @@ export type TimelineSeg = {
   grow: number;
   tip: string;
   live?: boolean;
+  /** Subtle flowing hatch for paused / waiting segments. */
+  flowing?: boolean;
 };
 
 const STAGE_SEGS: Record<
@@ -129,6 +131,7 @@ export function segsForStage(
       grow: def.grows[i] ?? 1,
       tip: def.tips[i] ?? "",
       live,
+      flowing: kind === "w",
     };
   });
 }
@@ -148,31 +151,45 @@ export function TimelineTrack(props: {
   ariaLabel: string;
   large?: boolean;
   className?: string;
+  /** Show the person / agent / waiting legend under this track. */
+  showLegend?: boolean;
+  legendCompact?: boolean;
 }) {
   return (
     <span
       className={cn(
-        "flex min-w-0 gap-[3px]",
-        props.large ? "h-[30px] w-full gap-1" : "h-3.5 flex-[2_1_320px]",
+        "flex min-w-0 flex-col gap-1.5",
+        props.large ? "w-full" : "flex-[2_1_320px]",
         props.className,
       )}
-      role="img"
-      aria-label={props.ariaLabel}
     >
-      {props.segs.map((seg, i) => (
-        <span
-          key={`${seg.kind}-${i}`}
-          title={seg.tip}
-          className={cn(
-            "rl-seg",
-            seg.kind === "p" && "rl-seg-p",
-            seg.kind === "a" && "rl-seg-a",
-            seg.kind === "w" && "rl-seg-w",
-            seg.live && "rl-seg-live",
-          )}
-          style={{ flexGrow: seg.grow }}
-        />
-      ))}
+      <span
+        className={cn(
+          "flex min-w-0 gap-[3px]",
+          props.large ? "h-[22px] w-full gap-1" : "h-3.5 w-full gap-[3px]",
+        )}
+        role="img"
+        aria-label={props.ariaLabel}
+      >
+        {props.segs.map((seg, i) => (
+          <span
+            key={`${seg.kind}-${i}`}
+            title={seg.tip}
+            className={cn(
+              "rl-seg",
+              seg.kind === "p" && "rl-seg-p",
+              seg.kind === "a" && "rl-seg-a",
+              seg.kind === "w" && "rl-seg-w",
+              seg.kind === "w" && seg.flowing && "rl-seg-w-flow",
+              seg.live && "rl-seg-live",
+            )}
+            style={{ flexGrow: seg.grow }}
+          />
+        ))}
+      </span>
+      {props.showLegend ? (
+        <TimelineLegend compact={props.legendCompact ?? true} />
+      ) : null}
     </span>
   );
 }
