@@ -149,8 +149,8 @@ export function CalastoneWireframes() {
       const drift = reduceMotion ? 0 : Math.sin(elapsed * 0.2) * 8;
 
       const styles = getComputedStyle(document.documentElement);
-      const teal = styles.getPropertyValue("--relay-wire-teal").trim() || "#80cbc4";
-      const blue = styles.getPropertyValue("--relay-wire-blue").trim() || "#1e88e5";
+      const teal = styles.getPropertyValue("--relay-wire-teal").trim() || "#6fa9f5";
+      const blue = styles.getPropertyValue("--relay-wire-blue").trim() || "#2b6fd6";
       const opacity = Number(styles.getPropertyValue("--relay-wire-opacity").trim() || "0.12");
 
       ctx.clearRect(0, 0, w, h);
@@ -158,28 +158,40 @@ export function CalastoneWireframes() {
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
 
-      // Upper-right complete polyhedron
+      // Upper polyhedron: teal-to-blue behind the Overview KPI band
       drawPoly(
-        w * 0.78 + drift,
-        h * 0.22,
-        Math.min(w, h) * 0.22,
+        w * 0.58 + drift,
+        h * 0.16,
+        Math.min(w, h) * 0.28,
         angle,
         angle * 0.6,
         teal,
         blue,
-        1.1,
+        1.45,
+      );
+
+      // Mid-right companion hexagon
+      drawPoly(
+        w * 0.88 - drift * 0.35,
+        h * 0.4,
+        Math.min(w, h) * 0.18,
+        -angle * 0.7,
+        angle * 0.35 + 0.2,
+        teal,
+        blue,
+        1.2,
       );
 
       // Lower crop (partially off-screen)
       drawPoly(
-        w * 0.42 - drift * 0.5,
-        h * 1.05,
-        Math.min(w, h) * 0.28,
+        w * 0.36 - drift * 0.5,
+        h * 1.04,
+        Math.min(w, h) * 0.32,
         -angle * 0.85,
         angle * 0.4 + 0.4,
         teal,
         blue,
-        1.05,
+        1.25,
       );
 
       ctx.globalAlpha = 1;

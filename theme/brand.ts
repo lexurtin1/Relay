@@ -51,10 +51,12 @@ export const brand = {
     segAgent: "#3F82E0",
     segWaitA: "#F0A630",
     segWaitB: "#B8780F",
-    // Atmosphere blobs
+    // Atmosphere: Calastone blue only (no green / teal decoration)
     blobBlue: "#2B6FD6",
-    blobTeal: "#14908F",
     blobAmber: "#D9861C",
+    // Wireframe polyhedra: light blue → brand blue
+    wireTeal: "#6FA9F5",
+    wireBlue: "#3F82E0",
   },
   light: {
     ink: "#0D131F",
@@ -71,6 +73,9 @@ export const brand = {
     primaryFg: "#FFFFFF",
     primarySoft: "#E8F1FB",
     brandSoft: "#E8F1FB",
+    blobBlue: "#2B6FD6",
+    wireTeal: "#5B8FD4",
+    wireBlue: "#2B6FD6",
   },
 } as const;
 

@@ -105,6 +105,7 @@ export function WorkstreamsList(props: { rows: WorkstreamRowRow[] }) {
                 <TimelineTrack
                   segs={segs}
                   ariaLabel={`${row.title}. ${row.progressLabel}.`}
+                  showLegend={false}
                 />
                 <span className="flex min-w-0 flex-[0_1_230px] flex-col gap-0.5 text-sm">
                   <span className={statusToneClass(tone)}>{row.progressLabel}</span>
