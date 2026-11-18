@@ -38,7 +38,7 @@ export function ResearchActivity(props: {
           Research activity
         </h2>
         <p className="mt-1.5 text-[13px] text-[var(--relay-ink-muted)]">
-          Scout uses the same MCP-style connectors as the company chatbot.
+          Scout uses the same company sources as the chatbot.
         </p>
       </div>
 

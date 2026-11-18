@@ -7,6 +7,7 @@ import {
   setIdeaStatus,
 } from "@/app/actions/ideas";
 import type { IdeaBoardItem, IdeaWorkstreamOption } from "@/lib/ideas";
+import { ColourDot } from "@/components/colour-dot";
 import { cn } from "@/lib/utils";
 import {
   WORKSTREAM_COLOUR_LABELS,
@@ -48,9 +49,9 @@ export function IdeasBoard(props: {
           Ideas
         </h1>
         <p className="mt-2 max-w-[72ch] text-[15px] text-[var(--relay-ink-body)]">
-          Friction logs and external signals that become colour-coded build tickets. Scout and
-          Knowledge use the same MCP-style connectors as the company chatbot (Salesforce, Jira,
-          Confluence, Databricks, Datadog, GitHub, Power BI) so research has full company context.
+          Capture friction and external signals, then promote the ones worth building. Colour dots
+          show which workstream an idea belongs to. Research uses the same company sources as the
+          chatbot.
         </p>
       </div>
 
@@ -188,20 +189,12 @@ function Legend(props: { workstreams: IdeaWorkstreamOption[] }) {
     <ul className="m-0 flex list-none flex-wrap gap-3 p-0 text-[12px] text-[var(--relay-ink-muted)]">
       {rows.map((ws) => (
         <li key={ws.id} className="inline-flex items-center gap-1.5">
-          <span
-            className="inline-block h-2.5 w-2.5 rounded-full"
-            style={{ background: ws.color }}
-            aria-hidden
-          />
+          <ColourDot color={ws.color} />
           <span className="max-w-[220px] truncate">{ws.title}</span>
         </li>
       ))}
       <li className="inline-flex items-center gap-1.5">
-        <span
-          className="inline-block h-2.5 w-2.5 rounded-full"
-          style={{ background: WORKSTREAM_COLOURS.neutral }}
-          aria-hidden
-        />
+        <ColourDot color={WORKSTREAM_COLOURS.neutral} />
         Unlinked
       </li>
     </ul>
@@ -223,13 +216,7 @@ function FilterChip(props: {
         props.active && "rl-chip-on",
       )}
     >
-      {props.color ? (
-        <span
-          className="inline-block h-2 w-2 rounded-full"
-          style={{ background: props.color }}
-          aria-hidden
-        />
-      ) : null}
+      {props.color ? <ColourDot color={props.color} size="sm" /> : null}
       {props.label}
     </button>
   );
@@ -246,15 +233,23 @@ function IdeaCard(props: {
       ? item.frequencyPerWeek * item.minutesLostEach
       : null;
 
+  const needsDecision =
+    item.status === "new" || item.status === "triaged";
+
   return (
-    <article
-      className="flex flex-col gap-2 rounded-[14px] border border-[var(--relay-border)] bg-[var(--relay-surface-muted)] p-3"
-      style={{ borderLeftWidth: 4, borderLeftColor: item.color }}
-    >
-      <p className="m-0 text-[11px] uppercase tracking-[0.05em] text-[var(--relay-ink-muted)]">
-        {item.type === "external_signal" ? "External signal" : "Friction log"}
-        {item.workstreamTitle ? ` · ${item.workstreamTitle}` : ""}
-      </p>
+    <article className="flex flex-col gap-2 rounded-[14px] border border-[var(--relay-border)] bg-[var(--relay-surface-muted)] p-3">
+      <div className="flex items-start gap-2">
+        <ColourDot
+          color={item.color}
+          pulse={needsDecision}
+          className="mt-1"
+          label={needsDecision ? "Needs a decision" : undefined}
+        />
+        <p className="m-0 min-w-0 flex-1 text-[11px] uppercase tracking-[0.05em] text-[var(--relay-ink-muted)]">
+          {item.type === "external_signal" ? "External signal" : "Friction log"}
+          {item.workstreamTitle ? ` · ${item.workstreamTitle}` : ""}
+        </p>
+      </div>
       <h3 className="m-0 text-[14px] font-medium tracking-[-0.01em] text-[var(--relay-ink)]">
         {item.title}
       </h3>

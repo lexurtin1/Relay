@@ -18,6 +18,19 @@ export type ActionBarState = {
   reviseReason?: string;
 };
 
+export function planActionStatus(state: ActionBarState): string {
+  if (state.openCommentCount > 0) {
+    return `${state.openCommentCount} comment${state.openCommentCount === 1 ? "" : "s"} must be resolved before approval.`;
+  }
+  if (state.canHandOff) {
+    return "Plan approved. Hand it off to start the build.";
+  }
+  if (state.canApprove) {
+    return "All comments resolved. The plan can be approved.";
+  }
+  return "Actions apply to the current plan version.";
+}
+
 export function ActionBar(props: {
   state: ActionBarState;
   role: string;
@@ -25,15 +38,6 @@ export function ActionBar(props: {
   planId: string | null;
   color?: string;
 }) {
-  const statusLeft =
-    props.state.openCommentCount > 0
-      ? `${props.state.openCommentCount} comment${props.state.openCommentCount === 1 ? "" : "s"} must be resolved before approval.`
-      : props.state.canHandOff
-        ? "Plan approved. Hand it off to start the build."
-        : props.state.canApprove
-          ? "All comments resolved. The plan can be approved."
-          : "Actions apply to the current plan version.";
-
   const secondary: Array<{
     id: string;
     label: string;
@@ -61,8 +65,7 @@ export function ActionBar(props: {
   return (
     <TooltipProvider>
       <div className="rl-glass sticky bottom-4 z-20 mx-auto mt-6 flex max-w-[1120px] flex-col gap-3 rounded-[22px] p-3.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="mr-auto text-sm text-[var(--relay-ink-muted)]">{statusLeft}</div>
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {secondary.map((action) => {
             const button = (
               <button

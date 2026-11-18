@@ -6,6 +6,9 @@
   --relay-brand-hover: #3f82e0;
   --relay-brand-soft: rgba(63, 130, 224, 0.18);
   --relay-brand-fg: #8dbbfa;
+  --relay-gateway-purple: #7c5cff;
+  --relay-gateway-purple-soft: rgba(124, 92, 255, 0.22);
+  --relay-gateway-end: #3f82e0;
   --relay-primary: #f2f5fa;
   --relay-primary-hover: #ffffff;
   --relay-primary-fg: #0d131f;
@@ -61,6 +64,9 @@
   --relay-brand-hover: #245db8;
   --relay-brand-soft: #e8f1fb;
   --relay-brand-fg: #2b6fd6;
+  --relay-gateway-purple: #7c5cff;
+  --relay-gateway-purple-soft: rgba(124, 92, 255, 0.14);
+  --relay-gateway-end: #3f82e0;
   --relay-primary: #2b6fd6;
   --relay-primary-hover: #245db8;
   --relay-primary-fg: #ffffff;
@@ -206,13 +212,21 @@ kbd {
 }
 
 .rl-sidebar-link-active {
-  background: linear-gradient(90deg, var(--relay-brand) 0%, var(--relay-brand-hover) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--relay-gateway-purple) 0%,
+    var(--relay-gateway-end) 100%
+  );
   color: #ffffff;
-  box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--relay-brand) 70%, transparent);
+  box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--relay-gateway-purple) 65%, transparent);
 }
 
 .rl-sidebar-link-active:hover {
-  background: linear-gradient(90deg, var(--relay-brand) 0%, var(--relay-brand-hover) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--relay-gateway-purple) 0%,
+    var(--relay-gateway-end) 100%
+  );
   color: #ffffff;
 }
 
@@ -291,9 +305,23 @@ kbd {
 }
 
 .rl-chip-on {
-  background: var(--relay-primary);
-  color: var(--relay-primary-fg);
-  border-color: var(--relay-primary);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--relay-gateway-purple) 88%, white) 0%,
+    var(--relay-primary) 100%
+  );
+  color: #ffffff;
+  border-color: transparent;
+}
+
+[data-theme="dark"] .rl-chip-on {
+  background: linear-gradient(
+    90deg,
+    var(--relay-gateway-purple) 0%,
+    var(--relay-gateway-end) 100%
+  );
+  color: #ffffff;
+  border-color: transparent;
 }
 
 .rl-chip-on:hover {
@@ -463,6 +491,22 @@ kbd {
   }
 }
 
+@keyframes rl-colour-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--relay-pulse-colour, var(--relay-warning)) 55%, transparent);
+  }
+  50% {
+    opacity: 0.72;
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--relay-pulse-colour, var(--relay-warning)) 0%, transparent);
+  }
+}
+
+.animate-relay-colour-pulse {
+  animation: rl-colour-pulse 1.5s ease-out infinite;
+}
+
 @keyframes relay-slide-in {
   from {
     opacity: 0;
@@ -512,6 +556,7 @@ h2 {
 
 @media (prefers-reduced-motion: reduce) {
   .animate-relay-pulse,
+  .animate-relay-colour-pulse,
   .animate-relay-in,
   .transition-relay,
   .rl-blob,

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { stageLabel, type WorkstreamStage } from "@relay/core";
+import { ColourDot } from "@/components/colour-dot";
 import {
   segsForStage,
   statusToneClass,
@@ -81,9 +82,15 @@ export function WorkstreamsList(props: { rows: WorkstreamRowRow[] }) {
                 key={row.id}
                 href={`/workstreams/${row.id}`}
                 className="flex w-full flex-wrap items-center gap-x-7 gap-y-3.5 rounded-[14px] px-3.5 py-4 text-left text-[var(--relay-ink)] no-underline transition-relay hover:bg-[color-mix(in_srgb,var(--relay-ink)_4.5%,transparent)]"
-                style={{ borderLeftWidth: 4, borderLeftColor: row.color }}
               >
-                <span className="flex min-w-0 flex-[1_1_300px] flex-col gap-0.5">
+                <ColourDot
+                  color={row.color}
+                  pulse={row.progressTone === "waiting"}
+                  size="md"
+                  className="mt-1.5"
+                  label={row.progressTone === "waiting" ? "Needs a decision" : undefined}
+                />
+                <span className="flex min-w-0 flex-[1_1_280px] flex-col gap-0.5">
                   <span className="text-base font-medium">{row.title}</span>
                   <span className="text-[13px] text-[var(--relay-ink-muted)]">
                     {row.jiraKey ? (

@@ -82,12 +82,12 @@ async function main() {
     }),
   ]);
 
-  // 1. Context layer MCP — in review
+  // 1. Context — in review
   const wsContext = await prisma.workstream.create({
     data: {
-      title: "Ship read-side MCP tools for design partners",
+      title: "Share dealing info with partner teams",
       problemStatement:
-        "Agents cannot act on data they cannot read. Expose dealing rules, order status and exceptions through the same MCP surface the company chatbot already uses, with Relay as a first internal client.",
+        "Partner agents need dealing rules, order status and exceptions before they can help. Use the same company sources the chatbot already reads, with Relay as a first internal client.",
       stage: WorkstreamStage.in_review,
       jiraKey: "INNO-310",
       origin: WorkstreamOrigin.roadmap,
@@ -249,9 +249,9 @@ async function main() {
   // 2. Agent transaction rail — awaiting input (Runner paused)
   const wsRail = await prisma.workstream.create({
     data: {
-      title: "Run one human-approved agent order pilot",
+      title: "Run one approved savings or rebalance pilot",
       problemStatement:
-        "Start with ops agents and one low-risk write flow (regular savings or model rebalance). Every order needs human approval, throttles and a kill switch.",
+        "Start with ops helpers and one low-risk write flow (regular savings or model rebalance). Every order needs a named person to approve, plus clear stops if something goes wrong.",
       stage: WorkstreamStage.awaiting_input,
       jiraKey: "INNO-311",
       origin: WorkstreamOrigin.roadmap,
@@ -346,9 +346,9 @@ async function main() {
   // 3. Trust and identity — research
   const wsTrust = await prisma.workstream.create({
     data: {
-      title: "Stand up agent registry with scopes and audit",
+      title: "Know which agents can act for each firm",
       problemStatement:
-        "Calastone already knows every participant. Extend that to the agents they run: registry, scopes, signed mandates, provenance on each order, and a readable audit trail.",
+        "Calastone already knows every participant. Extend that to the helpers they run: who owns them, what they may do, signed mandates, and a clear trail on each order.",
       stage: WorkstreamStage.research,
       jiraKey: "INNO-312",
       origin: WorkstreamOrigin.roadmap,
@@ -413,9 +413,9 @@ async function main() {
   // 4. Collective intelligence — planning
   const wsCollective = await prisma.workstream.create({
     data: {
-      title: "Predict settlement fails with partner consent",
+      title: "Spot orders likely to fail before settlement",
       problemStatement:
-        "Combine Calastone order flow with SS&C register-side data under clear consent. Score rejection and late settlement risk before T+1 pressure rises.",
+        "With clear partner consent, combine order flow with register-side signals. Flag rejection and late settlement risk earlier, before T+1 pressure rises.",
       stage: WorkstreamStage.planning,
       jiraKey: "INNO-313",
       origin: WorkstreamOrigin.external_opportunity,
@@ -462,9 +462,9 @@ async function main() {
   // 5. Standards — merged example
   const wsStandards = await prisma.workstream.create({
     data: {
-      title: "Draft agent fields for UKFMPG change request",
+      title: "Agree agent fields with UK market groups",
       problemStatement:
-        "ISO 20022 defines the fund order but not the initiating agent or mandate. Draft optional fields and take them to UKFMPG with SS&C and two platforms as co-sponsors.",
+        "Fund orders name the trade but not the helper that started them. Draft optional fields and take them to UK market groups with SS&C and two platforms as co-sponsors.",
       stage: WorkstreamStage.merged,
       jiraKey: "INNO-314",
       origin: WorkstreamOrigin.roadmap,
@@ -518,10 +518,112 @@ async function main() {
     },
   });
 
+  // Extra workstreams so Overview and lists feel full
+  const wsCoverage = await prisma.workstream.create({
+    data: {
+      title: "Explain coverage in plain language",
+      problemStatement:
+        "Partners ask whether coverage is by value or by count. Agree one wording before any client demo.",
+      stage: WorkstreamStage.planning,
+      jiraKey: "INNO-315",
+      origin: WorkstreamOrigin.internal_friction,
+      priority: WorkstreamPriority.medium,
+      color: WORKSTREAM_COLOURS.context,
+      ownerId: leon.id,
+      lastActivityAt: hoursAgo(8),
+    },
+  });
+
+  const wsRepair = await prisma.workstream.create({
+    data: {
+      title: "Cut repair time when an order breaks",
+      problemStatement:
+        "When an order fails, platforms, TAs and managers still chase each other by email. Make a clear repair path with named owners.",
+      stage: WorkstreamStage.building,
+      jiraKey: "INNO-316",
+      origin: WorkstreamOrigin.internal_friction,
+      priority: WorkstreamPriority.high,
+      color: WORKSTREAM_COLOURS.rail,
+      ownerId: alex.id,
+      lastActivityAt: hoursAgo(3),
+    },
+  });
+
+  const wsInvite = await prisma.workstream.create({
+    data: {
+      title: "Invite two platforms to a shared pilot",
+      problemStatement:
+        "Design partners need a short invite pack: what they get, what they share, and how to stop.",
+      stage: WorkstreamStage.idea,
+      jiraKey: "INNO-317",
+      origin: WorkstreamOrigin.roadmap,
+      priority: WorkstreamPriority.medium,
+      color: WORKSTREAM_COLOURS.trust,
+      ownerId: aisha.id,
+      lastActivityAt: hoursAgo(10),
+    },
+  });
+
+  const wsOpenProfile = await prisma.workstream.create({
+    data: {
+      title: "Publish a simple open dealing profile",
+      problemStatement:
+        "Vendors should not need a bilateral deal just to try basic dealing helpers. Publish a short open profile.",
+      stage: WorkstreamStage.research,
+      jiraKey: "INNO-318",
+      origin: WorkstreamOrigin.external_opportunity,
+      priority: WorkstreamPriority.low,
+      color: WORKSTREAM_COLOURS.standards,
+      ownerId: owen.id,
+      lastActivityAt: hoursAgo(12),
+    },
+  });
+
+  const wsWeeklyNote = await prisma.workstream.create({
+    data: {
+      title: "Send managers a weekly cost-avoided note",
+      problemStatement:
+        "Message volume will rise with helpers. Offset that with a clear weekly note on rejects avoided and repair time saved.",
+      stage: WorkstreamStage.in_review,
+      jiraKey: "INNO-319",
+      origin: WorkstreamOrigin.roadmap,
+      priority: WorkstreamPriority.medium,
+      color: WORKSTREAM_COLOURS.collective,
+      ownerId: leon.id,
+      lastActivityAt: hoursAgo(5),
+    },
+  });
+
+  await prisma.plan.create({
+    data: {
+      workstreamId: wsWeeklyNote.id,
+      versionNumber: 1,
+      status: PlanStatus.in_review,
+      markdownBody:
+        "# Plan: Weekly cost-avoided note\n\n1. Pick two metrics\n2. Draft the manager email\n3. Pilot with one design partner",
+      steps: {
+        create: [
+          {
+            order: 1,
+            title: "Pick two metrics",
+            description: "Rejects avoided and repair minutes saved.",
+            riskLevel: RiskLevel.low,
+          },
+          {
+            order: 2,
+            title: "Draft the note",
+            description: "One page, plain language, no jargon.",
+            riskLevel: RiskLevel.low,
+          },
+        ],
+      },
+    },
+  });
+
   await prisma.idea.createMany({
     data: [
       {
-        title: "Publish dealing rules as MCP tools",
+        title: "Publish dealing rules for partners",
         description:
           "Orderability, cut-offs, frequency, minimums and settlement by link. Read-only first for design partners.",
         submittedById: alex.id,
@@ -534,7 +636,7 @@ async function main() {
       {
         title: "Give managers a free flow statement",
         description:
-          "Show messages, flows delivered and cost per pound of flow before any Data Insights upsell.",
+          "Show messages, flows delivered and cost per pound of flow before any upsell conversation.",
         submittedById: leon.id,
         type: IdeaType.friction_log,
         frequencyPerWeek: 2,
@@ -543,9 +645,9 @@ async function main() {
         workstreamId: wsContext.id,
       },
       {
-        title: "Use Relay as first MCP client",
+        title: "Use Relay as the first internal client",
         description:
-          "Point Scout and Knowledge at the same connectors as the company chatbot so the strategy is dogfooded internally.",
+          "Point Scout and Knowledge at the same company sources as the chatbot so we learn on our own work first.",
         submittedById: alex.id,
         type: IdeaType.external_signal,
         status: IdeaStatus.promoted,
@@ -563,9 +665,9 @@ async function main() {
         workstreamId: wsRail.id,
       },
       {
-        title: "Add per-agent kill switch",
+        title: "Add a stop button per helper",
         description:
-          "Throttles, duplicate detection and a kill switch so one faulty agent cannot flood a fund.",
+          "Throttles, duplicate checks and a clear stop so one faulty helper cannot flood a fund.",
         submittedById: aisha.id,
         type: IdeaType.friction_log,
         frequencyPerWeek: 1,
@@ -574,9 +676,9 @@ async function main() {
         workstreamId: wsRail.id,
       },
       {
-        title: "Register agents under participant identity",
+        title: "List helpers under the firm that owns them",
         description:
-          "Registry lists each agent, owner participant, endpoint and scopes. No consumer chatbot IDs.",
+          "Each helper has an owner firm, what it may do, and how to reach the person in charge.",
         submittedById: alex.id,
         type: IdeaType.friction_log,
         status: IdeaStatus.promoted,
@@ -592,16 +694,16 @@ async function main() {
         workstreamId: wsTrust.id,
       },
       {
-        title: "Score orders for fail or late settlement",
+        title: "Flag orders that may fail or settle late",
         description:
-          "Network model with partner consent. Ties to UK and EU T+1 pressure in 2027.",
+          "With partner consent, score risk earlier. Ties to UK and EU settlement pressure in 2027.",
         submittedById: owen.id,
         type: IdeaType.external_signal,
         status: IdeaStatus.promoted,
         workstreamId: wsCollective.id,
       },
       {
-        title: "Agree GIDS data consent with SS&C",
+        title: "Agree data sharing rules with SS&C",
         description:
           "Register-side data fills holdings gaps only with explicit consent or a contribute-to-receive pool.",
         submittedById: leon.id,
@@ -610,25 +712,72 @@ async function main() {
         workstreamId: wsCollective.id,
       },
       {
-        title: "Draft agent ID fields for UKFMPG",
+        title: "Draft optional agent fields for market groups",
         description:
-          "Optional initiating agent ID and mandate reference in fund order messages.",
+          "Optional initiating helper ID and mandate reference on fund order messages.",
         submittedById: leon.id,
         type: IdeaType.friction_log,
         status: IdeaStatus.promoted,
         workstreamId: wsStandards.id,
       },
       {
-        title: "Open fund-dealing MCP profile",
+        title: "Publish an open dealing profile",
         description:
-          "Publish tool definitions openly so vendors can build without a bilateral deal.",
+          "A short public profile so vendors can try basic helpers without a bilateral deal.",
         submittedById: aisha.id,
         type: IdeaType.external_signal,
         status: IdeaStatus.promoted,
         workstreamId: wsStandards.id,
       },
       {
-        title: "Join Agentic AI Foundation working item",
+        title: "One coverage definition for demos",
+        description:
+          "Agree value vs count language so partner demos do not contradict each other.",
+        submittedById: leon.id,
+        type: IdeaType.friction_log,
+        status: IdeaStatus.promoted,
+        workstreamId: wsCoverage.id,
+      },
+      {
+        title: "Named owners on the repair path",
+        description:
+          "When an order breaks, everyone should know who answers first at platform, TA and manager.",
+        submittedById: alex.id,
+        type: IdeaType.friction_log,
+        frequencyPerWeek: 4,
+        minutesLostEach: 45,
+        status: IdeaStatus.promoted,
+        workstreamId: wsRepair.id,
+      },
+      {
+        title: "Short invite pack for two platforms",
+        description:
+          "What they get, what they share, how to stop. Keep legal light for the first pilot.",
+        submittedById: aisha.id,
+        type: IdeaType.friction_log,
+        status: IdeaStatus.promoted,
+        workstreamId: wsInvite.id,
+      },
+      {
+        title: "Open profile sketch for vendors",
+        description:
+          "Map the common dealing asks into a short open card vendors can implement.",
+        submittedById: owen.id,
+        type: IdeaType.external_signal,
+        status: IdeaStatus.promoted,
+        workstreamId: wsOpenProfile.id,
+      },
+      {
+        title: "Weekly cost-avoided email for managers",
+        description:
+          "Two numbers and one sentence. No dashboard required for the first pilot.",
+        submittedById: leon.id,
+        type: IdeaType.friction_log,
+        status: IdeaStatus.promoted,
+        workstreamId: wsWeeklyNote.id,
+      },
+      {
+        title: "Join an industry working item on helpers",
         description:
           "Propose a financial services item and contribute the fund dealing profile.",
         submittedById: leon.id,
@@ -636,7 +785,7 @@ async function main() {
         status: IdeaStatus.triaged,
       },
       {
-        title: "Meet FCA AI Lab on fund dealing trust",
+        title: "Meet the FCA AI Lab on fund dealing trust",
         description:
           "Extend Know Your Agent conversations from payments into fund dealing with Calastone as industry pilot.",
         submittedById: vera.id,
@@ -644,9 +793,27 @@ async function main() {
         status: IdeaStatus.triaged,
       },
       {
+        title: "Plain-language exception labels",
+        description:
+          "Ops teams still decode opaque codes. Agree a short shared label set for the top ten failures.",
+        submittedById: owen.id,
+        type: IdeaType.friction_log,
+        frequencyPerWeek: 8,
+        minutesLostEach: 10,
+        status: IdeaStatus.triaged,
+      },
+      {
+        title: "Office-hours slot for design partners",
+        description:
+          "A weekly drop-in so partners can raise blockers without opening a new ticket every time.",
+        submittedById: aisha.id,
+        type: IdeaType.friction_log,
+        status: IdeaStatus.triaged,
+      },
+      {
         title: "Segment views instead of named distributors",
         description:
-          "Safer Data Insights design until distributors opt in. Avoid green-space leaks.",
+          "Safer Insights design until distributors opt in. Avoid green-space leaks.",
         submittedById: alex.id,
         type: IdeaType.friction_log,
         frequencyPerWeek: 3,
@@ -654,9 +821,9 @@ async function main() {
         status: IdeaStatus.new,
       },
       {
-        title: "Scope FE fundinfo for peer comparison",
+        title: "Licensed peer data for comparisons",
         description:
-          "Layer 2 needs licensed fund data Calastone does not hold. Pitch flows plus FE, not against data vendors.",
+          "Peer views need licensed fund data Calastone does not hold. Pitch flows plus a data partner, not against vendors.",
         submittedById: owen.id,
         type: IdeaType.external_signal,
         status: IdeaStatus.new,
@@ -664,11 +831,45 @@ async function main() {
       {
         title: "Show managers repair cost avoided",
         description:
-          "Counter higher agent message volume with a clear saving report per fund manager.",
+          "Counter higher helper message volume with a clear saving report per fund manager.",
         submittedById: leon.id,
         type: IdeaType.friction_log,
         frequencyPerWeek: 1,
         minutesLostEach: 60,
+        status: IdeaStatus.new,
+      },
+      {
+        title: "Template answers for Runner questions",
+        description:
+          "Common pause questions should have ready answers so owners do not rewrite the same reply.",
+        submittedById: alex.id,
+        type: IdeaType.friction_log,
+        frequencyPerWeek: 6,
+        minutesLostEach: 8,
+        status: IdeaStatus.new,
+      },
+      {
+        title: "Partner success story one-pager",
+        description:
+          "A short internal note when a pilot hits its first week of rejects avoided.",
+        submittedById: vera.id,
+        type: IdeaType.external_signal,
+        status: IdeaStatus.new,
+      },
+      {
+        title: "Calm alerts when helpers go quiet",
+        description:
+          "If a helper stops sending heartbeats, notify the owner firm without paging the whole ops floor.",
+        submittedById: owen.id,
+        type: IdeaType.friction_log,
+        status: IdeaStatus.new,
+      },
+      {
+        title: "Shared glossary for Scout findings",
+        description:
+          "Scout summaries mix platform and TA terms. One short glossary keeps plans readable.",
+        submittedById: aisha.id,
+        type: IdeaType.friction_log,
         status: IdeaStatus.new,
       },
       {
@@ -679,6 +880,22 @@ async function main() {
         type: IdeaType.external_signal,
         status: IdeaStatus.parked,
       },
+      {
+        title: "Park live write access for chatbots",
+        description:
+          "Consumer chatbots must not place orders. Keep this parked while trust work lands.",
+        submittedById: leon.id,
+        type: IdeaType.friction_log,
+        status: IdeaStatus.parked,
+      },
+      {
+        title: "Park cross-border mandate reuse",
+        description:
+          "Interesting later, but consent rules differ by market. Park until UK pilot is stable.",
+        submittedById: vera.id,
+        type: IdeaType.external_signal,
+        status: IdeaStatus.parked,
+      },
     ],
   });
 
@@ -686,12 +903,14 @@ async function main() {
     data: {
       action: AuditAction.seed,
       userId: alex.id,
-      detail: "Seeded strategy-aligned workstreams and ideas for agent infrastructure demo.",
+      detail: "Seeded strategy workstreams and a fuller Ideas board for the agent demo.",
     },
   });
 
   void runnerRail;
-  console.log("Seed complete: 5 strategy workstreams, ideas board content, MCP connectors story.");
+  console.log(
+    "Seed complete: 10 workstreams, expanded Ideas board, shared company sources story.",
+  );
 }
 
 main()

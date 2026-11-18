@@ -5,7 +5,12 @@ import { useState } from "react";
 import type { WorkstreamStage } from "@relay/core";
 import { StageStepper } from "@/components/stage-stepper";
 import { PlanDocument, type PlanCommentView, type PlanStepView } from "@/components/plan-document";
-import { ActionBar, type ActionBarState } from "@/components/action-bar";
+import {
+  ActionBar,
+  planActionStatus,
+  type ActionBarState,
+} from "@/components/action-bar";
+import { ColourDot } from "@/components/colour-dot";
 import {
   ResearchActivity,
   type ResearchStepView,
@@ -72,6 +77,8 @@ export function WorkstreamDetail(props: {
       ? `Plan in review${openComments ? `, ${openComments} open comments` : ""}`
       : props.stage.replaceAll("_", " ");
 
+  const actionStatus = planActionStatus(props.actionState);
+
   return (
     <div className="flex flex-col gap-6 pb-8">
       <div>
@@ -91,10 +98,11 @@ export function WorkstreamDetail(props: {
           {props.ownerName}
         </p>
         <div className="mt-1.5 flex flex-wrap items-center gap-3">
-          <span
-            className="inline-block h-3 w-3 rounded-full"
-            style={{ background: props.color }}
-            aria-hidden
+          <ColourDot
+            color={props.color}
+            pulse={Boolean(props.openQuestion)}
+            size="md"
+            label={props.openQuestion ? "Needs a decision" : undefined}
           />
           <h1 className="m-0 text-[clamp(30px,3.4vw,42px)] font-medium leading-[1.1] tracking-[-0.03em] text-[var(--relay-ink)]">
             {props.title}
@@ -212,10 +220,16 @@ export function WorkstreamDetail(props: {
 
         <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-4">
           <section className="rl-sheet flex flex-col gap-5 p-7" aria-labelledby="plan-heading">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 id="plan-heading" className="m-0 text-xl font-medium text-[var(--relay-ink)]">
-                Plan
-              </h2>
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="m-0 text-[13px] text-[var(--relay-ink-muted)]">{actionStatus}</p>
+                <h2
+                  id="plan-heading"
+                  className="m-0 mt-1 text-xl font-medium text-[var(--relay-ink)]"
+                >
+                  Plan
+                </h2>
+              </div>
               {props.planVersion ? (
                 <div className="text-[13px] text-[var(--relay-ink-muted)]">
                   Version {props.planVersion} of {props.planTotalVersions}

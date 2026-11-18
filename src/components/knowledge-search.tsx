@@ -68,9 +68,9 @@ export function KnowledgeSearch(props: {
           Knowledge search
         </h1>
         <p className="mt-2 max-w-[68ch] text-[var(--relay-ink-muted)]">
-          Shared company MCP surface: Salesforce, Jira, Confluence, Databricks, Datadog,
-          GitHub and Power BI. Same connectors Scout and the company chatbot use. Research
-          connectors are read-only. Mock mode serves fictional Calastone demo documents.
+          Search the same company sources Scout and the chatbot use: Salesforce, Jira,
+          Confluence, Databricks, Datadog, GitHub and Power BI. Read-only. Mock mode serves
+          fictional Calastone demo documents.
         </p>
       </div>
 

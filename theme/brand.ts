@@ -1,7 +1,8 @@
 /**
  * Brand tokens for Relay (white-labelled Calastone / SS&C).
  * Light-first Operate shell (sidebar + elevated sheets); dark remains available.
- * Calastone blues for primary / live; no SaaS purple.
+ * Calastone blues for primary / live. AI Gateway purple used only for active nav
+ * and selected chips (matches SS&C AI Governance accents).
  */
 export const brand = {
   nameSource: "APP_NAME",
