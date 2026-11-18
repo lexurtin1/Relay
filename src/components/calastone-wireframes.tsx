@@ -149,8 +149,8 @@ export function CalastoneWireframes() {
       const drift = reduceMotion ? 0 : Math.sin(elapsed * 0.2) * 8;
 
       const styles = getComputedStyle(document.documentElement);
-      const teal = styles.getPropertyValue("--relay-wire-teal").trim() || "#80cbc4";
-      const blue = styles.getPropertyValue("--relay-wire-blue").trim() || "#1e88e5";
+      const teal = styles.getPropertyValue("--relay-wire-teal").trim() || "#6fa9f5";
+      const blue = styles.getPropertyValue("--relay-wire-blue").trim() || "#2b6fd6";
       const opacity = Number(styles.getPropertyValue("--relay-wire-opacity").trim() || "0.12");
 
       ctx.clearRect(0, 0, w, h);
