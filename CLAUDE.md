@@ -39,9 +39,12 @@ Tests: `pnpm test`
 
 1. Skeleton: schema, seed, branded dashboard (done)
 2. Connectors and knowledge search (done)
-3. Scout and Planner (current)
+3. Scout and Planner (simulated in demo mode; worker processors pending)
+4. Review / comments / approval (demo mode done; database actions pending)
+5. Runner (simulated in demo mode)
+6. Reviewer, Ideas, Metrics, Audit (Ideas, Metrics, Audit done in demo mode)
+7. Hardening and Playwright happy path (happy path in `e2e/`)
 
-4. Review / comments / approval
-5. Runner
-6. Reviewer, Ideas, Metrics, Audit
-7. Hardening and Playwright happy path
+## Demo mode
+
+With no `DATABASE_URL`, the UI runs on the browser store in `src/lib/demo-store/`. Every button dispatches through `useRelayActions()`; permissions live in `permissions.ts` and are shared by the reducer and the UI. Import Astryx only through `src/components/ui/astryx.tsx`. Client code imports `@relay/core/domain`, never `@relay/core` (it pulls in Prisma).

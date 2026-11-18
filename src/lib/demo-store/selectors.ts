@@ -480,7 +480,8 @@ export function selectMetrics(state: DemoState, now: number): MetricsModel {
         const span = Math.max(0, end - h.at);
         if (AGENT_STAGES.includes(h.stage)) agent += span;
         else if (WAITING_STAGES.includes(h.stage)) waiting += span;
-        else if (h.stage !== "merged" && h.stage !== "killed") personMs += span;
+        // Idle backlog (idea) is nobody's work yet; leave it out.
+        else if (h.stage !== "merged" && h.stage !== "killed" && h.stage !== "idea") personMs += span;
       });
       return {
         id: w.id,

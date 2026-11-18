@@ -203,7 +203,7 @@ export type AuditEntry = {
   detail: string;
 };
 
-export type TourState = { active: boolean; step: number };
+export type TourState = { active: boolean; step: number; wsId?: string | null };
 
 export type DemoState = {
   schemaVersion: number;

@@ -17,3 +17,7 @@ docker/data
 .worktrees
 demo-repos/**/.git
 !demo-repos/**/.gitkeep
+
+# Playwright
+test-results/
+playwright-report/

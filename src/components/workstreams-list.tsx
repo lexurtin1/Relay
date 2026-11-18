@@ -11,6 +11,8 @@ import {
   TimelineTrack,
 } from "@/components/timeline-track";
 import type { WorkstreamRowRow } from "@/lib/overview";
+import { PageHero } from "@/components/page-hero";
+import type { StageCount } from "@/lib/demo-store/selectors";
 import { formatRelativeTime } from "@/lib/utils";
 
 const STAGE_FILTERS: Array<{ key: string; label: string; match?: WorkstreamStage[] }> = [
@@ -23,7 +25,36 @@ const STAGE_FILTERS: Array<{ key: string; label: string; match?: WorkstreamStage
   { key: "merged", label: "Merged", match: ["merged"] },
 ];
 
-export function WorkstreamsList(props: { rows: WorkstreamRowRow[] }) {
+const STAGE_SHADES = ["#2B6FD6", "#3F82E0", "#0D9488", "#14908F", "#475569"];
+
+function StageDistribution(props: { counts: StageCount[] }) {
+  const total = props.counts.reduce((s, c) => s + c.count, 0) || 1;
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex h-4 w-full overflow-hidden rounded-full bg-[var(--relay-surface-sunken)]" role="img" aria-label={props.counts.map((c) => `${c.label} ${c.count}`).join(", ")}>
+        {props.counts.map((c, i) =>
+          c.count > 0 ? (
+            <span key={c.key} className="h-full" style={{ width: `${(c.count / total) * 100}%`, background: STAGE_SHADES[i] }} title={`${c.label}: ${c.count}`} />
+          ) : null,
+        )}
+      </div>
+      <ul className="m-0 grid list-none grid-cols-2 gap-2 p-0 sm:grid-cols-5">
+        {props.counts.map((c, i) => (
+          <li key={c.key} className="flex flex-col gap-0.5 rounded-[12px] border border-[var(--relay-border)] bg-[var(--relay-surface)] px-3 py-2">
+            <span className="inline-flex items-center gap-1.5 text-[11.5px] text-[var(--relay-ink-muted)]">
+              <span className="inline-block h-2 w-2 rounded-full" style={{ background: STAGE_SHADES[i] }} aria-hidden />
+              {c.label}
+            </span>
+            <span className="rl-stat-value text-[20px]">{c.count}</span>
+            {c.blocked > 0 ? <span className="text-[11px] text-[var(--relay-warning)]">{c.blocked} waiting</span> : <span className="text-[11px] text-[var(--relay-ink-subtle)]">{c.holderLabel}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export function WorkstreamsList(props: { rows: WorkstreamRowRow[]; stageCounts: StageCount[]; agentsActive: number }) {
   const [filter, setFilter] = useState("all");
 
   const filtered = useMemo(() => {
@@ -34,15 +65,24 @@ export function WorkstreamsList(props: { rows: WorkstreamRowRow[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="m-0 text-[clamp(30px,3.4vw,42px)] font-medium leading-[1.1] tracking-[-0.03em] text-[var(--relay-ink)]">
-          Workstreams
-        </h1>
-        <p className="mt-2 max-w-[68ch] text-[var(--relay-ink-muted)]">
-          Every workstream moves through five stages: Research, Plan, Review, Build, Pull request.
-          Open one to see its agent session, plan and build.
-        </p>
-      </div>
+      <PageHero
+        id="workstreams"
+        eyebrow="Workstreams"
+        title="Every piece of work, and who holds the baton"
+        purpose="Each workstream runs Research, Plan, Review, Build and Pull request. Agents carry the routine legs; people decide at review, at questions and at merge."
+        stats={[
+          { label: "Active", value: props.rows.filter((r) => r.stage !== "merged" && r.stage !== "killed").length },
+          { label: "Waiting on a person", value: props.rows.filter((r) => r.progressTone === "waiting").length, tone: props.rows.filter((r) => r.progressTone === "waiting").length > 0 ? "waiting" : "default" },
+          { label: "Agents working", value: props.agentsActive, tone: props.agentsActive > 0 ? "live" : "default" },
+          { label: "Merged", value: props.rows.filter((r) => r.stage === "merged").length },
+        ]}
+        actions={
+          <Link href="/workstreams/new" className="rl-btn-primary rl-btn-compact inline-flex items-center no-underline">
+            New workstream
+          </Link>
+        }
+        visual={<StageDistribution counts={props.stageCounts} />}
+      />
 
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by stage">
@@ -108,7 +148,7 @@ export function WorkstreamsList(props: { rows: WorkstreamRowRow[] }) {
                 />
                 <span className="flex min-w-0 flex-[0_1_230px] flex-col gap-0.5 text-sm">
                   <span className={statusToneClass(tone)}>{row.progressLabel}</span>
-                  <span className="text-[13px] text-[var(--relay-ink-muted)]">
+                  <span className="text-[13px] text-[var(--relay-ink-muted)]" suppressHydrationWarning>
                     Updated {formatRelativeTime(row.updatedAt)}
                   </span>
                 </span>

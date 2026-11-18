@@ -73,6 +73,22 @@ const items = [
       </svg>
     ),
   },
+  {
+    href: "/audit",
+    label: "Audit",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px]">
+        <path
+          d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z M9 12l2 2 4-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
 ] as const;
 
 export function Sidebar() {

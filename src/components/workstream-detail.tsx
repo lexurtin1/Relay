@@ -1,326 +1,395 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Bot, Loader2 } from "lucide-react";
 import type { WorkstreamStage } from "@relay/core/domain";
-import { StageStepper } from "@/components/stage-stepper";
-import { PlanDocument, type PlanCommentView, type PlanStepView } from "@/components/plan-document";
-import {
-  ActionBar,
-  planActionStatus,
-  type ActionBarState,
-} from "@/components/action-bar";
+import { ActionBar, applicableVerbs, planActionStatus } from "@/components/action-bar";
 import { ColourDot } from "@/components/colour-dot";
-import {
-  ResearchActivity,
-  type ResearchStepView,
-} from "@/components/research-activity";
-import {
-  segsForStage,
-  TimelineTrack,
-} from "@/components/timeline-track";
+import { CommentsRail, type CommentDraftTarget } from "@/components/comments-rail";
+import { HandOffModal } from "@/components/hand-off-modal";
+import { PlanDocument } from "@/components/plan-document";
+import { ResearchActivity } from "@/components/research-activity";
+import { RunnerConsole } from "@/components/runner-console";
+import { StageStepper } from "@/components/stage-stepper";
+import { segsForStage, statusToneClass, TimelineTrack } from "@/components/timeline-track";
+import { Avatar, Badge, EmptyState, Tab, TabList } from "@/components/ui/astryx";
+import { useRelayActions } from "@/lib/demo-store/provider";
+import type { ActionVerb, WorkstreamDetailModel } from "@/lib/view-models";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
-export type ResearchSourceView = {
-  connector: string;
-  title: string;
-  itemId?: string;
+type TabKey = "research" | "plan" | "build" | "activity";
+
+function tabForStage(stage: WorkstreamStage): TabKey {
+  if (stage === "idea" || stage === "research") return "research";
+  if (stage === "planning" || stage === "in_review" || stage === "approved") return "plan";
+  if (stage === "building" || stage === "awaiting_input" || stage === "pr_open" || stage === "merged") return "build";
+  return "activity";
+}
+
+const PRIMARY_LABEL: Record<ActionVerb, string> = {
+  start_research: "Start research",
+  generate_plan: "Generate plan",
+  request_review: "Request review",
+  revise_plan: "Revise from comments",
+  approve_plan: "Approve plan",
+  hand_off: "Hand off to Runner",
+  answer_question: "Answer the Runner",
+  merge_pr: "Merge pull request",
 };
 
-export type HistoryItemView = {
-  id: string;
-  label: string;
-  at: string;
-};
+export function WorkstreamDetail(props: { model: WorkstreamDetailModel }) {
+  const m = props.model;
+  const actions = useRelayActions();
+  const [tab, setTab] = useState<TabKey>(() => tabForStage(m.stage));
+  const [handOffOpen, setHandOffOpen] = useState(false);
+  const [target, setTarget] = useState<CommentDraftTarget>(null);
+  const [hover, setHover] = useState<string | null>(null);
+  const lastStage = useRef(m.stage);
 
-export function WorkstreamDetail(props: {
-  id: string;
-  title: string;
-  problemStatement: string;
-  stage: WorkstreamStage;
-  ownerName: string;
-  origin: string;
-  priority: string;
-  jiraKey: string | null;
-  role: string;
-  color: string;
-  planId: string | null;
-  planVersion: number | null;
-  planTotalVersions: number;
-  planMarkdown: string | null;
-  steps: PlanStepView[];
-  comments: PlanCommentView[];
-  researchSummary: string | null;
-  sources: ResearchSourceView[];
-  researchSteps: ResearchStepView[];
-  liveToolsLine: string | null;
-  history: HistoryItemView[];
-  openQuestion: string | null;
-  actionState: ActionBarState;
-}) {
-  const [hoverCommentId, setHoverCommentId] = useState<string | null>(null);
-  const openComments = props.comments.filter((c) => !c.resolved).length;
-  const segs = segsForStage(
-    props.stage,
-    props.openQuestion
-      ? "waiting"
-      : props.stage === "building" || props.stage === "research"
-        ? "active"
-        : props.stage === "merged" || props.stage === "pr_open"
-          ? "done"
-          : "neutral",
-  );
+  // Follow the baton: when the stage moves, open the tab where the work now is.
+  useEffect(() => {
+    if (lastStage.current !== m.stage) {
+      lastStage.current = m.stage;
+      setTab(tabForStage(m.stage));
+    }
+  }, [m.stage]);
 
-  const statusLine = props.openQuestion
-    ? "Runner paused, waiting on you"
-    : props.stage === "in_review"
-      ? `Plan in review${openComments ? `, ${openComments} open comments` : ""}`
-      : props.stage.replaceAll("_", " ");
+  const run = (verb: ActionVerb) => {
+    switch (verb) {
+      case "start_research":
+        setTab("research");
+        return actions.startResearch(m.id);
+      case "generate_plan":
+        setTab("plan");
+        return void actions.generatePlan(m.id);
+      case "request_review":
+        return actions.requestReview(m.id);
+      case "revise_plan":
+        setTab("plan");
+        return void actions.revisePlan(m.id);
+      case "approve_plan":
+        return actions.approvePlan(m.id);
+      case "hand_off":
+        return setHandOffOpen(true);
+      case "answer_question":
+        setTab("build");
+        requestAnimationFrame(() => document.getElementById("runner-q")?.scrollIntoView({ behavior: "smooth", block: "center" }));
+        return;
+      case "merge_pr":
+        return actions.mergePr(m.id);
+    }
+  };
 
-  const actionStatus = planActionStatus(props.actionState);
+  const segs = segsForStage(m.stage, m.progress.tone);
+  const tone = m.progress.tone === "waiting" ? "w" : m.progress.tone === "done" ? "d" : m.progress.tone === "active" ? "a" : "p";
+  const verbs = applicableVerbs(m.plan, Boolean(m.runner), m.research.status === "succeeded", Boolean(m.planDrafting));
+  const primary = m.nextMove.primary;
+  const primaryGate = primary ? m.gates[primary] : null;
+  const commentTarget = m.gates.comment.ok ? (t: { anchorText: string | null; stepId: string | null }) => setTarget(t) : undefined;
 
   return (
-    <div className="flex flex-col gap-6 pb-8">
-      <div>
-        <Link
-          href="/workstreams"
-          className="inline-flex min-h-11 items-center rounded-[10px] px-2.5 text-sm text-[var(--relay-ink-muted)] no-underline transition-relay hover:bg-[color-mix(in_srgb,var(--relay-ink)_6%,transparent)] hover:text-[var(--relay-ink)]"
-        >
-          Back to workstreams
-        </Link>
-        <p className="mt-2 text-[13px] text-[var(--relay-ink-muted)]">
-          {props.jiraKey ? (
-            <span className="font-mono">{props.jiraKey}</span>
-          ) : (
-            <span className="font-mono">{props.id.slice(0, 8)}</span>
-          )}
-          {" · Owner "}
-          {props.ownerName}
-        </p>
-        <div className="mt-1.5 flex flex-wrap items-center gap-3">
-          <ColourDot
-            color={props.color}
-            pulse={Boolean(props.openQuestion)}
-            size="md"
-            label={props.openQuestion ? "Needs a decision" : undefined}
-          />
-          <h1 className="m-0 text-[clamp(30px,3.4vw,42px)] font-medium leading-[1.1] tracking-[-0.03em] text-[var(--relay-ink)]">
-            {props.title}
-          </h1>
-        </div>
-        <p
-          className={cn(
-            "mt-2.5 text-[17px] capitalize",
-            props.openQuestion
-              ? "text-[var(--relay-warning)]"
-              : "text-[var(--relay-brand-fg)]",
-          )}
-        >
-          {statusLine}
-        </p>
-      </div>
+    <div className="flex flex-col gap-5 pb-6">
+      <Link
+        href="/workstreams"
+        className="inline-flex w-fit items-center gap-1.5 rounded-[10px] px-2 py-1.5 text-sm text-[var(--relay-ink-muted)] no-underline transition-relay hover:bg-[color-mix(in_srgb,var(--relay-ink)_6%,transparent)] hover:text-[var(--relay-ink)]"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        All workstreams
+      </Link>
 
-      <StageStepper stage={props.stage} />
-
-      <div>
-        <TimelineTrack
-          segs={segs}
-          ariaLabel={`${props.title} timeline`}
-          large
-        />
-        <p className="mt-2.5 text-[13px] text-[var(--relay-ink-muted)]">
-          Timeline · Updated {formatRelativeTime(props.history[0]?.at ?? new Date().toISOString())}
-        </p>
-      </div>
-
-      {props.openQuestion ? (
-        <section className="rl-sheet flex flex-col gap-3 p-7" aria-labelledby="rl-q-h">
-          <h2 id="rl-q-h" className="m-0 text-xl font-medium text-[var(--relay-warning)]">
-            Question from the Runner
-          </h2>
-          <p className="m-0 text-[17px] text-[var(--relay-ink)]">{props.openQuestion}</p>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" className="rl-btn-second">
-              Answer in workstream
-            </button>
-          </div>
-        </section>
-      ) : null}
-
-      <ResearchActivity
-        workstreamId={props.id}
-        userAsk={props.problemStatement}
-        steps={props.researchSteps}
-        liveToolsLine={props.liveToolsLine}
-        color={props.color}
-      />
-
-      <div className="flex flex-wrap items-start gap-6">
-        <section
-          className="rl-sheet min-w-0 flex-[1_1_300px] p-6"
-          aria-labelledby="rl-sess-h"
-        >
-          <h2 id="rl-sess-h" className="m-0 text-xl font-medium text-[var(--relay-ink)]">
-            Agent session
-          </h2>
-          <p className="mt-1.5 text-[13px] text-[var(--relay-ink-muted)]">
-            Everything Scout, the Runner and people did on this workstream, newest first.
+      <section className="rl-hero grid gap-6 p-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]" aria-labelledby="ws-title">
+        <div className="flex min-w-0 flex-col gap-3">
+          <p className="m-0 text-[13px] text-[var(--relay-ink-muted)]">
+            <span className="font-mono">{m.jiraKey ?? m.id.slice(0, 8)}</span>
+            {" · "}
+            <span className="capitalize">{m.priority}</span> priority
+            {" · "}
+            <span className="capitalize">{m.origin.replaceAll("_", " ")}</span>
+            {" · Owner "}
+            {m.owner.name}
           </p>
-          <ol className="mt-4 flex list-none flex-col gap-3.5 p-0">
-            {props.history.length === 0 ? (
-              <li className="text-sm text-[var(--relay-ink-muted)]">No history yet.</li>
-            ) : (
-              props.history.map((item) => (
-                <li key={item.id} className="flex items-start gap-3">
-                  <span
-                    className="mt-1.5 inline-block h-3 w-3 shrink-0 rounded bg-[var(--relay-seg-agent)]"
-                    aria-hidden
-                  />
-                  <span>
-                    <span className="block">
-                      <span className="mr-2 inline-block text-[11.5px] uppercase tracking-[0.06em] text-[var(--relay-brand-fg)]">
-                        Event
-                      </span>
-                      {item.label}
-                    </span>
-                    <span className="text-[13px] text-[var(--relay-ink-muted)]">
-                      {formatRelativeTime(item.at)}
-                    </span>
-                  </span>
-                </li>
-              ))
-            )}
-          </ol>
-
-          <div className="mt-5">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--relay-ink-subtle)]">
-              Sources read by Scout
-            </h3>
-            {props.sources.length === 0 ? (
-              <p className="text-sm text-[var(--relay-ink-muted)]">
-                No sources yet. Start research to populate this list.
-              </p>
-            ) : (
-              <ul className="space-y-2">
-                {props.sources.map((source) => (
-                  <li
-                    key={`${source.connector}-${source.itemId ?? source.title}`}
-                    className="rounded-[14px] border border-[var(--relay-border)] bg-[color-mix(in_srgb,var(--relay-ink)_4%,transparent)] px-3 py-2 text-sm"
-                  >
-                    <div className="font-medium text-[var(--relay-ink)]">{source.title}</div>
-                    <div className="text-xs capitalize text-[var(--relay-ink-subtle)]">
-                      {source.connector}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <div className="flex items-start gap-3">
+            <ColourDot color={m.color} pulse={m.progress.tone === "waiting"} size="md" className="mt-3" label={m.progress.tone === "waiting" ? "Needs a decision" : undefined} />
+            <h1 id="ws-title" className="m-0 text-[clamp(26px,3vw,38px)] font-medium leading-[1.12] tracking-[-0.03em] text-[var(--relay-ink)]">
+              {m.title}
+            </h1>
           </div>
-        </section>
+          <p className="m-0 max-w-[70ch] text-[14.5px] leading-relaxed text-[var(--relay-ink-body)]">{m.problemStatement}</p>
+          <div className="mt-1 flex flex-col gap-3">
+            <StageStepper stage={m.stage} />
+            <div className="flex flex-wrap items-center gap-3">
+              <TimelineTrack segs={segs} ariaLabel={`${m.title} timeline`} className="h-3 min-w-[200px] flex-1" />
+              <span className={cn("text-[13px] font-medium", statusToneClass(tone))}>{m.progress.label}</span>
+            </div>
+          </div>
+        </div>
 
-        <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-4">
-          <section className="rl-sheet flex flex-col gap-5 p-7" aria-labelledby="plan-heading">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div className="min-w-0">
-                <p className="m-0 text-[13px] text-[var(--relay-ink-muted)]">{actionStatus}</p>
-                <h2
-                  id="plan-heading"
-                  className="m-0 mt-1 text-xl font-medium text-[var(--relay-ink)]"
-                >
-                  Plan
-                </h2>
-              </div>
-              {props.planVersion ? (
-                <div className="text-[13px] text-[var(--relay-ink-muted)]">
-                  Version {props.planVersion} of {props.planTotalVersions}
-                </div>
+        <aside
+          className="flex flex-col gap-3 rounded-[18px] border border-[var(--relay-border)] bg-[var(--relay-surface)] p-5 shadow-[var(--relay-sheet-shadow)]"
+          aria-labelledby="next-move-h"
+          data-tour="next-move"
+        >
+          <p className="rl-eyebrow">Next move</p>
+          <div className="flex items-center gap-3">
+            {m.nextMove.holder.kind === "agent" ? (
+              <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--relay-brand-soft)] text-[var(--relay-brand-fg)]">
+                <Bot className="h-5 w-5" aria-hidden />
+                <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-[var(--relay-surface)] bg-[var(--relay-live)] animate-relay-pulse" aria-hidden />
+              </span>
+            ) : (
+              <Avatar name={m.nextMove.holder.name} size="lg" tooltip={false} />
+            )}
+            <div className="min-w-0">
+              <p className="m-0 text-[14px] font-medium text-[var(--relay-ink)]">{m.nextMove.holder.name}</p>
+              <p className="m-0 text-[12px] text-[var(--relay-ink-muted)]">
+                {m.nextMove.holder.kind === "agent" ? `Agent · ${m.nextMove.holder.detail}` : m.nextMove.holder.detail}
+              </p>
+            </div>
+          </div>
+          <h2 id="next-move-h" className="m-0 text-[18px] font-medium tracking-[-0.02em] text-[var(--relay-ink)]">
+            {m.nextMove.headline}
+          </h2>
+          <p className="m-0 text-[13.5px] text-[var(--relay-ink-body)]">{m.nextMove.body}</p>
+          {primary && primaryGate ? (
+            <div className="flex flex-col gap-1.5">
+              <button type="button" className="rl-btn-primary self-start" disabled={!primaryGate.ok} onClick={() => run(primary)}>
+                {PRIMARY_LABEL[primary]}
+              </button>
+              {!primaryGate.ok ? (
+                <p className="m-0 text-[12.5px] text-[var(--relay-ink-muted)]">
+                  {primaryGate.reason}
+                  {primaryGate.switchTo && actions.mode === "demo" ? (
+                    <button
+                      type="button"
+                      className="ml-1.5 font-medium text-[var(--relay-brand-fg)] hover:underline"
+                      onClick={() => actions.switchUser(primaryGate.switchTo!.id)}
+                    >
+                      Switch to {primaryGate.switchTo.name}
+                    </button>
+                  ) : null}
+                </p>
               ) : null}
             </div>
-            {props.planMarkdown ? (
-              <PlanDocument
-                markdown={props.planMarkdown}
-                steps={props.steps}
-                comments={props.comments}
-                highlightedCommentId={hoverCommentId}
-                onHoverAnchor={setHoverCommentId}
-              />
-            ) : (
-              <div className="text-sm text-[var(--relay-ink-muted)]">
-                <p className="m-0 font-medium text-[var(--relay-ink)]">No plan yet</p>
-                <p className="mt-1">
-                  {props.researchSummary ?? props.problemStatement}
-                </p>
-              </div>
-            )}
-          </section>
+          ) : m.nextMove.holder.kind === "agent" ? (
+            <p className="m-0 inline-flex items-center gap-1.5 text-[12.5px] text-[var(--relay-brand-fg)]">
+              <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
+              Nothing for you to do yet. This updates live.
+            </p>
+          ) : null}
+        </aside>
+      </section>
 
-          <section className="rl-sheet p-6" aria-labelledby="comments-heading">
-            <h2 id="comments-heading" className="m-0 text-xl font-medium text-[var(--relay-ink)]">
-              Comments {openComments > 0 ? `· ${openComments} open` : ""}
-            </h2>
-            {props.comments.length === 0 ? (
-              <p className="mt-3 text-sm text-[var(--relay-ink-muted)]">
-                No comments yet. Select text in the plan to leave an anchored note.
-              </p>
-            ) : (
-              <ul className="mt-4 space-y-3">
-                {props.comments.map((comment) => (
-                  <li
-                    key={comment.id}
-                    id={`comment-${comment.id}`}
-                    className={cn(
-                      "rounded-[14px] border p-3.5 text-sm transition-relay scroll-mt-24",
-                      comment.resolved
-                        ? "border-[var(--relay-border)] bg-[color-mix(in_srgb,var(--relay-success)_8%,transparent)]"
-                        : "border-[color-mix(in_srgb,var(--relay-warning)_30%,transparent)] bg-[var(--relay-warning-soft)]",
-                      hoverCommentId === comment.id && "border-[var(--relay-brand-fg)]",
-                    )}
-                    onMouseEnter={() => setHoverCommentId(comment.id)}
-                    onMouseLeave={() => setHoverCommentId(null)}
-                  >
-                    <div className="text-xs text-[var(--relay-ink-subtle)]">
-                      {comment.authorName}
-                      {comment.anchorText ? (
-                        <>
-                          {" · on \u201c"}
-                          <a
-                            href={`#anchor-${comment.id}`}
-                            className="text-[var(--relay-warning)] hover:underline"
-                          >
-                            {comment.anchorText}
-                          </a>
-                          {"\u201d"}
-                        </>
-                      ) : null}
+      <div className="flex flex-col gap-4">
+        <TabList value={tab} onChange={(v) => setTab(v as TabKey)} role="tablist" hasDivider>
+          <Tab value="research" label="Research" panelId="panel-research" endContent={m.research.status === "running" ? <Badge variant="info" label="Live" /> : undefined} />
+          <Tab
+            value="plan"
+            label="Plan"
+            panelId="panel-plan"
+            endContent={
+              m.plan && m.plan.openComments > 0 ? (
+                <Badge variant="warning" label={String(m.plan.openComments)} />
+              ) : m.plan ? (
+                <Badge label={`v${m.plan.version}`} />
+              ) : undefined
+            }
+          />
+          <Tab
+            value="build"
+            label="Build"
+            panelId="panel-build"
+            endContent={m.runner?.question && !m.runner.question.answer ? <Badge variant="warning" label="Needs you" /> : undefined}
+          />
+          <Tab value="activity" label="Activity" panelId="panel-activity" />
+        </TabList>
+
+        <div id="panel-research" role="tabpanel" hidden={tab !== "research"}>
+          {tab === "research" ? (
+            <ResearchActivity
+              workstreamId={m.id}
+              userAsk={m.research.ask}
+              steps={m.research.steps}
+              liveToolsLine={m.research.liveTools}
+              color={m.color}
+              status={m.research.status}
+              findings={m.research.findings}
+              sources={m.research.sources}
+              askGate={m.gates.ask}
+              startGate={m.stage === "idea" ? m.gates.start_research : undefined}
+            />
+          ) : null}
+        </div>
+
+        <div id="panel-plan" role="tabpanel" hidden={tab !== "plan"}>
+          {tab === "plan" ? (
+            m.planDrafting ? (
+              <PlanSkeleton kind={m.planDrafting} />
+            ) : m.plan ? (
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,1fr)]">
+                <section className="rl-sheet flex flex-col gap-4 p-6" aria-labelledby="plan-heading" data-tour="plan">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <h2 id="plan-heading" className="m-0 text-[18px] font-medium text-[var(--relay-ink)]">
+                        Plan v{m.plan.version}
+                      </h2>
+                      <Badge
+                        variant={m.plan.status === "approved" ? "success" : m.plan.status === "in_review" ? "warning" : "neutral"}
+                        label={m.plan.status === "in_review" ? "In review" : m.plan.status === "approved" ? "Approved" : "Draft"}
+                      />
                     </div>
-                    <p className="mt-1.5 text-[var(--relay-ink)]">{comment.body}</p>
-                    {comment.resolved ? (
-                      <p className="mt-2 text-[13px] text-[var(--relay-success)]">Resolved</p>
-                    ) : (
-                      <div className="mt-2 flex gap-3 text-xs font-medium text-[var(--relay-brand-fg)]">
-                        <button type="button" className="hover:underline">
-                          Reply
-                        </button>
-                        <button type="button" className="hover:underline">
-                          Resolve
-                        </button>
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+                    <p className="m-0 text-[12.5px] text-[var(--relay-ink-muted)]">
+                      {m.plan.totalVersions > 1 ? `${m.plan.totalVersions} versions` : "First version"}
+                      {m.plan.approvals.length ? ` · Approved by ${m.plan.approvals.map((a) => a.name).join(", ")}` : ""}
+                    </p>
+                  </div>
+                  <PlanDocument
+                    markdown={m.plan.markdown}
+                    steps={m.plan.steps}
+                    comments={m.plan.comments}
+                    highlightedCommentId={hover}
+                    onHoverAnchor={setHover}
+                    onCommentTarget={commentTarget}
+                  />
+                </section>
+                <CommentsRail
+                  comments={m.plan.comments}
+                  commentGate={m.gates.comment}
+                  resolveGate={m.gates.resolve}
+                  target={target}
+                  onClearTarget={() => setTarget(null)}
+                  onAdd={(input) => actions.addComment({ wsId: m.id, ...input })}
+                  onResolve={(id) => actions.resolveComment(m.id, id)}
+                  highlightedId={hover}
+                  onHover={setHover}
+                />
+              </div>
+            ) : (
+              <div className="rl-sheet p-6">
+                <EmptyState
+                  title="No plan yet"
+                  description={
+                    m.research.status === "succeeded"
+                      ? "Scout's findings are ready. The Planner turns them into ordered, testable steps."
+                      : "The Planner needs Scout's findings first."
+                  }
+                  actions={
+                    <button
+                      type="button"
+                      className="rl-btn-primary rl-btn-compact"
+                      disabled={!m.gates.generate_plan.ok}
+                      title={m.gates.generate_plan.reason}
+                      onClick={() => run("generate_plan")}
+                    >
+                      Generate plan
+                    </button>
+                  }
+                />
+              </div>
+            )
+          ) : null}
+        </div>
+
+        <div id="panel-build" role="tabpanel" hidden={tab !== "build"}>
+          {tab === "build" ? (
+            <RunnerConsole
+              runner={m.runner}
+              steps={m.plan?.steps ?? []}
+              color={m.color}
+              answerGate={m.gates.answer_question}
+              mergeGate={m.gates.merge_pr}
+              handOffGate={m.gates.hand_off}
+              onAnswer={(a) => actions.answerQuestion(m.id, a)}
+              onMerge={() => actions.mergePr(m.id)}
+              onHandOff={() => setHandOffOpen(true)}
+            />
+          ) : null}
+        </div>
+
+        <div id="panel-activity" role="tabpanel" hidden={tab !== "activity"}>
+          {tab === "activity" ? <ActivityPanel model={m} /> : null}
         </div>
       </div>
 
-      <ActionBar
-        state={props.actionState}
-        role={props.role}
-        workstreamId={props.id}
-        planId={props.planId}
-        color={props.color}
+      {m.interactive ? (
+        <ActionBar
+          verbs={verbs}
+          gates={m.gates}
+          status={planActionStatus(m.plan, Boolean(m.planDrafting))}
+          primary={primary}
+          onRun={run}
+          onSwitch={(id) => actions.switchUser(id)}
+          color={m.color}
+        />
+      ) : null}
+
+      <HandOffModal
+        open={handOffOpen}
+        onOpenChange={setHandOffOpen}
+        workstreamId={m.id}
+        planId={m.plan?.id ?? null}
+        planVersion={m.plan?.version ?? null}
+        stepsTotal={m.plan?.steps.length ?? 0}
+        color={m.color}
+        onDone={() => setTab("build")}
       />
+    </div>
+  );
+}
+
+function PlanSkeleton(props: { kind: "generate" | "revise" }) {
+  return (
+    <section className="rl-sheet flex flex-col gap-4 p-6" aria-busy="true" aria-live="polite">
+      <p className="m-0 inline-flex items-center gap-2 text-[14px] font-medium text-[var(--relay-brand-fg)]">
+        <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
+        {props.kind === "revise" ? "The Planner is revising the plan from review comments" : "The Planner is drafting the plan from Scout's findings"}
+      </p>
+      {[78, 92, 64, 85, 70].map((w, i) => (
+        <div key={i} className="h-3.5 rounded-full bg-[var(--relay-surface-sunken)] animate-relay-pulse" style={{ width: `${w}%` }} />
+      ))}
+    </section>
+  );
+}
+
+function ActivityPanel(props: { model: WorkstreamDetailModel }) {
+  const m = props.model;
+  const total = m.tokens.input + m.tokens.output;
+  return (
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(260px,1fr)]">
+      <section className="rl-sheet p-5" aria-labelledby="activity-h">
+        <h2 id="activity-h" className="m-0 text-[16px] font-medium text-[var(--relay-ink)]">
+          Everything that happened
+        </h2>
+        <p className="m-0 mt-1 text-[13px] text-[var(--relay-ink-muted)]">Agents and people, newest first. The same entries appear in Audit.</p>
+        <ol className="m-0 mt-4 flex list-none flex-col gap-3 p-0">
+          {m.history.length === 0 ? <li className="text-sm text-[var(--relay-ink-muted)]">No activity yet.</li> : null}
+          {m.history.map((item) => (
+            <li key={item.id} className="flex items-start gap-3">
+              <span
+                className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ background: item.actor === "agent" ? "var(--relay-seg-agent)" : "var(--relay-seg-person)" }}
+                aria-hidden
+              />
+              <span className="min-w-0">
+                <span className="block text-[13.5px] text-[var(--relay-ink)]">{item.label}</span>
+                <span className="text-[12px] text-[var(--relay-ink-muted)]" suppressHydrationWarning>
+                  {item.actor === "agent" ? "Agent" : "Person"} · {formatRelativeTime(item.at)}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+      <aside className="rl-sheet flex flex-col gap-3 p-5">
+        <h3 className="m-0 text-[15px] font-medium text-[var(--relay-ink)]">Model use</h3>
+        <p className="rl-stat-value m-0">{total.toLocaleString("en-GB")}</p>
+        <p className="m-0 text-[12.5px] text-[var(--relay-ink-muted)]">
+          tokens through the AI Gateway ({m.tokens.input.toLocaleString("en-GB")} in, {m.tokens.output.toLocaleString("en-GB")} out)
+        </p>
+        <Link href="/audit" className="text-[13px] font-medium">
+          Open the audit log
+        </Link>
+      </aside>
     </div>
   );
 }
