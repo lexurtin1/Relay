@@ -80,7 +80,31 @@ export function Sidebar() {
 
   return (
     <aside className="rl-sidebar relative z-20 flex shrink-0 flex-col border-r border-[var(--relay-border)] bg-[var(--relay-surface)]">
-      <nav aria-label="Sections" className="flex flex-1 flex-col gap-1 p-3 pt-4">
+      <div className="rl-sidebar-brand flex items-center px-3 pb-1 pt-4">
+        <svg
+          viewBox="0 0 40 40"
+          fill="none"
+          aria-hidden
+          className="h-8 w-8 shrink-0"
+        >
+          <circle cx="10" cy="20" r="7.5" fill="var(--relay-brand)" />
+          <circle cx="30" cy="20" r="7.5" fill="var(--relay-brand)" />
+          <path
+            d="M14.5 16.2 L25.5 23.8"
+            stroke="var(--relay-brand-hover)"
+            strokeWidth="4.2"
+            strokeLinecap="round"
+          />
+          <path
+            d="M14.5 23.8 L25.5 16.2"
+            stroke="var(--relay-accent-muted)"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            opacity="0.95"
+          />
+        </svg>
+      </div>
+      <nav aria-label="Sections" className="flex flex-1 flex-col gap-1 p-3 pt-3">
         {items.map((item) => {
           const active =
             item.href === "/"

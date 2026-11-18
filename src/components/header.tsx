@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { User } from "@prisma/client";
 import { switchUser } from "@/app/actions";
+import { BrandLockup } from "@/components/brand-lockup";
 import { CommandTrigger } from "@/components/command-trigger";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -25,18 +25,8 @@ export function Header(props: {
       : "Workspace ready";
 
   return (
-    <header className="relative z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-[var(--relay-border)] bg-[var(--relay-surface)] px-5">
-      <div className="flex min-w-0 flex-wrap items-baseline gap-2.5">
-        <Link
-          href="/"
-          className="truncate text-[15px] font-semibold tracking-[0.02em] text-[var(--relay-ink)]"
-        >
-          {props.appName}
-        </Link>
-        <small className="hidden truncate text-[12.5px] text-[var(--relay-ink-muted)] sm:inline">
-          SS&amp;C Calastone · Innovation and Strategy
-        </small>
-      </div>
+    <header className="relative z-30 flex h-[68px] shrink-0 items-center justify-between gap-3 border-b border-[var(--relay-border)] bg-[var(--relay-surface)] px-5">
+      <BrandLockup appName={props.appName} />
 
       <div className="flex shrink-0 flex-wrap items-center gap-2">
         <CommandTrigger />

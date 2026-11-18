@@ -64,7 +64,7 @@ pnpm dev
 
 ## Branding
 
-- Logos: `public/brand/logo-light.png` (header), `logo-dark.png` / `logo-on-dark.png` for dark surfaces, plus `logo.svg` placeholder
+- Logos: SS&C Calastone `logo-header.png` / `logo-on-dark.png`; Relay `relay.svg` / `relay-mark.svg`
 - Theme tokens: `theme/brand.ts` + `src/app/globals.css` (dark glass default, light theme option, Calastone blues)
 
 

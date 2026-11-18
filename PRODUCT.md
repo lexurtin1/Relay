@@ -40,7 +40,7 @@ Used at a desk in a corporate environment alongside Jira, Confluence, Salesforce
 
 ## Evidence on Hand
 
-- Logo PNGs: `public/brand/logo-light.png`, `logo-dark.png`, and derivatives.
+- Logo assets: official SS&C Calastone lockup (`public/brand/logo-header.png`, `logo-on-dark.png`); Relay mark + wordmark (`public/brand/relay.svg`, `relay-mark.svg`).
 - Theme tokens: `theme/brand.ts` and `src/app/globals.css` (light default `#F2F5FA` sheets on pale ground; dark `data-theme` alternate; Calastone blues `#2B6FD6` / `#3F82E0`).
 - Seeded demo story: five workstreams at different stages, six ideas, fictional users.
 - Screenshots: `docs/screenshots/` (Milestone 1 baseline).
