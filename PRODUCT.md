@@ -20,12 +20,16 @@ One workspace that owns the path from problem to PR with research, plan review, 
 
 ## Operating Context
 
-Used at a desk in a corporate environment alongside Jira, Confluence, Salesforce, Power BI, Databricks, and GitHub. Default run mode is mock with seeded Calastone-flavoured fiction. Live connectors and the SS&C AI Gateway are configuration switches. Product name is a single config value (`APP_NAME`, default `Relay`).
+Used at a desk in a corporate environment alongside Jira, Confluence, Salesforce, Power BI, Databricks, Datadog, and GitHub. Those connectors are the shared company MCP surface (mock by default; live health when env is set) used by Scout, Knowledge, and the company chatbot. Default run mode is mock with seeded Calastone-flavoured fiction. Live connectors and the SS&C AI Gateway are configuration switches. Product name is a single config value (`APP_NAME`, default `Relay`).
 
 ## Capabilities and Constraints
 
 - Workstreams progress through stages: idea, research, planning, in_review, approved, building, awaiting_input, pr_open, merged, killed.
+- Ideas board is strategy intake: New → Triaged → Promoted → Parked. Promoted ideas link to a workstream and inherit its colour.
+- Five strategy workstreams carry a stable colour (Context blue, Rail teal, Trust amber, Collective green, Standards slate). Linked tickets and Overview needs-input rows inherit that colour; unlinked ideas stay neutral.
 - Roles: engineer, architect, lead, viewer. Architect approval required before Runner hand-off.
+- Hand off to Runner opens a modal (optional context, model, Runner profile) and creates an isolated Runner workspace from an approved plan.
+- Workstream detail shows Orbit-style research activity: user ask, numbered Scout steps with connector disclosures, live tool line, and an Ask anything follow-up.
 - All model calls go through the SS&C AI Gateway module; never call providers directly.
 - No production data in Runner workspaces. Research connectors are read-only.
 - Prototype must run with Docker Compose in mock mode offline when no gateway key is set.
@@ -42,7 +46,7 @@ Used at a desk in a corporate environment alongside Jira, Confluence, Salesforce
 
 - Logo assets: official SS&C Calastone lockup (`public/brand/logo-header.png`, `logo-on-dark.png`); Relay mark + wordmark (`public/brand/relay.svg`, `relay-mark.svg`).
 - Theme tokens: `theme/brand.ts` and `src/app/globals.css` (light default `#F2F5FA` sheets on pale ground; dark `data-theme` alternate; Calastone blues `#2B6FD6` / `#3F82E0`).
-- Seeded demo story: five workstreams at different stages, six ideas, fictional users.
+- Seeded demo story: five coloured strategy workstreams, 12–18 Ideas board tickets, Datadog in the connector set, fictional users.
 - Screenshots: `docs/screenshots/` (Milestone 1 baseline).
 
 ## Product Principles

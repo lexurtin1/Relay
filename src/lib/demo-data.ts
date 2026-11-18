@@ -1,10 +1,16 @@
 import type { User, UserRole, WorkstreamStage } from "@prisma/client";
+import {
+  WORKSTREAM_COLOURS,
+  resolveWorkstreamColour,
+} from "@relay/core";
 import type {
   AgentRunningItem,
   NeedsActionItem,
   OverviewStats,
   WorkstreamRowRow,
 } from "@/lib/overview";
+import type { IdeaBoardItem, IdeaWorkstreamOption } from "@/lib/ideas";
+import type { ResearchStepView } from "@/components/research-activity";
 
 const now = Date.now();
 const hoursAgo = (h: number) => new Date(now - h * 3_600_000);
@@ -60,9 +66,9 @@ export const DEMO_USERS: User[] = [
 
 export const DEMO_WORKSTREAM_ROWS: WorkstreamRowRow[] = [
   {
-    id: "demo-ws-isin",
-    title: "Add ISIN validation tool to the Calastone MCP server",
-    jiraKey: "INNO-214",
+    id: "demo-ws-context",
+    title: "Ship read-side MCP tools for design partners",
+    jiraKey: "INNO-310",
     ownerName: "Alex Curtin",
     ownerInitials: "AC",
     stage: "in_review" as WorkstreamStage,
@@ -70,11 +76,12 @@ export const DEMO_WORKSTREAM_ROWS: WorkstreamRowRow[] = [
     progressLabel: "Plan v2, 3 comments",
     progressTone: "waiting",
     updatedAt: hoursAgo(2).toISOString(),
+    color: WORKSTREAM_COLOURS.context,
   },
   {
-    id: "demo-ws-nav",
-    title: "NAV reconciliation exception classifier",
-    jiraKey: "INNO-201",
+    id: "demo-ws-rail",
+    title: "Run one human-approved agent order pilot",
+    jiraKey: "INNO-311",
     ownerName: "Owen Blake",
     ownerInitials: "OB",
     stage: "awaiting_input" as WorkstreamStage,
@@ -82,11 +89,12 @@ export const DEMO_WORKSTREAM_ROWS: WorkstreamRowRow[] = [
     progressLabel: "Paused, waiting on you",
     progressTone: "waiting",
     updatedAt: hoursAgo(1).toISOString(),
+    color: WORKSTREAM_COLOURS.rail,
   },
   {
-    id: "demo-ws-fx",
-    title: "FX cut-off calendar sync for order routing",
-    jiraKey: "INNO-188",
+    id: "demo-ws-trust",
+    title: "Stand up agent registry with scopes and audit",
+    jiraKey: "INNO-312",
     ownerName: "Alex Curtin",
     ownerInitials: "AC",
     stage: "research" as WorkstreamStage,
@@ -94,23 +102,25 @@ export const DEMO_WORKSTREAM_ROWS: WorkstreamRowRow[] = [
     progressLabel: "Scout researching",
     progressTone: "active",
     updatedAt: hoursAgo(4).toISOString(),
+    color: WORKSTREAM_COLOURS.trust,
   },
   {
-    id: "demo-ws-audit",
-    title: "Audit export for Relay plan approvals",
-    jiraKey: "INNO-176",
+    id: "demo-ws-collective",
+    title: "Predict settlement fails with partner consent",
+    jiraKey: "INNO-313",
     ownerName: "Aisha Rahman",
     ownerInitials: "AR",
-    stage: "pr_open" as WorkstreamStage,
-    stepperIndex: 4,
-    progressLabel: "PR open, checks running",
-    progressTone: "done",
+    stage: "planning" as WorkstreamStage,
+    stepperIndex: 1,
+    progressLabel: "Findings ready",
+    progressTone: "neutral",
     updatedAt: hoursAgo(6).toISOString(),
+    color: WORKSTREAM_COLOURS.collective,
   },
   {
-    id: "demo-ws-kill",
-    title: "Legacy CSV settlement uploader",
-    jiraKey: "INNO-155",
+    id: "demo-ws-standards",
+    title: "Draft agent fields for UKFMPG change request",
+    jiraKey: "INNO-314",
     ownerName: "Leon Okonkwo",
     ownerInitials: "LO",
     stage: "merged" as WorkstreamStage,
@@ -118,6 +128,7 @@ export const DEMO_WORKSTREAM_ROWS: WorkstreamRowRow[] = [
     progressLabel: "Merged",
     progressTone: "done",
     updatedAt: daysAgo(2).toISOString(),
+    color: WORKSTREAM_COLOURS.standards,
   },
 ];
 
@@ -126,55 +137,57 @@ const DEMO_STATS: OverviewStats = {
   research: 1,
   inReview: 1,
   building: 1,
-  pullRequest: 1,
+  pullRequest: 0,
   mergedThisWeek: 1,
 };
 
 const DEMO_NEEDS: NeedsActionItem[] = [
   {
-    id: "demo-ws-nav-q",
-    jiraKey: "INNO-201",
-    title: "NAV reconciliation exception classifier",
+    id: "demo-ws-rail-q",
+    jiraKey: "INNO-311",
+    title: "Run one human-approved agent order pilot",
     kind: "question",
-    summary: "Runner paused at step 2 of 4",
+    summary: "Runner paused at step 2 of 3",
     detail:
-      "Should threshold breaches use the existing Power BI semantic model labels, or a new enum in the MCP tool response?",
-    options: ["Reuse Power BI labels", "New MCP enum", "Ask architect"],
+      "Should the first write pilot be a regular savings run or a model portfolio rebalance?",
+    options: ["Regular savings", "Model rebalance", "Ask architect"],
     actionLabel: "Write an answer",
     createdAt: hoursAgo(1).toISOString(),
+    color: WORKSTREAM_COLOURS.rail,
   },
   {
-    id: "demo-ws-isin-c",
-    jiraKey: "INNO-214",
-    title: "Add ISIN validation tool to the Calastone MCP server",
+    id: "demo-ws-context-c",
+    jiraKey: "INNO-310",
+    title: "Ship read-side MCP tools for design partners",
     kind: "comments",
     summary: "Plan v2 · 3 open comments, architect approval needed",
     detail: null,
     options: [],
     actionLabel: "Review plan",
     createdAt: hoursAgo(2).toISOString(),
+    color: WORKSTREAM_COLOURS.context,
   },
 ];
 
 const DEMO_AGENTS: AgentRunningItem[] = [
   {
-    id: "demo-runner-nav",
-    workstreamId: "demo-ws-nav",
+    id: "demo-runner-rail",
+    workstreamId: "demo-ws-rail",
     kind: "Runner",
-    jiraKey: "INNO-201",
-    title: "NAV reconciliation exception classifier",
+    jiraKey: "INNO-311",
+    title: "Run one human-approved agent order pilot",
     statusLine: "Paused for human input",
     stepsCompleted: 2,
-    stepsTotal: 4,
+    stepsTotal: 3,
     startedAt: hoursAgo(3).toISOString(),
   },
   {
-    id: "demo-scout-fx",
-    workstreamId: "demo-ws-fx",
+    id: "demo-scout-trust",
+    workstreamId: "demo-ws-trust",
     kind: "Scout",
-    jiraKey: "INNO-188",
-    title: "FX cut-off calendar sync for order routing",
-    statusLine: "4 sources read: confluence, jira, github",
+    jiraKey: "INNO-312",
+    title: "Stand up agent registry with scopes and audit",
+    statusLine: "3 sources read: confluence, jira, datadog",
     stepsCompleted: 0,
     stepsTotal: 0,
     startedAt: hoursAgo(4).toISOString(),
@@ -210,122 +223,396 @@ export function listDemoFixtureUsers(): User[] {
   return [...DEMO_USERS].sort((a, b) => a.name.localeCompare(b.name));
 }
 
+const DEMO_IDEA_WORKSTREAMS: IdeaWorkstreamOption[] = DEMO_WORKSTREAM_ROWS.map(
+  (row) => ({
+    id: row.id,
+    title: row.title,
+    color: row.color,
+  }),
+);
+
+const DEMO_IDEAS: IdeaBoardItem[] = [
+  {
+    id: "demo-idea-1",
+    title: "Publish dealing rules as MCP tools",
+    description:
+      "Orderability, cut-offs, frequency, minimums and settlement by link. Read-only first for design partners.",
+    type: "friction_log",
+    status: "promoted",
+    frequencyPerWeek: 12,
+    minutesLostEach: 15,
+    submittedByName: "Alex Curtin",
+    workstreamId: "demo-ws-context",
+    workstreamTitle: "Ship read-side MCP tools for design partners",
+    color: WORKSTREAM_COLOURS.context,
+    createdAt: daysAgo(5).toISOString(),
+  },
+  {
+    id: "demo-idea-2",
+    title: "Use Relay as first MCP client",
+    description:
+      "Point Scout and Knowledge at the same connectors as the company chatbot so the strategy is dogfooded internally.",
+    type: "external_signal",
+    status: "promoted",
+    frequencyPerWeek: null,
+    minutesLostEach: null,
+    submittedByName: "Alex Curtin",
+    workstreamId: "demo-ws-context",
+    workstreamTitle: "Ship read-side MCP tools for design partners",
+    color: WORKSTREAM_COLOURS.context,
+    createdAt: daysAgo(4).toISOString(),
+  },
+  {
+    id: "demo-idea-3",
+    title: "Pilot regular savings with human approval",
+    description:
+      "Low-risk write path. Every order approved by a named person. Measure rejects avoided.",
+    type: "friction_log",
+    status: "promoted",
+    frequencyPerWeek: 5,
+    minutesLostEach: 25,
+    submittedByName: "Owen Blake",
+    workstreamId: "demo-ws-rail",
+    workstreamTitle: "Run one human-approved agent order pilot",
+    color: WORKSTREAM_COLOURS.rail,
+    createdAt: daysAgo(4).toISOString(),
+  },
+  {
+    id: "demo-idea-4",
+    title: "Register agents under participant identity",
+    description:
+      "Registry lists each agent, owner participant, endpoint and scopes. No consumer chatbot IDs.",
+    type: "friction_log",
+    status: "promoted",
+    frequencyPerWeek: null,
+    minutesLostEach: null,
+    submittedByName: "Alex Curtin",
+    workstreamId: "demo-ws-trust",
+    workstreamTitle: "Stand up agent registry with scopes and audit",
+    color: WORKSTREAM_COLOURS.trust,
+    createdAt: daysAgo(3).toISOString(),
+  },
+  {
+    id: "demo-idea-5",
+    title: "Score orders for fail or late settlement",
+    description:
+      "Network model with partner consent. Ties to UK and EU T+1 pressure in 2027.",
+    type: "external_signal",
+    status: "promoted",
+    frequencyPerWeek: null,
+    minutesLostEach: null,
+    submittedByName: "Owen Blake",
+    workstreamId: "demo-ws-collective",
+    workstreamTitle: "Predict settlement fails with partner consent",
+    color: WORKSTREAM_COLOURS.collective,
+    createdAt: daysAgo(3).toISOString(),
+  },
+  {
+    id: "demo-idea-6",
+    title: "Draft agent ID fields for UKFMPG",
+    description:
+      "Optional initiating agent ID and mandate reference in fund order messages.",
+    type: "friction_log",
+    status: "promoted",
+    frequencyPerWeek: null,
+    minutesLostEach: null,
+    submittedByName: "Leon Okonkwo",
+    workstreamId: "demo-ws-standards",
+    workstreamTitle: "Draft agent fields for UKFMPG change request",
+    color: WORKSTREAM_COLOURS.standards,
+    createdAt: daysAgo(6).toISOString(),
+  },
+  {
+    id: "demo-idea-7",
+    title: "Join Agentic AI Foundation working item",
+    description:
+      "Propose a financial services item and contribute the fund dealing profile.",
+    type: "external_signal",
+    status: "triaged",
+    frequencyPerWeek: null,
+    minutesLostEach: null,
+    submittedByName: "Leon Okonkwo",
+    workstreamId: null,
+    workstreamTitle: null,
+    color: WORKSTREAM_COLOURS.neutral,
+    createdAt: daysAgo(2).toISOString(),
+  },
+  {
+    id: "demo-idea-8",
+    title: "Meet FCA AI Lab on fund dealing trust",
+    description:
+      "Extend Know Your Agent conversations from payments into fund dealing with Calastone as industry pilot.",
+    type: "external_signal",
+    status: "triaged",
+    frequencyPerWeek: null,
+    minutesLostEach: null,
+    submittedByName: "Vera Nilsen",
+    workstreamId: null,
+    workstreamTitle: null,
+    color: WORKSTREAM_COLOURS.neutral,
+    createdAt: daysAgo(2).toISOString(),
+  },
+  {
+    id: "demo-idea-9",
+    title: "Segment views instead of named distributors",
+    description:
+      "Safer Data Insights design until distributors opt in. Avoid green-space leaks.",
+    type: "friction_log",
+    status: "new",
+    frequencyPerWeek: 3,
+    minutesLostEach: 30,
+    submittedByName: "Alex Curtin",
+    workstreamId: null,
+    workstreamTitle: null,
+    color: WORKSTREAM_COLOURS.neutral,
+    createdAt: daysAgo(1).toISOString(),
+  },
+  {
+    id: "demo-idea-10",
+    title: "Scope FE fundinfo for peer comparison",
+    description:
+      "Layer 2 needs licensed fund data Calastone does not hold. Pitch flows plus FE, not against data vendors.",
+    type: "external_signal",
+    status: "new",
+    frequencyPerWeek: null,
+    minutesLostEach: null,
+    submittedByName: "Owen Blake",
+    workstreamId: null,
+    workstreamTitle: null,
+    color: WORKSTREAM_COLOURS.neutral,
+    createdAt: hoursAgo(20).toISOString(),
+  },
+  {
+    id: "demo-idea-11",
+    title: "Show managers repair cost avoided",
+    description:
+      "Counter higher agent message volume with a clear saving report per fund manager.",
+    type: "friction_log",
+    status: "new",
+    frequencyPerWeek: 1,
+    minutesLostEach: 60,
+    submittedByName: "Leon Okonkwo",
+    workstreamId: null,
+    workstreamTitle: null,
+    color: WORKSTREAM_COLOURS.neutral,
+    createdAt: hoursAgo(12).toISOString(),
+  },
+  {
+    id: "demo-idea-12",
+    title: "Park named-distributor wallet share",
+    description:
+      "Needs distributor opt-in. Park until legal review of green space and consent is done.",
+    type: "external_signal",
+    status: "parked",
+    frequencyPerWeek: null,
+    minutesLostEach: null,
+    submittedByName: "Aisha Rahman",
+    workstreamId: null,
+    workstreamTitle: null,
+    color: WORKSTREAM_COLOURS.neutral,
+    createdAt: daysAgo(7).toISOString(),
+  },
+];
+
+export function getDemoIdeasData() {
+  return {
+    items: DEMO_IDEAS,
+    workstreamOptions: DEMO_IDEA_WORKSTREAMS,
+  };
+}
+
+function demoResearchSteps(id: string): {
+  steps: ResearchStepView[];
+  liveToolsLine: string | null;
+} {
+  if (id === "demo-ws-trust" || id === "demo-ws-context") {
+    return {
+      steps: [
+        {
+          id: `${id}-r1`,
+          title:
+            id === "demo-ws-trust"
+              ? "Researching agent registry patterns and fund dealing scopes"
+              : "Researching dealing rules across Confluence and Jira",
+          rationale: "Pulling shared MCP connectors used by the company chatbot.",
+          disclosureLabel: "Searching connectors",
+          disclosureDetail: "confluence.search · jira.search",
+        },
+        {
+          id: `${id}-r2`,
+          title:
+            id === "demo-ws-trust"
+              ? "Interpreting mandate and kill-switch requirements"
+              : "Interpreting order status and exception tools for partner pilots",
+          rationale: "Mapping findings into a buildable plan for the workstream.",
+          disclosureLabel: "Read files",
+          disclosureDetail:
+            id === "demo-ws-trust"
+              ? "Agent registry and scopes (draft)"
+              : "Dealing rules MCP tools (draft)",
+        },
+      ],
+      liveToolsLine:
+        id === "demo-ws-trust"
+          ? "confluence.search… jira.search"
+          : "confluence.search… datadog.get_dashboard",
+    };
+  }
+  return { steps: [], liveToolsLine: null };
+}
+
 export function getDemoWorkstreamDetail(id: string) {
   const row = DEMO_WORKSTREAM_ROWS.find((w) => w.id === id);
   if (!row) return null;
 
   const owner =
     DEMO_USERS.find((u) => u.name === row.ownerName) ?? DEMO_USERS[0]!;
+  const color = resolveWorkstreamColour(row.color);
+  const { steps: researchSteps, liveToolsLine } = demoResearchSteps(id);
 
-  const planMarkdown = `# Plan: ISIN validation tool
+  const planMarkdown =
+    id === "demo-ws-rail"
+      ? `# Plan: Human-approved write pilot
 
 ## Goal
-Expose a shared ISIN validation tool on the Calastone MCP server so engineers stop re-implementing checks.
+Start with ops agents and one low-risk write flow.
 
 ## Steps
-1. Add ISIN helper with ISO 6166 check digit
-2. Register MCP tool with typed error codes
-3. Add unit tests and a thin integration smoke test
-4. Document usage in Confluence
+1. Pick regular savings or model rebalance
+2. Require human approval on every order
+3. Measure pre-trade rejects avoided and repair time saved
+`
+      : `# Plan: Context layer MCP for design partners
 
-## Risks
-- **medium** — existing callers expect different error shapes
-- **low** — check-digit edge cases for CUSIP-mapped ISINs
+## Goal
+Give platforms and ops agents trustworthy read tools before any write pilot.
+
+## Steps
+1. Publish dealing-rules, order-status and exception tools on the shared MCP server
+2. Point Relay Scout at the same connectors as the chatbot
+3. Agree fair-use limits and a free flow statement for two fund managers
+4. Document coverage definition before any client demo
 `;
+
+  const planStatus =
+    id === "demo-ws-rail" || id === "demo-ws-standards"
+      ? ("approved" as const)
+      : ("in_review" as const);
 
   return {
     id: row.id,
     title: row.title,
     jiraKey: row.jiraKey,
     stage: row.stage,
-    origin: "internal_friction" as const,
+    origin: "roadmap" as const,
     priority: "high" as const,
+    color,
+    canHandOff: planStatus === "approved",
     problemStatement:
-      "Engineers repeatedly re-implement ISIN checks across tools. Expose a shared validation tool on the fictional Calastone MCP server with clear error codes.",
+      id === "demo-ws-rail"
+        ? "Start with ops agents and one low-risk write flow. Every order needs human approval, throttles and a kill switch."
+        : "Agents cannot act on data they cannot read. Expose dealing rules, order status and exceptions through the same MCP surface the company chatbot already uses, with Relay as a first internal client.",
     owner,
     ownerId: owner.id,
     plan: {
       id: `${row.id}-plan-v2`,
       versionNumber: 2,
-      status: "in_review" as const,
+      status: planStatus,
       markdownBody: planMarkdown,
       steps: [
         {
           id: "s1",
           order: 1,
-          title: "Add ISIN helper",
-          description: "Create a shared validator module with check-digit support.",
-          filesLikelyTouched: ["packages/mcp/src/isin.ts"],
-          testsToAdd: ["isin.test.ts"],
-          riskLevel: "low" as const,
+          title: id === "demo-ws-rail" ? "Choose pilot flow" : "Publish core read tools",
+          description:
+            id === "demo-ws-rail"
+              ? "Regular savings or model rebalance with design partners."
+              : "Dealing rules, status, exceptions, coverage queries.",
+          filesLikelyTouched: ["packages/mcp/tools"],
+          testsToAdd: ["tool contract tests"],
+          riskLevel: "medium" as const,
           completed: true,
         },
         {
           id: "s2",
           order: 2,
-          title: "Register MCP tool",
-          description: "Wire validate_isin with structured error codes.",
-          filesLikelyTouched: ["packages/mcp/src/tools/isin.ts"],
-          testsToAdd: ["tools.isin.test.ts"],
-          riskLevel: "medium" as const,
-          completed: false,
+          title: id === "demo-ws-rail" ? "Wire approval gate" : "Connect Relay as internal client",
+          description:
+            id === "demo-ws-rail"
+              ? "No agent order leaves without a named person."
+              : "Scout uses the shared connector set for company context.",
+          filesLikelyTouched: [],
+          testsToAdd: [],
+          riskLevel: "high" as const,
+          completed: id === "demo-ws-rail",
         },
         {
           id: "s3",
           order: 3,
-          title: "Add tests and docs",
-          description: "Cover edge cases and publish Confluence usage notes.",
-          filesLikelyTouched: ["docs/isin-tool.md"],
+          title: id === "demo-ws-rail" ? "Measure outcomes" : "Pilot free flow statement",
+          description:
+            id === "demo-ws-rail"
+              ? "Track rejects avoided and repair time saved."
+              : "Two managers who raised cost concerns.",
+          filesLikelyTouched: [],
           testsToAdd: [],
           riskLevel: "low" as const,
           completed: false,
         },
       ],
-      comments: [
-        {
-          id: "c1",
-          body: "Please keep error codes stable for existing order-routing callers.",
-          resolved: false,
-          createdAt: hoursAgo(3).toISOString(),
-          anchorText: "typed error codes",
-          author: DEMO_USERS[2]!,
-        },
-        {
-          id: "c2",
-          body: "Add an explicit test for lowercase input normalisation.",
-          resolved: false,
-          createdAt: hoursAgo(2).toISOString(),
-          anchorText: "unit tests",
-          author: DEMO_USERS[2]!,
-        },
-        {
-          id: "c3",
-          body: "Link the Confluence page from the tool description.",
-          resolved: false,
-          createdAt: hoursAgo(2).toISOString(),
-          anchorText: "Document usage",
-          author: DEMO_USERS[3]!,
-        },
-      ],
+      comments:
+        planStatus === "in_review"
+          ? [
+              {
+                id: "c1",
+                body: "Confirm entitlements sit in the data layer, not in prompts.",
+                resolved: false,
+                createdAt: hoursAgo(3).toISOString(),
+                anchorText: "entitlements",
+                author: DEMO_USERS[2]!,
+              },
+              {
+                id: "c2",
+                body: "Add Datadog latency dashboard to the pilot checklist.",
+                resolved: false,
+                createdAt: hoursAgo(2).toISOString(),
+                anchorText: "Datadog",
+                author: DEMO_USERS[3]!,
+              },
+              {
+                id: "c3",
+                body: "Coverage wording must match Fund Flow Index language.",
+                resolved: false,
+                createdAt: hoursAgo(2).toISOString(),
+                anchorText: "coverage",
+                author: DEMO_USERS[1]!,
+              },
+            ]
+          : [],
     },
     sources: [
       {
         connector: "confluence",
-        title: "ISIN handling in order routing",
-        itemId: "conf-isin",
+        title:
+          id === "demo-ws-trust"
+            ? "Agent registry and scopes (draft)"
+            : "Dealing rules MCP tools (draft)",
+        itemId: "conf-1",
       },
       {
-        connector: "confluence",
-        title: "MCP server tool conventions",
-        itemId: "conf-mcp",
+        connector: "datadog",
+        title: "MCP tool latency dashboard",
+        itemId: "dd-1",
       },
-      { connector: "jira", title: "INNO-198 duplicate ISIN logic", itemId: "INNO-198" },
+      { connector: "jira", title: row.jiraKey ?? "INNO ticket", itemId: row.jiraKey ?? "jira" },
       { connector: "github", title: "packages/mcp/src/tools", itemId: "gh-tools" },
     ],
+    researchSteps,
+    liveToolsLine,
     history: [
       {
         id: "h1",
-        label: "Research completed",
+        label: "Scout researching",
         at: hoursAgo(20).toISOString(),
       },
       {
@@ -340,10 +627,10 @@ Expose a shared ISIN validation tool on the Calastone MCP server so engineers st
       },
     ],
     researchSummary:
-      "Scout found duplicated ISIN regexes in three services and a Confluence convention for MCP tool error envelopes. Recommend a shared helper plus stable error codes.",
+      "Dealing-rules draft exists in Confluence. Datadog demo dashboard covers MCP latency. Relay listed as first internal MCP client in the 90-day plan.",
     openQuestion:
-      row.id === "demo-ws-nav"
-        ? "Should threshold breaches use the existing Power BI semantic model labels, or a new enum in the MCP tool response?"
+      row.id === "demo-ws-rail"
+        ? "Should the first write pilot be a regular savings run or a model portfolio rebalance?"
         : null,
   };
 }

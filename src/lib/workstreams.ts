@@ -1,4 +1,4 @@
-import { prisma } from "@relay/core";
+import { prisma, resolveWorkstreamColour } from "@relay/core";
 import {
   computeDashboardCounts,
   initialsFromName,
@@ -127,6 +127,7 @@ export async function getDashboardData(ownerId?: string) {
       priority: ws.priority,
       origin: ws.origin,
       jiraKey: ws.jiraKey,
+      color: resolveWorkstreamColour(ws.color),
       ownerName: ws.owner.name,
       ownerInitials: initialsFromName(ws.owner.name),
       lastActivityAt: ws.lastActivityAt.toISOString(),

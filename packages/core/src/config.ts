@@ -34,6 +34,7 @@ export const config = {
   confluenceBaseUrl: optionalEnv("CONFLUENCE_BASE_URL"),
   powerbiWorkspaceId: optionalEnv("POWERBI_WORKSPACE_ID"),
   databricksHost: optionalEnv("DATABRICKS_HOST"),
+  datadogSite: optionalEnv("DATADOG_SITE"),
   githubToken: optionalEnv("GITHUB_TOKEN"),
 };
 

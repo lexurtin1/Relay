@@ -56,6 +56,7 @@ export interface WorkstreamCardModel {
   priority: string;
   origin: string;
   jiraKey: string | null;
+  color: string;
   ownerName: string;
   ownerInitials: string;
   lastActivityAt: string;
@@ -68,6 +69,39 @@ export interface WorkstreamCardModel {
   stepsTotal: number;
   agentActive: boolean;
   stageEnteredAt: string;
+}
+
+/** Stable palette for strategy workstreams. Linked ideas inherit these colours. */
+export const WORKSTREAM_COLOURS = {
+  context: "#2B6FD6",
+  rail: "#0D9488",
+  trust: "#D97706",
+  collective: "#059669",
+  standards: "#475569",
+  neutral: "#94A3B8",
+} as const;
+
+export type WorkstreamColourKey = keyof typeof WORKSTREAM_COLOURS;
+
+export const WORKSTREAM_COLOUR_LABELS: Record<
+  Exclude<WorkstreamColourKey, "neutral">,
+  string
+> = {
+  context: "Context layer MCP",
+  rail: "Agent transaction rail",
+  trust: "Trust and identity",
+  collective: "Collective intelligence",
+  standards: "Standards and industry",
+};
+
+export function resolveWorkstreamColour(
+  color: string | null | undefined,
+): string {
+  if (!color) return WORKSTREAM_COLOURS.neutral;
+  const trimmed = color.trim();
+  if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) return trimmed;
+  const key = trimmed.toLowerCase() as WorkstreamColourKey;
+  return WORKSTREAM_COLOURS[key] ?? WORKSTREAM_COLOURS.neutral;
 }
 
 export function computeDashboardCounts(

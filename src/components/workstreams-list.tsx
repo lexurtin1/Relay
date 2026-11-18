@@ -81,6 +81,7 @@ export function WorkstreamsList(props: { rows: WorkstreamRowRow[] }) {
                 key={row.id}
                 href={`/workstreams/${row.id}`}
                 className="flex w-full flex-wrap items-center gap-x-7 gap-y-3.5 rounded-[14px] px-3.5 py-4 text-left text-[var(--relay-ink)] no-underline transition-relay hover:bg-[color-mix(in_srgb,var(--relay-ink)_4.5%,transparent)]"
+                style={{ borderLeftWidth: 4, borderLeftColor: row.color }}
               >
                 <span className="flex min-w-0 flex-[1_1_300px] flex-col gap-0.5">
                   <span className="text-base font-medium">{row.title}</span>

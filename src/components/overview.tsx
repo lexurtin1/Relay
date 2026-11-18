@@ -34,7 +34,7 @@ const MODES = [
   {
     id: "find" as const,
     label: "Search",
-    ph: "Search Confluence, Jira, GitHub and connected sources",
+    ph: "Search Confluence, Jira, Datadog, GitHub and connected sources",
     cta: "Search",
     href: "/knowledge",
   },
@@ -206,6 +206,7 @@ function NeedsInputSection(props: { items: NeedsActionItem[] }) {
               <article
                 key={item.id}
                 className="flex flex-col gap-2 rounded-[14px] border border-[var(--relay-border)] bg-[var(--relay-surface-muted)] p-3.5 animate-relay-in"
+                style={{ borderLeftWidth: 4, borderLeftColor: item.color }}
               >
                 <p className="m-0 text-[12px] text-[var(--relay-ink-muted)]">
                   {item.jiraKey ? (
@@ -280,6 +281,11 @@ function WorkstreamTimelines(props: { rows: WorkstreamRowRow[] }) {
               href={`/workstreams/${row.id}`}
               className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-[12px] px-3 py-2 text-left text-[var(--relay-ink)] no-underline transition-relay hover:bg-[color-mix(in_srgb,var(--relay-ink)_4%,transparent)]"
             >
+              <span
+                className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ background: row.color }}
+                aria-hidden
+              />
               <span className="flex min-w-0 flex-[1_1_160px] flex-col gap-0.5">
                 <span className="truncate text-[13.5px] font-medium">{row.title}</span>
                 <span className="truncate text-[12px] text-[var(--relay-ink-muted)]">

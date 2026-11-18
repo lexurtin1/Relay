@@ -217,6 +217,7 @@ function WorkstreamCard(props: { card: WorkstreamCardModel }) {
     <Link
       href={`/workstreams/${card.id}`}
       className="block rounded-2xl border border-[var(--relay-border)] bg-[var(--relay-surface)] p-3 shadow-sm transition-relay hover:border-[var(--relay-primary)] hover:shadow-md"
+      style={{ borderLeftWidth: 4, borderLeftColor: card.color }}
     >
       <div className="flex items-start gap-2">
         <h3 className="min-w-0 flex-1 text-sm font-semibold leading-snug text-[var(--relay-ink)]">

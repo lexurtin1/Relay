@@ -130,6 +130,8 @@ model Workstream {
   jiraKey          String?
   origin           WorkstreamOrigin
   priority         WorkstreamPriority @default(medium)
+  /** Hex accent for Ideas, tickets, and lists. Linked ideas inherit this. */
+  color            String            @default("#2B6FD6")
   ownerId          String
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt

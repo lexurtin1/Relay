@@ -4,6 +4,7 @@ export type ConnectorId =
   | "jira"
   | "confluence"
   | "databricks"
+  | "datadog"
   | "github"
   | "ontology";
 

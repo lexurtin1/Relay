@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
-import { prisma } from "@relay/core";
+import { prisma, resolveWorkstreamColour } from "@relay/core";
 import type { WorkstreamStage } from "@relay/core";
 import { getCurrentUser } from "@/lib/session";
 import { WorkstreamDetail } from "@/components/workstream-detail";
 import type { ActionBarState } from "@/components/action-bar";
 import { useDemoFixtures } from "@/lib/db";
 import { getDemoWorkstreamDetail } from "@/lib/demo-data";
+import { buildResearchStepsFromEvents } from "@/lib/research-activity";
 
 export const dynamic = "force-dynamic";
 
@@ -28,16 +29,25 @@ export default async function WorkstreamDetailPage({
       canGeneratePlan: true,
       canRequestReview: false,
       canRevise: openCommentCount > 0,
-      canApprove: false,
-      canHandOff: false,
+      canApprove:
+        demo.plan.status === "in_review" &&
+        openCommentCount === 0 &&
+        (role === "architect" || role === "lead"),
+      canHandOff:
+        (demo.plan.status === "approved" || Boolean(demo.canHandOff)) && owns,
       openCommentCount,
       generateReason: undefined,
       reviewReason: "Plan is already in review.",
       reviseReason: undefined,
-      approveReason: "Resolve or address open comments before approval.",
+      approveReason:
+        openCommentCount > 0
+          ? "Resolve or address open comments before approval."
+          : undefined,
       handOffReason: !owns
         ? "You can only hand off workstreams you own."
-        : "Needs at least one architect approval.",
+        : demo.plan.status === "approved" || demo.canHandOff
+          ? undefined
+          : "Needs at least one architect approval.",
     };
 
     return (
@@ -51,6 +61,8 @@ export default async function WorkstreamDetailPage({
         priority={demo.priority}
         jiraKey={demo.jiraKey}
         role={role}
+        color={demo.color}
+        planId={demo.plan.id}
         planVersion={demo.plan.versionNumber}
         planTotalVersions={2}
         planMarkdown={demo.plan.markdownBody}
@@ -68,6 +80,8 @@ export default async function WorkstreamDetailPage({
         }))}
         researchSummary={demo.researchSummary}
         sources={demo.sources}
+        researchSteps={demo.researchSteps}
+        liveToolsLine={demo.liveToolsLine}
         history={demo.history}
         openQuestion={demo.openQuestion}
         actionState={actionState}
@@ -100,7 +114,7 @@ export default async function WorkstreamDetailPage({
         take: 1,
       },
       researchRuns: {
-        include: { events: { orderBy: { createdAt: "desc" }, take: 30 } },
+        include: { events: { orderBy: { createdAt: "desc" }, take: 40 } },
         orderBy: { createdAt: "desc" },
         take: 3,
       },
@@ -120,47 +134,32 @@ export default async function WorkstreamDetailPage({
   const hasArchitectApproval = (plan?.approvals.length ?? 0) > 0;
   const role = user.role;
   const owns = workstream.ownerId === user.id;
+  const color = resolveWorkstreamColour(workstream.color);
 
   const sourcesRaw = Array.isArray(research?.sourcesConsulted)
     ? (research?.sourcesConsulted as Array<{
         connector?: string;
         title?: string;
         itemId?: string;
-      }>)
+      } | string>)
     : [];
 
   const sources = sourcesRaw
-    .filter((s) => s.title)
-    .map((s) => ({
-      connector: s.connector ?? "source",
-      title: s.title as string,
-      itemId: s.itemId,
-    }));
+    .map((s) =>
+      typeof s === "string"
+        ? { connector: s, title: `${s} sources`, itemId: s }
+        : {
+            connector: s.connector ?? "source",
+            title: s.title ?? s.connector ?? "Source",
+            itemId: s.itemId,
+          },
+    )
+    .filter((s) => Boolean(s.title));
 
-  if (sources.length === 0 && workstream.jiraKey === "INNO-214") {
-    sources.push(
-      {
-        connector: "confluence",
-        title: "ISIN handling in order routing",
-        itemId: "conf-isin",
-      },
-      {
-        connector: "confluence",
-        title: "MCP server tool conventions",
-        itemId: "conf-mcp",
-      },
-      {
-        connector: "jira",
-        title: "INNO-198 duplicate ISIN logic",
-        itemId: "INNO-198",
-      },
-      {
-        connector: "github",
-        title: "packages/mcp/src/tools",
-        itemId: "gh-tools",
-      },
-    );
-  }
+  const { steps: researchSteps, liveToolsLine } = buildResearchStepsFromEvents(
+    research?.events ?? [],
+    sources,
+  );
 
   const history = [
     ...workstream.plans.map((p) => ({
@@ -172,10 +171,11 @@ export default async function WorkstreamDetailPage({
       at: p.createdAt.toISOString(),
     })),
     ...workstream.researchRuns
-      .filter((r) => r.status === "succeeded" || r.findings)
+      .filter((r) => r.status === "succeeded" || r.findings || r.status === "running")
       .map((r) => ({
         id: `research-${r.id}`,
-        label: "Research completed",
+        label:
+          r.status === "running" ? "Scout researching" : "Research completed",
         at: (r.finishedAt ?? r.updatedAt).toISOString(),
       })),
   ].sort((a, b) => +new Date(b.at) - +new Date(a.at));
@@ -221,10 +221,7 @@ export default async function WorkstreamDetailPage({
   };
 
   const researchSummary =
-    research?.findings ??
-    (workstream.jiraKey === "INNO-214"
-      ? "ISIN checks are implemented separately in three tools. None return structured error codes, so agents cannot branch on failure type."
-      : workstream.problemStatement);
+    research?.findings ?? workstream.problemStatement;
 
   return (
     <WorkstreamDetail
@@ -237,6 +234,8 @@ export default async function WorkstreamDetailPage({
       priority={workstream.priority}
       jiraKey={workstream.jiraKey}
       role={role}
+      color={color}
+      planId={plan?.id ?? null}
       planVersion={plan?.versionNumber ?? null}
       planTotalVersions={workstream.plans.length}
       planMarkdown={plan?.markdownBody ?? null}
@@ -265,6 +264,8 @@ export default async function WorkstreamDetailPage({
       }
       researchSummary={researchSummary}
       sources={sources}
+      researchSteps={researchSteps}
+      liveToolsLine={liveToolsLine}
       history={history}
       openQuestion={openQuestion}
       actionState={actionState}

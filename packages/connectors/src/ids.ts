@@ -8,6 +8,7 @@ export const SOURCE_CONNECTOR_IDS: SourceConnectorId[] = [
   "jira",
   "confluence",
   "databricks",
+  "datadog",
   "github",
 ];
 
@@ -17,6 +18,7 @@ export const CONNECTOR_LABELS: Record<SourceConnectorId, string> = {
   jira: "Jira",
   confluence: "Confluence",
   databricks: "Databricks",
+  datadog: "Datadog",
   github: "GitHub",
 };
 

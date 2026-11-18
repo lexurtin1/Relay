@@ -7,6 +7,10 @@ import { StageStepper } from "@/components/stage-stepper";
 import { PlanDocument, type PlanCommentView, type PlanStepView } from "@/components/plan-document";
 import { ActionBar, type ActionBarState } from "@/components/action-bar";
 import {
+  ResearchActivity,
+  type ResearchStepView,
+} from "@/components/research-activity";
+import {
   segsForStage,
   TimelineTrack,
 } from "@/components/timeline-track";
@@ -34,6 +38,8 @@ export function WorkstreamDetail(props: {
   priority: string;
   jiraKey: string | null;
   role: string;
+  color: string;
+  planId: string | null;
   planVersion: number | null;
   planTotalVersions: number;
   planMarkdown: string | null;
@@ -41,6 +47,8 @@ export function WorkstreamDetail(props: {
   comments: PlanCommentView[];
   researchSummary: string | null;
   sources: ResearchSourceView[];
+  researchSteps: ResearchStepView[];
+  liveToolsLine: string | null;
   history: HistoryItemView[];
   openQuestion: string | null;
   actionState: ActionBarState;
@@ -82,9 +90,16 @@ export function WorkstreamDetail(props: {
           {" · Owner "}
           {props.ownerName}
         </p>
-        <h1 className="mt-1.5 text-[clamp(30px,3.4vw,42px)] font-medium leading-[1.1] tracking-[-0.03em] text-[var(--relay-ink)]">
-          {props.title}
-        </h1>
+        <div className="mt-1.5 flex flex-wrap items-center gap-3">
+          <span
+            className="inline-block h-3 w-3 rounded-full"
+            style={{ background: props.color }}
+            aria-hidden
+          />
+          <h1 className="m-0 text-[clamp(30px,3.4vw,42px)] font-medium leading-[1.1] tracking-[-0.03em] text-[var(--relay-ink)]">
+            {props.title}
+          </h1>
+        </div>
         <p
           className={cn(
             "mt-2.5 text-[17px] capitalize",
@@ -123,6 +138,14 @@ export function WorkstreamDetail(props: {
           </div>
         </section>
       ) : null}
+
+      <ResearchActivity
+        workstreamId={props.id}
+        userAsk={props.problemStatement}
+        steps={props.researchSteps}
+        liveToolsLine={props.liveToolsLine}
+        color={props.color}
+      />
 
       <div className="flex flex-wrap items-start gap-6">
         <section
@@ -277,7 +300,13 @@ export function WorkstreamDetail(props: {
         </div>
       </div>
 
-      <ActionBar state={props.actionState} role={props.role} />
+      <ActionBar
+        state={props.actionState}
+        role={props.role}
+        workstreamId={props.id}
+        planId={props.planId}
+        color={props.color}
+      />
     </div>
   );
 }

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Workstream" ADD COLUMN "color" TEXT NOT NULL DEFAULT '#2B6FD6';

@@ -1,4 +1,4 @@
-import { prisma } from "@relay/core";
+import { prisma, resolveWorkstreamColour } from "@relay/core";
 import {
   initialsFromName,
   mapStageToStepper,
@@ -28,6 +28,7 @@ export type NeedsActionItem = {
   options: string[];
   actionLabel: string;
   createdAt: string;
+  color: string;
 };
 
 export type AgentRunningItem = {
@@ -53,6 +54,7 @@ export type WorkstreamRowRow = {
   progressLabel: string;
   progressTone: "active" | "waiting" | "done" | "neutral";
   updatedAt: string;
+  color: string;
 };
 
 function weekAgo(): Date {
@@ -129,6 +131,8 @@ async function loadOverviewFromDatabase() {
     const stepsCompleted = plan?.steps.filter((s) => s.completed).length ?? 0;
     const question = job?.questions[0];
 
+    const color = resolveWorkstreamColour(ws.color);
+
     if (question) {
       needsAction.push({
         id: `${ws.id}-q`,
@@ -140,6 +144,7 @@ async function loadOverviewFromDatabase() {
         options: question.options,
         actionLabel: "Write an answer",
         createdAt: question.createdAt.toISOString(),
+        color,
       });
     } else if (openComments > 0 && ws.stage === "in_review") {
       needsAction.push({
@@ -152,6 +157,7 @@ async function loadOverviewFromDatabase() {
         options: [],
         actionLabel: "Review plan",
         createdAt: ws.lastActivityAt.toISOString(),
+        color,
       });
     }
 
@@ -234,6 +240,7 @@ async function loadOverviewFromDatabase() {
       progressLabel,
       progressTone,
       updatedAt: ws.lastActivityAt.toISOString(),
+      color,
     });
   }
 

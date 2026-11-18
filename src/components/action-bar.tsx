@@ -1,5 +1,6 @@
 "use client";
 
+import { HandOffModal } from "@/components/hand-off-modal";
 import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,9 @@ export type ActionBarState = {
 export function ActionBar(props: {
   state: ActionBarState;
   role: string;
+  workstreamId: string;
+  planId: string | null;
+  color?: string;
 }) {
   const statusLeft =
     props.state.openCommentCount > 0
@@ -30,12 +34,11 @@ export function ActionBar(props: {
           ? "All comments resolved. The plan can be approved."
           : "Actions apply to the current plan version.";
 
-  const actions: Array<{
+  const secondary: Array<{
     id: string;
     label: string;
     enabled: boolean;
     reason: string;
-    primary?: boolean;
   }> = [
     {
       id: "revise",
@@ -53,15 +56,6 @@ export function ActionBar(props: {
           ? "Only architects and leads can approve plans."
           : "Plan must be in review with comments addressed."),
     },
-    {
-      id: "handoff",
-      label: "Hand off to Runner",
-      enabled: props.state.canHandOff,
-      reason:
-        props.state.handOffReason ??
-        "Requires an architect-approved plan for a workstream you own.",
-      primary: true,
-    },
   ];
 
   return (
@@ -69,14 +63,14 @@ export function ActionBar(props: {
       <div className="rl-glass sticky bottom-4 z-20 mx-auto mt-6 flex max-w-[1120px] flex-col gap-3 rounded-[22px] p-3.5">
         <div className="flex flex-wrap items-center gap-2">
           <div className="mr-auto text-sm text-[var(--relay-ink-muted)]">{statusLeft}</div>
-          {actions.map((action) => {
+          {secondary.map((action) => {
             const button = (
               <button
                 key={action.id}
                 type="button"
                 disabled={!action.enabled}
                 className={cn(
-                  action.primary ? "rl-btn-primary" : "rl-btn-second",
+                  "rl-btn-second",
                   "disabled:cursor-not-allowed disabled:opacity-50",
                 )}
               >
@@ -92,6 +86,13 @@ export function ActionBar(props: {
               </Tooltip>
             );
           })}
+          <HandOffModal
+            workstreamId={props.workstreamId}
+            planId={props.planId}
+            canHandOff={props.state.canHandOff}
+            handOffReason={props.state.handOffReason}
+            color={props.color}
+          />
         </div>
       </div>
     </TooltipProvider>

@@ -1,10 +1,25 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { IdeasBoard } from "@/components/ideas-board";
+import { getIdeasBoardData } from "@/lib/ideas";
+import { getCurrentUser } from "@/lib/session";
 
-export default function IdeasPage() {
+export const dynamic = "force-dynamic";
+
+export default async function IdeasPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ draft?: string }>;
+}) {
+  const params = searchParams ? await searchParams : {};
+  const user = await getCurrentUser();
+  const data = await getIdeasBoardData();
+  const canTriage = user?.role === "lead" || user?.role === "architect";
+
   return (
-    <PlaceholderPage
-      title="Ideas"
-      body="Friction log and external signals land in Milestone 6. Seed data already includes six ideas."
+    <IdeasBoard
+      items={data.items}
+      workstreamOptions={data.workstreamOptions}
+      draft={params.draft ?? ""}
+      canTriage={Boolean(canTriage)}
     />
   );
 }

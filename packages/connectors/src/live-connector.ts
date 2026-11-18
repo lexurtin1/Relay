@@ -34,6 +34,11 @@ function credentialFor(id: SourceId): { configured: boolean; label: string } {
         configured: Boolean(config.databricksHost),
         label: "DATABRICKS_HOST",
       };
+    case "datadog":
+      return {
+        configured: Boolean(config.datadogSite),
+        label: "DATADOG_SITE",
+      };
     case "github":
       return { configured: Boolean(config.githubToken), label: "GITHUB_TOKEN" };
     default:

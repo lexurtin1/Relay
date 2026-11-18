@@ -3,6 +3,8 @@ import {
   computeDashboardCounts,
   initialsFromName,
   mapStageToStepper,
+  resolveWorkstreamColour,
+  WORKSTREAM_COLOURS,
 } from "./domain";
 
 describe("computeDashboardCounts", () => {
@@ -38,5 +40,13 @@ describe("mapStageToStepper", () => {
     expect(mapStageToStepper("in_review")).toBe("review");
     expect(mapStageToStepper("awaiting_input")).toBe("build");
     expect(mapStageToStepper("pr_open")).toBe("pr");
+  });
+});
+
+describe("resolveWorkstreamColour", () => {
+  it("resolves hex and named keys, falling back to neutral", () => {
+    expect(resolveWorkstreamColour("#0D9488")).toBe("#0D9488");
+    expect(resolveWorkstreamColour("trust")).toBe(WORKSTREAM_COLOURS.trust);
+    expect(resolveWorkstreamColour(null)).toBe(WORKSTREAM_COLOURS.neutral);
   });
 });

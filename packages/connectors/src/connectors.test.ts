@@ -15,13 +15,14 @@ afterEach(() => {
 });
 
 describe("connectors registry", () => {
-  it("lists the six research sources", () => {
+  it("lists the seven research sources", () => {
     expect(listConnectorIds()).toEqual([
       "salesforce",
       "powerbi",
       "jira",
       "confluence",
       "databricks",
+      "datadog",
       "github",
     ]);
   });
@@ -45,7 +46,7 @@ describe("connectors registry", () => {
 
   it("reports healthy mock connectors", async () => {
     const rows = await healthAll();
-    expect(rows).toHaveLength(6);
+    expect(rows).toHaveLength(7);
     expect(rows.every((r) => r.ok && r.mode === "mock")).toBe(true);
   });
 
