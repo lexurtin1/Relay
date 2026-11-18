@@ -94,17 +94,17 @@ export function CalastoneLogo(props: { className?: string; priority?: boolean })
 export function BrandLockup(props: { appName: string }) {
   return (
     <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+      <CalastoneLogo priority />
+      <span
+        className="h-7 w-px shrink-0 bg-[var(--relay-border-strong)] sm:h-8"
+        aria-hidden
+      />
       <RelayLogo
         appName={props.appName}
         href="/"
         markClassName="h-8 w-8 sm:h-9 sm:w-9"
         wordClassName="text-[20px] sm:text-[24px]"
       />
-      <span
-        className="h-7 w-px shrink-0 bg-[var(--relay-border-strong)] sm:h-8"
-        aria-hidden
-      />
-      <CalastoneLogo priority />
     </div>
   );
 }

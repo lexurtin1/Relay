@@ -12,7 +12,7 @@ Light-first Calastone agent workspace. Pale ground, white elevated sheets with s
 
 ## Surfaces
 
-- Shell: slim top brand bar with Relay mark+wordmark and official SS&C Calastone lockup (PNG), command, theme toggle, user; left sidebar nav (Overview, Workstreams, Ideas, Knowledge, Metrics) with Calastone blue active state and Relay mark. Audit linked from Metrics.
+- Shell: slim top brand bar with official SS&C Calastone lockup (PNG) on the left, then Relay mark+wordmark, command, theme toggle, user; left sidebar nav (Overview, Workstreams, Ideas, Knowledge, Metrics) with Calastone blue active state and Relay mark. Audit linked from Metrics.
 - Overview: compact title, horizontal KPI row, two-column body (Start work + timelines on the left; Needs your input tickets stacked on the right). Desktop viewport fits without page scroll; lists scroll internally when needed.
 - Workstream list/detail: stage chips, timeline tracks, sheet panels, sticky action bar.
 - Atmosphere: soft blue / teal / amber blobs plus slow-rotating Calastone wireframe icosahedra at low opacity (especially on light).
