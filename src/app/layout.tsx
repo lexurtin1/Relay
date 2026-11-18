@@ -5,7 +5,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import { Header } from "@/components/header";
 import { CommandPalette } from "@/components/command-palette";
-import { DockNav } from "@/components/dock-nav";
+import { Sidebar } from "@/components/sidebar";
 import { Atmosphere } from "@/components/atmosphere";
 import { CalastoneWireframes } from "@/components/calastone-wireframes";
 import { ThemeProvider, themeBootScript } from "@/components/theme-provider";
@@ -43,14 +43,14 @@ export default async function RootLayout({
     <html
       lang="en"
       className={`${GeistSans.variable} ${GeistMono.variable}`}
-      data-theme="dark"
+      data-theme="light"
       suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
-      <body className="relative min-h-screen overflow-x-hidden">
-        <ThemeProvider defaultTheme="dark">
+      <body className="relative min-h-dvh overflow-x-hidden">
+        <ThemeProvider defaultTheme="light">
           <a
             href="#main"
             className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-[var(--relay-surface)] focus:px-3 focus:py-2 focus:text-sm focus:shadow"
@@ -59,25 +59,29 @@ export default async function RootLayout({
           </a>
           <CalastoneWireframes />
           <Atmosphere />
-          {currentUser ? (
-            <Header
-              appName={appName}
-              mockMode={mockMode}
-              currentUser={currentUser}
-              users={users}
-            />
-          ) : (
-            <header className="relative z-30 border-b border-[var(--relay-border)] px-4 py-3 text-sm text-[var(--relay-ink-muted)]">
-              {appName} is starting. Waiting for database seed.
-            </header>
-          )}
-          <main
-            id="main"
-            className="relative z-10 mx-auto max-w-[1120px] px-7 pb-36 pt-28"
-          >
-            {children}
-          </main>
-          {currentUser ? <DockNav /> : null}
+          <div className="relative z-10 flex h-dvh min-h-0 flex-col">
+            {currentUser ? (
+              <Header
+                appName={appName}
+                mockMode={mockMode}
+                currentUser={currentUser}
+                users={users}
+              />
+            ) : (
+              <header className="relative z-30 shrink-0 border-b border-[var(--relay-border)] bg-[var(--relay-surface)] px-4 py-3 text-sm text-[var(--relay-ink-muted)]">
+                {appName} is starting. Waiting for database seed.
+              </header>
+            )}
+            <div className="flex min-h-0 flex-1">
+              {currentUser ? <Sidebar /> : null}
+              <main
+                id="main"
+                className="rl-main relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto"
+              >
+                {children}
+              </main>
+            </div>
+          </div>
           {currentUser ? (
             <CommandPalette
               workstreams={commandItems.map((item) => ({

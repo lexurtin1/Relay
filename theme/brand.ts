@@ -1,6 +1,6 @@
 /**
  * Brand tokens for Relay (white-labelled Calastone / SS&C).
- * Dark glass workspace from the approved mockup; light theme is a composed alternate.
+ * Light-first Operate shell (sidebar + elevated sheets); dark remains available.
  * Calastone blues for primary / live; no SaaS purple.
  */
 export const brand = {
@@ -11,8 +11,8 @@ export const brand = {
   },
   radius: {
     control: "12px",
-    card: "20px",
-    panel: "26px",
+    card: "16px",
+    panel: "20px",
     pill: "999px",
   },
   colors: {

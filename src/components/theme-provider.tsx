@@ -26,14 +26,15 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeProvider(props: { children: ReactNode; defaultTheme?: Theme }) {
-  const [theme, setThemeState] = useState<Theme>(props.defaultTheme ?? "dark");
+  const fallback: Theme = props.defaultTheme ?? "light";
+  const [theme, setThemeState] = useState<Theme>(fallback);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    const next: Theme = stored === "light" || stored === "dark" ? stored : "dark";
+    const next: Theme = stored === "light" || stored === "dark" ? stored : fallback;
     setThemeState(next);
     applyTheme(next);
-  }, []);
+  }, [fallback]);
 
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);
@@ -61,4 +62,4 @@ export function useTheme(): ThemeContextValue {
 }
 
 /** Inline boot script: set data-theme before paint to avoid flash. */
-export const themeBootScript = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}');document.documentElement.setAttribute('data-theme',t==='light'||t==='dark'?t:'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
+export const themeBootScript = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}');document.documentElement.setAttribute('data-theme',t==='light'||t==='dark'?t:'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;

@@ -30,9 +30,9 @@ pnpm dev
 
 ## What works now
 
-- Glass branded shell with dark/light theme, dock nav, and Calastone wireframe atmosphere
+- Light-first branded shell with sidebar nav, theme toggle, and Calastone wireframe atmosphere
 - Mock mode badge and role switcher (engineer / architect / lead / viewer)
-- Overview with Start work composer, needs-you cards, and workstream timelines
+- Overview with KPI row, Start work composer, needs-you tickets on the right, and workstream timelines
 - Workstream detail with plan, comments, and stage stepper
 - Knowledge search across Salesforce, Power BI, Jira, Confluence, Databricks, GitHub (mock corpus; live health when env vars are set)
 - New workstream form (creates a DB record)

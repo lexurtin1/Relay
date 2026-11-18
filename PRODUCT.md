@@ -35,13 +35,13 @@ Used at a desk in a corporate environment alongside Jira, Confluence, Salesforce
 
 - Name: Relay (configurable via `APP_NAME`). Parent brand: SS&C Calastone.
 - Voice: calm, precise, dense. Internal ops tool, not marketing.
-- Visual constraints (binding from product owner): dark glass Calastone workspace (approved HTML mockup) with optional light theme. Glass chrome, soft colour atmosphere blobs, and subtle teal-to-blue wireframe polyhedra are brand atmosphere and must stay subordinate to status and actions. No emoji. Calastone blues from `theme/brand.ts` for live states and links; no SaaS purple. Status colours only on status indicators (amber = needs you, green = done, red = failed). Typography: Geist Sans for UI; Geist Mono for IDs, paths, and code. Tabular numbers for counts. Logo assets under `public/brand/` remain available; shell brand line uses product name plus SS&C Calastone subtitle.
+- Visual constraints (binding from product owner): light-first Calastone Operate shell (sidebar + elevated white sheets) with dark theme via toggle. Soft colour atmosphere blobs and subtle teal-to-blue wireframe polyhedra stay subordinate to status and actions. No emoji. Calastone blues from `theme/brand.ts` for live states, links, and sidebar active; no SaaS purple. Status colours only on status indicators (amber = needs you, green = done, red = failed). Typography: Geist Sans for UI; Geist Mono for IDs, paths, and code. Tabular numbers for counts. Logo assets under `public/brand/` remain available; shell brand line uses product name plus SS&C Calastone subtitle.
 - Do not invent real Calastone clients, systems, or unconfirmed brand colours.
 
 ## Evidence on Hand
 
 - Logo PNGs: `public/brand/logo-light.png`, `logo-dark.png`, and derivatives.
-- Theme tokens: `theme/brand.ts` and `src/app/globals.css` (dark default `#060A12` glass world; light `data-theme`; Calastone blues `#2B6FD6` / `#3F82E0`).
+- Theme tokens: `theme/brand.ts` and `src/app/globals.css` (light default `#F2F5FA` sheets on pale ground; dark `data-theme` alternate; Calastone blues `#2B6FD6` / `#3F82E0`).
 - Seeded demo story: five workstreams at different stages, six ideas, fictional users.
 - Screenshots: `docs/screenshots/` (Milestone 1 baseline).
 
