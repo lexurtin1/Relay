@@ -13,7 +13,8 @@ Light-first Calastone agent workspace. Pale ground, white elevated sheets with s
 ## Surfaces
 
 - Shell: slim top brand bar with official SS&C Calastone lockup (PNG) on the left, then Relay mark+wordmark, command, theme toggle, user; left sidebar nav (Overview, Workstreams, Ideas, Knowledge, Metrics) with Calastone blue active state and Relay mark. Audit linked from Metrics.
-- Overview: compact title, horizontal KPI row, two-column body (timelines on the left; Needs your input on the right). Start work is a fixed floating glass box at bottom centre (does not scroll away). Lists scroll internally when needed.
+- Overview: compact title, horizontal KPI row, two-column body (timelines on the left; Needs your input on the right). Start work is a short wide fixed dock at bottom centre; typing expands it with thinking steps and sources, logged into Knowledge. Lists scroll internally when needed.
+- Workstream detail: plan, decision, comments, sources and actions above the fold; research and session history behind details. Timeline legend shown with the track; waiting segments use a subtle flowing hatch.
 - Workstream list/detail: stage chips, timeline tracks, sheet panels, sticky action bar. Workstream colour shown as a small circle (not a left border). Circles pulse when a human decision is waiting.
 - Ideas board: four status columns with colour-dot cards, workstream legend, composer honouring `?draft=` from Overview.
 - Research activity: calm Orbit-inspired feed (user ask bubble, numbered steps, connector disclosures, live Tools line, Ask anything composer). Keep Calastone light theme; no Orbit purple.
