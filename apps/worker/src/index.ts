@@ -1,7 +1,13 @@
 import { config, isMockMode } from "@relay/core";
+import { startAnthropicShim } from "@relay/core/llm/anthropic-shim";
+import { startToolshedHttp } from "@relay/connectors/toolshed";
+import { createCredentialBroker } from "./runner/broker";
+import { processStoredRunnerJob } from "./runner/prisma-store";
+import { startRunnerConsumer } from "./queue";
 
 async function main() {
   const startedAt = new Date().toISOString();
+  const broker = createCredentialBroker();
   console.log(
     JSON.stringify({
       service: "relay-worker",
@@ -10,9 +16,16 @@ async function main() {
       mode: isMockMode() ? "mock" : "live",
       redisUrl: config.redisUrl,
       startedAt,
-      note: "Job processors arrive in Milestones 3 and 5. Heartbeat only for Milestone 1.",
+      note: "Runner consumer, Anthropic shim, and Toolshed are up. Heartbeat continues.",
     }),
   );
+
+  startAnthropicShim(config.shimPort, { tokens: broker });
+  startToolshedHttp(config.toolshedPort);
+  startRunnerConsumer({
+    redisUrl: config.redisUrl,
+    handler: (jobId) => processStoredRunnerJob(jobId, broker),
+  });
 
   setInterval(() => {
     console.log(

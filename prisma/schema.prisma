@@ -103,6 +103,7 @@ enum AuditAction {
   connector_access
   role_switch
   seed
+  tool_call
 }
 
 model User {

@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import { prisma, resolveWorkstreamColour } from "@relay/core";
 import { WorkstreamDetailContainer } from "@/components/containers/workstream-detail-container";
-import { WorkstreamDetail } from "@/components/workstream-detail";
+import { LiveWorkstream } from "@/components/live-workstream";
 import { isDemoMode } from "@/lib/db";
 import { deriveProgress } from "@/lib/derive";
 import { buildResearchStepsFromEvents } from "@/lib/research-activity";
+import { toRunnerView } from "@/lib/runner-snapshot";
 import { getCurrentUser } from "@/lib/session";
 import type { ActionGate, ActionVerb, NextMove, WorkstreamDetailModel } from "@/lib/view-models";
 
@@ -32,7 +33,10 @@ export default async function WorkstreamDetailPage({ params }: { params: Promise
         orderBy: { versionNumber: "desc" },
       },
       runnerJobs: {
-        include: { questions: true, events: { orderBy: { createdAt: "asc" }, take: 60 } },
+        include: {
+          questions: { include: { answeredBy: true } },
+          events: { orderBy: { createdAt: "asc" }, take: 80 },
+        },
         orderBy: { createdAt: "desc" },
         take: 1,
       },
@@ -75,7 +79,10 @@ export default async function WorkstreamDetailPage({ params }: { params: Promise
     approve_plan: off(role === "architect" || role === "lead" ? pending : "Only architects and leads approve plans."),
     hand_off:
       plan?.status === "approved" && owns && !job ? { ok: true } : off(owns ? "Needs an approved plan." : "Only the owner can hand off."),
-    answer_question: off(pending),
+    answer_question:
+      question && (owns || role === "lead")
+        ? { ok: true }
+        : off(question ? "Only the owner or a lead can answer the Runner." : "The Runner has not asked a question."),
     merge_pr: off(pending),
     comment: off(pending),
     resolve: off(pending),
@@ -83,6 +90,25 @@ export default async function WorkstreamDetailPage({ params }: { params: Promise
   };
 
   const steps = plan?.steps ?? [];
+  const runner = job
+    ? toRunnerView(
+        {
+          status: job.status,
+          branch: job.branch,
+          prUrl: job.prUrl,
+          additionalInstructions: job.additionalInstructions,
+          events: job.events,
+          questions: job.questions.map((item) => ({
+            questionText: item.questionText,
+            options: item.options,
+            answer: item.answer,
+            answeredByName: item.answeredBy?.name ?? null,
+          })),
+        },
+        steps.filter((step) => step.completed).length,
+        steps.length,
+      )
+    : null;
   const progress = deriveProgress({
     stage: ws.stage,
     questionOpen: Boolean(question),
@@ -102,7 +128,9 @@ export default async function WorkstreamDetailPage({ params }: { params: Promise
   const nextMove: NextMove = {
     holder: { kind: "person", name: ws.owner.name, detail: "Owner" },
     headline: progress.label,
-    body: "Database mode shows live records. Agents run once the worker lands; try the demo for the full journey.",
+    body: job
+      ? "The Runner works in an isolated workspace. Lint and test run there, with at most two fix attempts."
+      : "Database mode shows live records. The owner hands an approved plan to the Runner.",
     primary,
   };
 
@@ -171,29 +199,7 @@ export default async function WorkstreamDetailPage({ params }: { params: Promise
         }
       : null,
     planDrafting: null,
-    runner: job
-      ? {
-          status:
-            job.status === "awaiting_input"
-              ? "awaiting_input"
-              : job.status === "succeeded"
-                ? job.prUrl
-                  ? "pr_open"
-                  : "merged"
-                : job.status === "provisioning" || job.status === "queued"
-                  ? "provisioning"
-                  : "running",
-          model: "claude-opus-5-5",
-          profile: "default",
-          branch: job.branch ?? "relay/runner",
-          context: job.additionalInstructions ?? "",
-          log: job.events.map((e) => ({ at: e.createdAt.toISOString(), text: e.type.replaceAll("_", " "), kind: "info" as const })),
-          question: question ? { text: question.questionText, options: question.options, answer: null, answeredBy: null } : null,
-          pr: null,
-          stepsCompleted: steps.filter((s) => s.completed).length,
-          stepsTotal: steps.length,
-        }
-      : null,
+    runner,
     history: ws.plans.map((p) => ({
       id: p.id,
       label: p.versionNumber > 1 ? `Plan v${p.versionNumber} generated from comments` : `Plan v${p.versionNumber} generated`,
@@ -202,9 +208,9 @@ export default async function WorkstreamDetailPage({ params }: { params: Promise
     })),
     gates,
     nextMove,
-    tokens: { input: 0, output: 0 },
+    tokens: { input: 0, output: job?.tokenUsage ?? 0 },
     interactive: true,
   };
 
-  return <WorkstreamDetail model={model} />;
+  return <LiveWorkstream initial={model} />;
 }

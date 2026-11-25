@@ -10,7 +10,13 @@
     "./config": "./src/config.ts",
     "./domain": "./src/domain.ts",
     "./agents/planner-template": "./src/agents/planner-template.ts",
-    "./llm/gateway": "./src/llm/gateway.ts"
+    "./llm/gateway": "./src/llm/gateway.ts",
+    "./llm/anthropic-shim": "./src/llm/anthropic-shim.ts",
+    "./audit": "./src/audit.ts",
+    "./runner/blueprint": "./src/runner/blueprint.ts",
+    "./runner/hand-off": "./src/runner/hand-off.ts",
+    "./runner/queue-name": "./src/runner/queue-name.ts",
+    "./runner/instructions": "./src/runner/instructions.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

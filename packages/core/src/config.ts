@@ -36,6 +36,12 @@ export const config = {
   databricksHost: optionalEnv("DATABRICKS_HOST"),
   datadogSite: optionalEnv("DATADOG_SITE"),
   githubToken: optionalEnv("GITHUB_TOKEN"),
+  shimPort: intEnv("RELAY_SHIM_PORT", 8787),
+  toolshedPort: intEnv("RELAY_TOOLSHED_PORT", 8788),
+  shimPublicHost: optionalEnv("RELAY_SHIM_HOST", "http://127.0.0.1:8787"),
+  toolshedPublicUrl: optionalEnv("RELAY_TOOLSHED_URL", "http://127.0.0.1:8788/mcp"),
+  runnerWorkspaceRoot: optionalEnv("RUNNER_WORKSPACE_ROOT", "demo-repos"),
+  runnerImage: optionalEnv("RELAY_RUNNER_IMAGE", "relay-runner:local"),
 };
 
 export function isMockMode(): boolean {

@@ -12,6 +12,7 @@
   "dependencies": {
     "@relay/connectors": "workspace:*",
     "@relay/core": "workspace:*",
+    "@prisma/client": "^6.5.0",
     "bullmq": "^5.41.0",
     "ioredis": "^5.5.0"
   },

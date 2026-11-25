@@ -28,6 +28,7 @@ const ACTION_LABEL: Record<string, string> = {
   idea_status: "Idea triaged",
   idea_promoted: "Idea promoted",
   seed: "Seed",
+  tool_call: "Tool call",
   reset: "Reset",
 };
 
@@ -38,6 +39,7 @@ const ACTION_VARIANT: Record<string, "info" | "success" | "warning" | "neutral" 
   merge: "success",
   question_answered: "orange",
   connector_access: "cyan",
+  tool_call: "cyan",
 };
 
 function csv(rows: AuditRow[]): string {

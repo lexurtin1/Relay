@@ -10,7 +10,15 @@ export const dynamic = "force-dynamic";
 
 export default async function OverviewPage() {
   const appName = getAppName();
-  if (isDemoMode()) return <OverviewContainer appName={appName} />;
+  if (isDemoMode()) {
+    return (
+      <>
+        {/* Compile the workstream route during the overview load so the first hand-off is immediate. */}
+        <link rel="prefetch" href="/workstreams/preload" />
+        <OverviewContainer appName={appName} />
+      </>
+    );
+  }
 
   const user = await getCurrentUser();
   if (!user) {

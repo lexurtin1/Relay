@@ -1,0 +1,14 @@
+FROM node:22-bookworm-slim
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git ca-certificates curl \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN corepack enable && corepack prepare pnpm@10.33.4 --activate
+
+# goose CLI. The image has no API keys. The worker injects a job token at exec time.
+RUN curl -fsSL https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh | bash \
+  && ln -sf /root/.local/bin/goose /usr/local/bin/goose
+
+WORKDIR /workspace
+CMD ["sleep", "infinity"]
