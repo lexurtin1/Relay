@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { handOffToRunner } from "@/app/actions/ideas";
 import { Dialog, DialogHeader } from "@/components/ui/astryx";
 import { useRelayActions } from "@/lib/demo-store/provider";
@@ -29,6 +31,7 @@ export function HandOffModal(props: {
   onDone?: () => void;
 }) {
   const actions = useRelayActions();
+  const router = useRouter();
   const [context, setContext] = useState("");
   const [model, setModel] = useState(MODELS[0]!.id);
   const [profile, setProfile] = useState(PROFILES[0]!.id);
@@ -49,9 +52,14 @@ export function HandOffModal(props: {
     fd.set("additionalContext", context);
     fd.set("modelId", model);
     fd.set("profile", profile);
-    await handOffToRunner(fd);
-    props.onOpenChange(false);
-    props.onDone?.();
+    try {
+      await handOffToRunner(fd);
+      props.onOpenChange(false);
+      props.onDone?.();
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not hand off");
+    }
   };
 
   return (

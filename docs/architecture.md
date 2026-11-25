@@ -28,10 +28,10 @@ flowchart LR
 ## Components
 
 - **Web**: dashboard, workstream detail, ideas, knowledge, metrics, audit. Reads Postgres. Subscribes to agent activity over SSE (from Milestone 3).
-- **Worker**: consumes research, plan, and runner jobs from BullMQ.
-- **Gateway module**: `packages/core/src/llm/gateway.ts` is the only outbound model transport.
-- **Connectors**: MCP-style read interfaces under `packages/connectors`, package name intent `relay-toolshed`.
-- **Isolated workspaces**: one git worktree per Runner job (Docker in live/local builds; `demo-repos/` in mock mode).
+- **Worker**: consumes runner jobs from BullMQ. The Runner blueprint, sandbox, and goose adapter are specified in [PLAN.md](../PLAN.md). Research and plan processors are still pending.
+- **Gateway module**: `packages/core/src/llm/gateway.ts` is the only outbound model transport. goose talks to the worker shim, and the shim calls this module.
+- **Connectors**: read interfaces under `packages/connectors`. Toolshed (`packages/connectors/src/toolshed/server.ts`) exposes them as one MCP server.
+- **Isolated workspaces**: one workspace per Runner job (Docker when `RELAY_MODE=live`; `demo-repos/` in mock mode). See [PLAN.md](../PLAN.md).
 
 ## Config
 

@@ -176,6 +176,7 @@ export type AuditAction =
   | "connector_access"
   | "role_switch"
   | "seed"
+  | "tool_call"
   | "comment"
   | "resolve"
   | "revise"

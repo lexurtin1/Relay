@@ -3,6 +3,9 @@
 import { assertDatabase } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { prisma, WORKSTREAM_COLOURS } from "@relay/core";
+import { writeAudit } from "@relay/core/audit";
+import { handOffToRunnerJob } from "@relay/core/runner/hand-off";
+import { enqueueRunnerJob } from "@/lib/runner-queue";
 import {
   AgentEventType,
   IdeaStatus,
@@ -139,38 +142,37 @@ export async function handOffToRunner(formData: FormData) {
       },
     },
   });
-  if (!workstream) throw new Error("Workstream not found.");
-  if (workstream.ownerId !== user.id) {
-    throw new Error("You can only hand off workstreams you own.");
-  }
+  const plan = workstream?.plans[0] ?? null;
 
-  const plan = workstream.plans[0];
-  if (!plan || plan.status !== "approved" || plan.approvals.length === 0) {
-    throw new Error("Needs an architect-approved plan.");
-  }
-
-  await prisma.runnerJob.create({
-    data: {
-      workstreamId,
-      planId: plan.id,
-      status: "queued",
-      additionalInstructions: [
-        additional || null,
-        `model:${modelId}`,
-        `profile:${profile}`,
-      ]
-        .filter(Boolean)
-        .join("\n"),
+  await handOffToRunnerJob(
+    {
+      user: { id: user.id, role: user.role },
+      workstream: workstream ? { id: workstream.id, ownerId: workstream.ownerId } : null,
+      plan: plan ? { id: plan.id, status: plan.status, approvalCount: plan.approvals.length } : null,
+      additionalContext: additional,
+      modelId,
+      profile,
     },
-  });
-
-  await prisma.workstream.update({
-    where: { id: workstreamId },
-    data: {
-      stage: "building",
-      lastActivityAt: new Date(),
+    {
+      createJob: async (input) =>
+        prisma.runnerJob.create({
+          data: {
+            workstreamId: input.workstreamId,
+            planId: input.planId,
+            status: "queued",
+            additionalInstructions: input.additionalInstructions,
+          },
+        }),
+      markBuilding: async (id) => {
+        await prisma.workstream.update({
+          where: { id },
+          data: { stage: "building", lastActivityAt: new Date() },
+        });
+      },
+      audit: (row) => writeAudit(row).then(() => undefined),
+      enqueue: (jobId) => enqueueRunnerJob(jobId),
     },
-  });
+  );
 
   revalidatePath(`/workstreams/${workstreamId}`);
   revalidatePath("/");

@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
+import { answerRunnerQuestion } from "@/app/actions/runner";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { draftPlanFromTemplate } from "@relay/core/agents/planner-template";
@@ -197,7 +198,17 @@ export function useRelayActions(): RelayActions {
         revisePlan: async () => void run({ type: "TICK" }),
         approvePlan: () => run({ type: "TICK" }),
         handOff: () => run({ type: "TICK" }),
-        answerQuestion: () => run({ type: "TICK" }),
+        answerQuestion: (wsId, answer) => {
+          void answerRunnerQuestion(wsId, answer)
+            .then(() => {
+              toast.success("Answer sent");
+              router.refresh();
+            })
+            .catch((error: unknown) => {
+              toast.error(error instanceof Error ? error.message : "Could not send the answer");
+            });
+          return true;
+        },
         mergePr: () => run({ type: "TICK" }),
         createIdea: () => run({ type: "TICK" }),
         setIdeaStatus: () => run({ type: "TICK" }),

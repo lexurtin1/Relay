@@ -1,0 +1,18 @@
+# Opt-in live Runner. The default compose file stays in mock mode and does not
+# mount the Docker socket. Use: docker compose -f docker-compose.yml -f docker-compose.live.yml up
+services:
+  worker:
+    environment:
+      RELAY_MODE: live
+      RELAY_SHIM_HOST: http://worker:8787
+      RELAY_TOOLSHED_URL: http://worker:8788/mcp
+      RELAY_JOB_NETWORK: relay-jobs
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - default
+      - relay-jobs
+
+networks:
+  relay-jobs:
+    name: relay-jobs
